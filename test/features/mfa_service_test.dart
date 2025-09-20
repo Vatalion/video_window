@@ -63,8 +63,8 @@ void main() {
         expect(setupData, contains('provisioningUri'));
         expect(setupData, contains('manualEntryKey'));
 
-        // Verify secret format (should be base64-like alphanumeric)
-        expect(setupData['secret'], matches(r'^[A-Z0-9/]+$'));
+        // Verify secret format (should be base64-like)
+        expect(setupData['secret'], matches(r'^[A-Z0-9/+=]+$'));
       });
 
       test('verifyTotpSetup should validate TOTP codes', () async {
