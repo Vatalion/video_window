@@ -1,28 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../bloc/profile_bloc.dart';
-import '../../../auth/presentation/widgets/password_strength_indicator.dart';
+import 'package:flutter/services.dart';
+import '../../domain/models/user_profile.dart';
+import '../../data/repositories/profile_repository.dart';
 
 class ProfileEditor extends StatefulWidget {
-  const ProfileEditor({super.key});
+  final UserProfile initialProfile;
+  final Function(UserProfile) onSave;
+
+  const ProfileEditor({
+    super.key,
+    required this.initialProfile,
+    required this.onSave,
+  });
 
   @override
   State<ProfileEditor> createState() => _ProfileEditorState();
 }
 
 class _ProfileEditorState extends State<ProfileEditor> {
-  final _formKey = GlobalKey<FormState>();
-  final _displayNameController = TextEditingController();
-  final _bioController = TextEditingController();
-  final _websiteController = TextEditingController();
-  final _locationController = TextEditingController();
-  final _currentPasswordController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-
+  late final TextEditingController _displayNameController;
+  late final TextEditingController _bioController;
+  late final TextEditingController _websiteController;
+  late final TextEditingController _locationController;
+  final ProfileRepository _repository = ProfileRepository();
   bool _isLoading = false;
-  ProfileVisibility _selectedVisibility = ProfileVisibility.public;
-  DateTime? _selectedBirthDate;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _displayNameController = TextEditingController(text: widget.initialProfile.displayName);
+    _bioController = TextEditingController(text: widget.initialProfile.bio ?? '');
+    _websiteController = TextEditingController(text: widget.initialProfile.website ?? '');
+    _locationController = TextEditingController(text: widget.initialProfile.location ?? '');
+  }
 
   @override
   void dispose() {
@@ -30,344 +41,166 @@ class _ProfileEditorState extends State<ProfileEditor> {
     _bioController.dispose();
     _websiteController.dispose();
     _locationController.dispose();
-    _currentPasswordController.dispose();
-    _newPasswordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
   Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-
-    try {
-      context.read<ProfileBloc>().add(
-        UpdateProfile(
-          displayName: _displayNameController.text.trim(),
-          bio: _bioController.text.trim(),
-          website: _websiteController.text.trim().isEmpty ? null : _websiteController.text.trim(),
-          location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
-          birthDate: _selectedBirthDate,
-          visibility: _selectedVisibility,
-        ),
-      );
-    } catch (e) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Future<void> _changePassword() async {
-    if (_currentPasswordController.text.isEmpty ||
-        _newPasswordController.text.isEmpty ||
-        _confirmPasswordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all password fields'),
-          backgroundColor: Colors.red,
-        ),
-      );
+    if (_displayNameController.text.trim().isEmpty) {
+      setState(() {
+        _errorMessage = 'Display name is required';
+      });
       return;
     }
 
-    if (_newPasswordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('New passwords do not match'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
     try {
-      context.read<ProfileBloc>().add(
-        ChangePassword(
-          currentPassword: _currentPasswordController.text,
-          newPassword: _newPasswordController.text,
-        ),
+      final updatedProfile = widget.initialProfile.copyWith(
+        displayName: _displayNameController.text.trim(),
+        bio: _bioController.text.trim().isNotEmpty ? _bioController.text.trim() : null,
+        website: _websiteController.text.trim().isNotEmpty ? _websiteController.text.trim() : null,
+        location: _locationController.text.trim().isNotEmpty ? _locationController.text.trim() : null,
       );
+
+      final savedProfile = await _repository.updateUserProfile(updatedProfile);
+      widget.onSave(savedProfile);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully')),
+        );
+      }
     } catch (e) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ProfileBloc, ProfileState>(
-      listener: (context, state) {
-        if (state is ProfileUpdated) {
-          setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Profile updated successfully'),
-              backgroundColor: Colors.green,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Edit Profile'),
+        actions: [
+          TextButton(
+            onPressed: _isLoading ? null : _saveProfile,
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Save'),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_errorMessage != null)
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  _errorMessage!,
+                  style: TextStyle(color: Colors.red.shade900),
+                ),
+              ),
+            const SizedBox(height: 16),
+
+            _buildTextField(
+              controller: _displayNameController,
+              label: 'Display Name',
+              hintText: 'Enter your display name',
+              maxLength: 50,
+              required: true,
             ),
-          );
-        } else if (state is PasswordChanged) {
-          setState(() => _isLoading = false);
-          _currentPasswordController.clear();
-          _newPasswordController.clear();
-          _confirmPasswordController.clear();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Password changed successfully'),
-              backgroundColor: Colors.green,
+            const SizedBox(height: 16),
+
+            _buildTextField(
+              controller: _bioController,
+              label: 'Bio',
+              hintText: 'Tell us about yourself',
+              maxLength: 500,
+              maxLines: 3,
             ),
-          );
-        } else if (state is ProfileError) {
-          setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
+            const SizedBox(height: 16),
+
+            _buildTextField(
+              controller: _websiteController,
+              label: 'Website',
+              hintText: 'https://yourwebsite.com',
+              keyboardType: TextInputType.url,
             ),
-          );
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Edit Profile'),
-          actions: [
-            TextButton(
-              onPressed: _isLoading ? null : _saveProfile,
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Text('Save'),
+            const SizedBox(height: 16),
+
+            _buildTextField(
+              controller: _locationController,
+              label: 'Location',
+              hintText: 'City, Country',
             ),
           ],
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Profile Information Section
-                const Text(
-                  'Profile Information',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _displayNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Display Name',
-                    prefixIcon: Icon(Icons.person),
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a display name';
-                    }
-                    if (value.trim().length < 2) {
-                      return 'Display name must be at least 2 characters';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _bioController,
-                  decoration: const InputDecoration(
-                    labelText: 'Bio',
-                    prefixIcon: Icon(Icons.description),
-                    border: OutlineInputBorder(),
-                    hintText: 'Tell us about yourself...',
-                  ),
-                  maxLines: 3,
-                  maxLength: 500,
-                  validator: (value) {
-                    if (value != null && value.length > 500) {
-                      return 'Bio must be less than 500 characters';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _websiteController,
-                  decoration: const InputDecoration(
-                    labelText: 'Website',
-                    prefixIcon: Icon(Icons.language),
-                    border: OutlineInputBorder(),
-                    hintText: 'https://example.com',
-                  ),
-                  validator: (value) {
-                    if (value != null && value.isNotEmpty) {
-                      // Basic URL validation
-                      if (!value.startsWith('http://') && !value.startsWith('https://')) {
-                        return 'Please enter a valid URL (starting with http:// or https://)';
-                      }
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _locationController,
-                  decoration: const InputDecoration(
-                    labelText: 'Location',
-                    prefixIcon: Icon(Icons.location_on),
-                    border: OutlineInputBorder(),
-                    hintText: 'City, Country',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                InkWell(
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: _selectedBirthDate ?? DateTime(1990, 1, 1),
-                      firstDate: DateTime(1900, 1, 1),
-                      lastDate: DateTime.now().subtract(const Duration(days: 365 * 13)), // 13 years old
-                    );
-                    if (date != null) {
-                      setState(() => _selectedBirthDate = date);
-                    }
-                  },
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Birth Date',
-                      prefixIcon: Icon(Icons.cake),
-                      border: OutlineInputBorder(),
-                    ),
-                    child: Text(
-                      _selectedBirthDate != null
-                          ? '${_selectedBirthDate!.day}/${_selectedBirthDate!.month}/${_selectedBirthDate!.year}'
-                          : 'Select your birth date',
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<ProfileVisibility>(
-                  value: _selectedVisibility,
-                  decoration: const InputDecoration(
-                    labelText: 'Profile Visibility',
-                    prefixIcon: Icon(Icons.visibility),
-                    border: OutlineInputBorder(),
-                  ),
-                  items: ProfileVisibility.values.map((visibility) {
-                    return DropdownMenuItem(
-                      value: visibility,
-                      child: Text(_getVisibilityText(visibility)),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => _selectedVisibility = value);
-                    }
-                  },
-                ),
-                const SizedBox(height: 32),
-
-                // Password Change Section
-                const Text(
-                  'Change Password',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _currentPasswordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Current Password',
-                    prefixIcon: Icon(Icons.lock),
-                    border: OutlineInputBorder(),
-                  ),
-                  obscureText: true,
-                  validator: (value) {
-                    if (_newPasswordController.text.isNotEmpty && value?.isEmpty == true) {
-                      return 'Please enter your current password';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _newPasswordController,
-                  decoration: const InputDecoration(
-                    labelText: 'New Password',
-                    prefixIcon: Icon(Icons.lock_outline),
-                    border: OutlineInputBorder(),
-                  ),
-                  obscureText: true,
-                  onChanged: (value) {
-                    if (value.isNotEmpty) {
-                      setState(() {});
-                    }
-                  },
-                ),
-                const SizedBox(height: 8),
-                if (_newPasswordController.text.isNotEmpty)
-                  PasswordStrengthIndicator(password: _newPasswordController.text),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm New Password',
-                    prefixIcon: Icon(Icons.lock_outline),
-                    border: OutlineInputBorder(),
-                  ),
-                  obscureText: true,
-                  validator: (value) {
-                    if (_newPasswordController.text.isNotEmpty && value != _newPasswordController.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: (_currentPasswordController.text.isNotEmpty &&
-                          _newPasswordController.text.isNotEmpty &&
-                          _confirmPasswordController.text.isNotEmpty)
-                      ? _changePassword
-                      : null,
-                  child: const Text('Change Password'),
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
   }
 
-  String _getVisibilityText(ProfileVisibility visibility) {
-    switch (visibility) {
-      case ProfileVisibility.public:
-        return 'Public - Anyone can view';
-      case ProfileVisibility.private:
-        return 'Private - Only you can view';
-      case ProfileVisibility.friendsOnly:
-        return 'Friends Only - Only friends can view';
-    }
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    String? hintText,
+    int? maxLength,
+    int maxLines = 1,
+    bool required = false,
+    TextInputType? keyboardType,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (required)
+              const Text(
+                ' *',
+                style: TextStyle(color: Colors.red),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          maxLength: maxLength,
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hintText,
+            border: const OutlineInputBorder(),
+            counterText: maxLength != null ? null : '',
+          ),
+        ),
+      ],
+    );
   }
 }

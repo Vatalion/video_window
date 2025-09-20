@@ -1,17 +1,20 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../bloc/profile_bloc.dart';
+import '../../domain/models/profile_media.dart';
+import '../../data/repositories/profile_repository.dart';
 
 class ProfileImageUploader extends StatefulWidget {
+  final String userId;
+  final ProfileMediaType mediaType;
   final String? currentImageUrl;
-  final ProfileImageType type;
+  final Function(ProfileMedia) onUploadComplete;
 
   const ProfileImageUploader({
     super.key,
+    required this.userId,
+    required this.mediaType,
     this.currentImageUrl,
-    required this.type,
+    required this.onUploadComplete,
   });
 
   @override
@@ -19,248 +22,173 @@ class ProfileImageUploader extends StatefulWidget {
 }
 
 class _ProfileImageUploaderState extends State<ProfileImageUploader> {
+  final ProfileRepository _repository = ProfileRepository();
   final ImagePicker _picker = ImagePicker();
-  bool _isLoading = false;
+  bool _isUploading = false;
+  String? _errorMessage;
 
-  Future<void> _pickImage() async {
-    final source = await showDialog<ImageSource>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Choose Image Source'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.camera),
-              title: const Text('Camera'),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (source != null) {
-      await _uploadImage(source);
-    }
-  }
-
-  Future<void> _uploadImage(ImageSource source) async {
+  Future<void> _pickAndUploadImage() async {
     try {
-      setState(() => _isLoading = true);
-
       final XFile? image = await _picker.pickImage(
-        source: source,
-        imageQuality: 85,
-        maxWidth: widget.type == ProfileImageType.profilePhoto ? 800 : 1920,
-        maxHeight: widget.type == ProfileImageType.profilePhoto ? 800 : 1080,
+        source: ImageSource.gallery,
+        imageQuality: 80,
+        maxWidth: widget.mediaType == ProfileMediaType.cover ? 1200 : 800,
+        maxHeight: widget.mediaType == ProfileMediaType.cover ? 400 : 800,
       );
 
       if (image != null) {
-        final bytes = await image.readAsBytes();
-        final mimeType = _getMimeType(image.path);
+        await _uploadImage(image.path);
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to pick image: ${e.toString()}';
+      });
+    }
+  }
 
-        context.read<ProfileBloc>().add(
-          UploadProfileImage(
-            filePath: image.path,
-            mimeType: mimeType,
-            type: widget.type,
-          ),
+  Future<void> _uploadImage(String imagePath) async {
+    setState(() {
+      _isUploading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final profileMedia = await _repository.uploadProfileMedia(
+        widget.userId,
+        widget.mediaType,
+        imagePath,
+      );
+
+      widget.onUploadComplete(profileMedia);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Image uploaded successfully')),
         );
       }
     } catch (e) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error picking image: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      setState(() {
+        _errorMessage = 'Failed to upload image: ${e.toString()}';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+        });
+      }
     }
-  }
-
-  String _getMimeType(String path) {
-    final extension = path.toLowerCase().split('.').last;
-    switch (extension) {
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      case 'gif':
-        return 'image/gif';
-      case 'webp':
-        return 'image/webp';
-      default:
-        return 'image/jpeg';
-    }
-  }
-
-  void _removeImage() {
-    context.read<ProfileBloc>().add(
-      RemoveProfileImage(type: widget.type),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ProfileBloc, ProfileState>(
-      listener: (context, state) {
-        if (state is ProfileImageUploaded) {
-          setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Image uploaded successfully'),
-              backgroundColor: Colors.green,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.mediaType == ProfileMediaType.photo
+                  ? 'Profile Photo'
+                  : 'Cover Image',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          );
-        } else if (state is ProfileImageRemoved) {
-          setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Image removed successfully'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } else if (state is ProfileError) {
-          setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      },
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            height: widget.type == ProfileImageType.profilePhoto ? 200 : 150,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: Stack(
-              children: [
-                if (widget.currentImageUrl != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      widget.currentImageUrl!,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: widget.type == ProfileImageType.profilePhoto
-                          ? BoxFit.cover
-                          : BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Center(
-                          child: Icon(Icons.broken_image, size: 50, color: Colors.grey),
-                        );
-                      },
-                    ),
-                  )
-                else
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          widget.type == ProfileImageType.profilePhoto
-                              ? Icons.person
-                              : Icons.photo_size_select_actual,
-                          size: 50,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.type == ProfileImageType.profilePhoto
-                              ? 'No Profile Photo'
-                              : 'No Cover Image',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
+            const SizedBox(height: 16),
+            _buildImagePreview(),
+            const SizedBox(height: 16),
+            if (_errorMessage != null)
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade100,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  _errorMessage!,
+                  style: TextStyle(color: Colors.red.shade900),
+                ),
+              ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isUploading ? null : _pickAndUploadImage,
+                child: _isUploading
+                    ? const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                if (_isLoading)
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _isLoading ? null : _pickImage,
-                  icon: const Icon(Icons.upload),
-                  label: Text(widget.currentImageUrl != null ? 'Change' : 'Upload'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
+                          SizedBox(width: 12),
+                          Text('Uploading...'),
+                        ],
+                      )
+                    : Text(widget.currentImageUrl == null
+                        ? 'Upload ${widget.mediaType == ProfileMediaType.photo ? 'Photo' : 'Cover'}'
+                        : 'Change ${widget.mediaType == ProfileMediaType.photo ? 'Photo' : 'Cover'}'),
               ),
-              if (widget.currentImageUrl != null) ...[
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _isLoading ? null : _removeImage,
-                    icon: const Icon(Icons.delete),
-                    label: const Text('Remove'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-          if (widget.type == ProfileImageType.profilePhoto) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Recommended: Square image, at least 400x400px',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ] else ...[
-            const SizedBox(height: 8),
-            Text(
-              'Recommended: 16:9 aspect ratio, at least 1920x1080px',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
             ),
           ],
-        ],
+        ),
       ),
     );
   }
-}
 
-enum ProfileImageType {
-  profilePhoto,
-  coverImage,
+  Widget _buildImagePreview() {
+    if (widget.currentImageUrl == null) {
+      return Container(
+        width: double.infinity,
+        height: widget.mediaType == ProfileMediaType.photo ? 200 : 150,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey.shade400),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                widget.mediaType == ProfileMediaType.photo
+                    ? Icons.person
+                    : Icons.image,
+                size: 48,
+                color: Colors.grey.shade600,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'No ${widget.mediaType == ProfileMediaType.photo ? 'profile photo' : 'cover image'}',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: AspectRatio(
+        aspectRatio: widget.mediaType == ProfileMediaType.photo ? 1 : 3,
+        child: Image.network(
+          widget.currentImageUrl!,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: Colors.grey.shade200,
+              child: const Center(
+                child: Icon(Icons.error, color: Colors.grey),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
 }

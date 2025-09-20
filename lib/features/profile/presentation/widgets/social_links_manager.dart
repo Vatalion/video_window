@@ -1,244 +1,87 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../bloc/profile_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../domain/models/social_link.dart';
+import '../../data/repositories/profile_repository.dart';
 
 class SocialLinksManager extends StatefulWidget {
-  const SocialLinksManager({super.key});
+  final String userId;
+  final List<SocialLink> initialLinks;
+  final Function(List<SocialLink>) onLinksUpdated;
+
+  const SocialLinksManager({
+    super.key,
+    required this.userId,
+    required this.initialLinks,
+    required this.onLinksUpdated,
+  });
 
   @override
   State<SocialLinksManager> createState() => _SocialLinksManagerState();
 }
 
 class _SocialLinksManagerState extends State<SocialLinksManager> {
+  final ProfileRepository _repository = ProfileRepository();
+  late List<SocialLink> _links;
   bool _isLoading = false;
 
   @override
-  Widget build(BuildContext context) {
-    return BlocListener<ProfileBloc, ProfileState>(
-      listener: (context, state) {
-        if (state is SocialLinksUpdated) {
-          setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Social links updated successfully'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } else if (state is ProfileError) {
-          setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Social Links'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: _isLoading ? null : _addSocialLink,
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: BlocBuilder<ProfileBloc, ProfileState>(
-                builder: (context, state) {
-                  if (state is ProfileLoaded) {
-                    return _buildSocialLinksList(state.profile.socialLinks);
-                  }
-                  return const Center(child: CircularProgressIndicator());
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  void initState() {
+    super.initState();
+    _links = List.from(widget.initialLinks);
   }
 
-  Widget _buildSocialLinksList(List<SocialLinkModel> links) {
-    if (links.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.link_off,
-              size: 64,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No social links added yet',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Add your social media profiles to connect with others',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _isLoading ? null : _addSocialLink,
-              icon: const Icon(Icons.add),
-              label: const Text('Add Social Link'),
-            ),
-          ],
-        ),
+  Future<void> _addSocialLink(SocialPlatform platform, String url) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final newLink = SocialLink(
+        userId: widget.userId,
+        platform: platform,
+        url: url,
+        displayOrder: _links.length,
       );
-    }
 
-    return ReorderableListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: links.length,
-      onReorder: (oldIndex, newIndex) {
-        _reorderLinks(links, oldIndex, newIndex);
-      },
-      itemBuilder: (context, index) {
-        final link = links[index];
-        return _buildSocialLinkCard(link, index);
-      },
-    );
-  }
+      final savedLink = await _repository.addSocialLink(newLink);
 
-  Widget _buildSocialLinkCard(SocialLinkModel link, int index) {
-    return Card(
-      key: ValueKey(link.id),
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: Colors.blue[100],
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Center(
-            child: Text(
-              link.platform.icon,
-              style: const TextStyle(fontSize: 20),
-            ),
-          ),
-        ),
-        title: Text(
-          link.displayName,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(link.displayUrl),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) async {
-            switch (value) {
-              case 'edit':
-                await _editSocialLink(link);
-                break;
-              case 'delete':
-                await _deleteSocialLink(link);
-                break;
-            }
-          },
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit),
-                  SizedBox(width: 8),
-                  Text('Edit'),
-                ],
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'delete',
-              child: Row(
-                children: [
-                  Icon(Icons.delete, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('Delete', style: TextStyle(color: Colors.red)),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+      setState(() {
+        _links.add(savedLink);
+        _isLoading = false;
+      });
 
-  Future<void> _addSocialLink() async {
-    await _showSocialLinkDialog();
-  }
+      widget.onLinksUpdated(_links);
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
 
-  Future<void> _editSocialLink(SocialLinkModel link) async {
-    await _showSocialLinkDialog(link: link);
-  }
-
-  Future<void> _deleteSocialLink(SocialLinkModel link) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Social Link'),
-        content: Text('Are you sure you want to delete your ${link.platform.displayName} link?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      setState(() => _isLoading = true);
-      context.read<ProfileBloc>().add(
-        DeleteSocialLink(linkId: link.id),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add link: ${e.toString()}')),
+        );
+      }
     }
   }
 
-  Future<void> _reorderLinks(List<SocialLinkModel> links, int oldIndex, int newIndex) async {
-    if (newIndex > oldIndex) {
-      newIndex -= 1;
-    }
-    final item = links.removeAt(oldIndex);
-    links.insert(newIndex, item);
-
-    final linkIds = links.map((link) => link.id).toList();
-    context.read<ProfileBloc>().add(ReorderSocialLinks(linkIds: linkIds));
+  void _removeSocialLink(int index) {
+    setState(() {
+      _links.removeAt(index);
+    });
+    widget.onLinksUpdated(_links);
   }
 
-  Future<void> _showSocialLinkDialog({SocialLinkModel? link}) async {
-    final platformController = TextEditingController(text: link?.platform.name);
-    final urlController = TextEditingController(text: link?.url);
-    final usernameController = TextEditingController(text: link?.username);
-    final formKey = GlobalKey<FormState>();
+  void _showAddLinkDialog() {
+    SocialPlatform? selectedPlatform;
+    final urlController = TextEditingController();
 
-    SocialPlatform? selectedPlatform = link?.platform;
-
-    await showDialog<void>(
+    showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(link == null ? 'Add Social Link' : 'Edit Social Link'),
-          content: Form(
-            key: formKey,
-            child: Column(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Add Social Link'),
+            content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<SocialPlatform>(
@@ -252,9 +95,9 @@ class _SocialLinksManagerState extends State<SocialLinksManager> {
                       value: platform,
                       child: Row(
                         children: [
-                          Text(platform.icon),
+                          Text(_getPlatformIcon(platform)),
                           const SizedBox(width: 8),
-                          Text(platform.displayName),
+                          Text(_getPlatformName(platform)),
                         ],
                       ),
                     );
@@ -262,98 +105,194 @@ class _SocialLinksManagerState extends State<SocialLinksManager> {
                   onChanged: (value) {
                     setState(() {
                       selectedPlatform = value;
-                      platformController.text = value?.name ?? '';
                     });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Please select a platform';
-                    }
-                    return null;
                   },
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
+                TextField(
                   controller: urlController,
-                  decoration: InputDecoration(
-                    labelText: selectedPlatform == SocialPlatform.website
-                        ? 'Website URL'
-                        : 'Profile URL',
-                    border: const OutlineInputBorder(),
-                    hintText: selectedPlatform?.urlTemplate.replaceAll('{username}', 'username'),
+                  decoration: const InputDecoration(
+                    labelText: 'URL',
+                    hintText: 'https://...',
+                    border: OutlineInputBorder(),
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a URL';
-                    }
-                    if (!value.startsWith('http://') && !value.startsWith('https://')) {
-                      return 'Please enter a valid URL';
-                    }
-                    return null;
-                  },
+                  keyboardType: TextInputType.url,
                 ),
-                if (selectedPlatform != SocialPlatform.website) ...[
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: usernameController,
-                    decoration: InputDecoration(
-                      labelText: '${selectedPlatform?.displayName} Username',
-                      border: const OutlineInputBorder(),
-                      hintText: 'your_username',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter a username';
-                      }
-                      return null;
-                    },
-                  ),
-                ],
               ],
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (formKey.currentState!.validate()) {
-                  Navigator.pop(context);
-                  setState(() => _isLoading = true);
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: selectedPlatform == null || urlController.text.isEmpty
+                    ? null
+                    : () {
+                        Navigator.pop(context);
+                        _addSocialLink(selectedPlatform!, urlController.text);
+                      },
+                child: const Text('Add'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 
-                  if (link == null) {
-                    // Add new link
-                    context.read<ProfileBloc>().add(
-                      AddSocialLink(
-                        platform: selectedPlatform!,
-                        url: urlController.text.trim(),
-                        username: usernameController.text.trim().isNotEmpty
-                            ? usernameController.text.trim()
-                            : null,
-                      ),
-                    );
-                  } else {
-                    // Update existing link
-                    context.read<ProfileBloc>().add(
-                      UpdateSocialLink(
-                        linkId: link.id,
-                        platform: selectedPlatform!,
-                        url: urlController.text.trim(),
-                        username: usernameController.text.trim().isNotEmpty
-                            ? usernameController.text.trim()
-                            : null,
-                      ),
-                    );
-                  }
-                }
-              },
-              child: Text(link == null ? 'Add' : 'Update'),
+  String _getPlatformIcon(SocialPlatform platform) {
+    switch (platform) {
+      case SocialPlatform.twitter:
+        return '🐦';
+      case SocialPlatform.instagram:
+        return '📷';
+      case SocialPlatform.facebook:
+        return '📘';
+      case SocialPlatform.linkedin:
+        return '💼';
+      case SocialPlatform.youtube:
+        return '🎥';
+      case SocialPlatform.tiktok:
+        return '🎵';
+      case SocialPlatform.github:
+        return '💻';
+      case SocialPlatform.website:
+        return '🌐';
+    }
+  }
+
+  String _getPlatformName(SocialPlatform platform) {
+    switch (platform) {
+      case SocialPlatform.twitter:
+        return 'Twitter';
+      case SocialPlatform.instagram:
+        return 'Instagram';
+      case SocialPlatform.facebook:
+        return 'Facebook';
+      case SocialPlatform.linkedin:
+        return 'LinkedIn';
+      case SocialPlatform.youtube:
+        return 'YouTube';
+      case SocialPlatform.tiktok:
+        return 'TikTok';
+      case SocialPlatform.github:
+        return 'GitHub';
+      case SocialPlatform.website:
+        return 'Website';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Social Links',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (_isLoading)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else
+                  IconButton(
+                    onPressed: _showAddLinkDialog,
+                    icon: const Icon(Icons.add),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (_links.isEmpty)
+              const Center(
+                child: Text(
+                  'No social links added yet',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              )
+            else
+              ReorderableListView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                onReorder: (oldIndex, newIndex) {
+                  setState(() {
+                    if (newIndex > oldIndex) {
+                      newIndex -= 1;
+                    }
+                    final item = _links.removeAt(oldIndex);
+                    _links.insert(newIndex, item);
+
+                    // Update display orders
+                    for (int i = 0; i < _links.length; i++) {
+                      _links[i] = _links[i].copyWith(displayOrder: i);
+                    }
+                  });
+                  widget.onLinksUpdated(_links);
+                },
+                children: [
+                  for (int index = 0; index < _links.length; index++)
+                    _buildSocialLinkTile(_links[index], index),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSocialLinkTile(SocialLink link, int index) {
+    return Card(
+      key: ValueKey(link.platform),
+      child: ListTile(
+        leading: Text(
+          _getPlatformIcon(link.platform),
+          style: const TextStyle(fontSize: 24),
+        ),
+        title: Text(_getPlatformName(link.platform)),
+        subtitle: Text(
+          link.url,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.open_in_new),
+              onPressed: () => _launchUrl(link.url),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () => _removeSocialLink(index),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch $url')),
+        );
+      }
+    }
   }
 }

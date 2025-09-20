@@ -1,378 +1,168 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../bloc/profile_bloc.dart';
-import '../../domain/models/notification_preference_model.dart';
+import '../../domain/models/notification_preference.dart';
+import '../../data/repositories/profile_repository.dart';
 
 class NotificationPreferences extends StatefulWidget {
-  const NotificationPreferences({super.key});
+  final String userId;
+  final List<NotificationPreference> initialPreferences;
+  final Function(List<NotificationPreference>) onPreferencesUpdated;
+
+  const NotificationPreferences({
+    super.key,
+    required this.userId,
+    required this.initialPreferences,
+    required this.onPreferencesUpdated,
+  });
 
   @override
   State<NotificationPreferences> createState() => _NotificationPreferencesState();
 }
 
 class _NotificationPreferencesState extends State<NotificationPreferences> {
+  final ProfileRepository _repository = ProfileRepository();
+  late List<NotificationPreference> _preferences;
   bool _isLoading = false;
-  NotificationSettings? _currentSettings;
-
-  // Global settings
-  bool _globalEnabled = true;
-  bool _soundEnabled = true;
-  bool _vibrationEnabled = true;
-  bool _ledEnabled = true;
-  bool _badgeEnabled = true;
-
-  // Quiet hours settings
-  bool _quietHoursEnabled = false;
-  TimeOfDay? _quietHoursStart;
-  TimeOfDay? _quietHoursEnd;
-
-  // Individual notification preferences
-  final Map<NotificationType, bool> _typeEnabled = {};
-  final Map<NotificationType, DeliveryMethod> _typeDeliveryMethod = {};
 
   @override
   void initState() {
     super.initState();
-    _loadNotificationPreferences();
+    _preferences = List.from(widget.initialPreferences);
   }
 
-  Future<void> _loadNotificationPreferences() async {
-    if (_currentUserId != null) {
-      context.read<ProfileBloc>().add(LoadNotificationPreferences(userId: _currentUserId!));
-    }
-  }
-
-  String? get _currentUserId {
-    // This should come from user authentication context
-    final state = context.read<ProfileBloc>().state;
-    if (state is ProfileLoaded) {
-      return state.profile.userId;
-    }
-    return null;
-  }
-
-  void _updateSettingsFromModel(NotificationSettings settings) {
+  Future<void> _updatePreference(NotificationPreference preference) async {
     setState(() {
-      _currentSettings = settings;
-      _globalEnabled = settings.globalEnabled;
-      _soundEnabled = settings.soundEnabled;
-      _vibrationEnabled = settings.vibrationEnabled;
-      _ledEnabled = settings.ledEnabled;
-      _badgeEnabled = settings.badgeEnabled;
-
-      // Initialize individual preferences
-      for (final pref in settings.preferences) {
-        _typeEnabled[pref.type] = pref.enabled;
-        _typeDeliveryMethod[pref.type] = pref.deliveryMethod;
-        _quietHoursEnabled = pref.quietHoursEnabled;
-
-        if (pref.quietHoursStart != null) {
-          _quietHoursStart = TimeOfDay.fromDateTime(pref.quietHoursStart!);
-        }
-        if (pref.quietHoursEnd != null) {
-          _quietHoursEnd = TimeOfDay.fromDateTime(pref.quietHoursEnd!);
-        }
-      }
+      _isLoading = true;
     });
+
+    try {
+      final updatedPreference = await _repository.updateNotificationPreference(preference);
+
+      setState(() {
+        final index = _preferences.indexWhere((p) => p.notificationType == updatedPreference.notificationType);
+        if (index != -1) {
+          _preferences[index] = updatedPreference;
+        }
+        _isLoading = false;
+      });
+
+      widget.onPreferencesUpdated(_preferences);
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update preference: ${e.toString()}')),
+        );
+      }
+    }
   }
 
-  Future<void> _saveNotificationPreferences() async {
-    if (_currentUserId == null) return;
+  void _toggleDeliveryMethod(NotificationPreference preference, DeliveryMethod method) {
+    final updatedMethods = Set<DeliveryMethod>.from(preference.deliveryMethods);
 
-    setState(() => _isLoading = true);
-
-    // Update all notification preferences
-    for (final type in NotificationType.values) {
-      final enabled = _typeEnabled[type] ?? true;
-      final deliveryMethod = _typeDeliveryMethod[type] ?? DeliveryMethod.push;
-
-      context.read<ProfileBloc>().add(
-        UpdateNotificationPreference(
-          type: type,
-          enabled: enabled,
-          deliveryMethod: deliveryMethod,
-          quietHoursEnabled: _quietHoursEnabled,
-          quietHoursStart: _quietHoursStart != null
-              ? DateTime(
-                  DateTime.now().year,
-                  DateTime.now().month,
-                  DateTime.now().day,
-                  _quietHoursStart!.hour,
-                  _quietHoursStart!.minute,
-                )
-              : null,
-          quietHoursEnd: _quietHoursEnd != null
-              ? DateTime(
-                  DateTime.now().year,
-                  DateTime.now().month,
-                  DateTime.now().day,
-                  _quietHoursEnd!.hour,
-                  _quietHoursEnd!.minute,
-                )
-              : null,
-        ),
-      );
+    if (updatedMethods.contains(method)) {
+      updatedMethods.remove(method);
+      // Ensure at least one delivery method is selected
+      if (updatedMethods.isEmpty) {
+        updatedMethods.add(DeliveryMethod.inApp);
+      }
+    } else {
+      updatedMethods.add(method);
     }
 
-    // Update global settings
-    await context.read<ProfileBloc>().add(UpdateNotificationPreference(
-      type: NotificationType.system,
-      enabled: _globalEnabled,
-    ));
+    final updatedPreference = preference.copyWith(deliveryMethods: updatedMethods);
+    _updatePreference(updatedPreference);
+  }
+
+  void _togglePreferenceEnabled(NotificationPreference preference) {
+    final updatedPreference = preference.copyWith(enabled: !preference.enabled);
+    _updatePreference(updatedPreference);
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ProfileBloc, ProfileState>(
-      listener: (context, state) {
-        if (state is NotificationPreferencesUpdated) {
-          setState(() => _isLoading = false);
-          _updateSettingsFromModel(state.settings);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Notification preferences updated successfully'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } else if (state is ProfileError) {
-          setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
-          );
-        } else if (state is ProfileLoaded && state.notificationSettings != null) {
-          _updateSettingsFromModel(state.notificationSettings!);
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Notification Preferences'),
-          actions: [
-            TextButton(
-              onPressed: _isLoading ? null : _saveNotificationPreferences,
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Notification Preferences',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (_isLoading)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16),
+                    child: SizedBox(
                       width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Text('Save'),
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+              ],
             ),
+            const SizedBox(height: 16),
+            ..._preferences.map((preference) => _buildPreferenceTile(preference)),
           ],
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Global Settings Section
-              _buildSectionTitle('Global Settings'),
-              _buildGlobalSettings(),
-              const SizedBox(height: 24),
-
-              // Notification Types Section
-              _buildSectionTitle('Notification Types'),
-              _buildNotificationTypes(),
-              const SizedBox(height: 24),
-
-              // Quiet Hours Section
-              _buildSectionTitle('Quiet Hours'),
-              _buildQuietHoursSettings(),
-              const SizedBox(height: 24),
-
-              // Test Notifications Section
-              _buildSectionTitle('Test Notifications'),
-              _buildTestNotifications(),
-            ],
-          ),
-        ),
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: Colors.black87,
-      ),
-    );
-  }
-
-  Widget _buildGlobalSettings() {
+  Widget _buildPreferenceTile(NotificationPreference preference) {
     return Card(
+      margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Global Notification Settings',
-              style: TextStyle(fontWeight: FontWeight.w600),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    preference.displayName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Switch(
+                  value: preference.enabled,
+                  onChanged: (value) => _togglePreferenceEnabled(preference),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            _buildSwitchTile(
-              title: 'Enable notifications',
-              subtitle: 'Turn all notifications on or off',
-              value: _globalEnabled,
-              onChanged: (value) => setState(() => _globalEnabled = value),
-            ),
-            _buildSwitchTile(
-              title: 'Sound',
-              subtitle: 'Play sound for notifications',
-              value: _soundEnabled,
-              onChanged: (value) => setState(() => _soundEnabled = value),
-            ),
-            _buildSwitchTile(
-              title: 'Vibration',
-              subtitle: 'Vibrate for notifications',
-              value: _vibrationEnabled,
-              onChanged: (value) => setState(() => _vibrationEnabled = value),
-            ),
-            _buildSwitchTile(
-              title: 'LED light',
-              subtitle: 'Blink LED light for notifications',
-              value: _ledEnabled,
-              onChanged: (value) => setState(() => _ledEnabled = value),
-            ),
-            _buildSwitchTile(
-              title: 'Badge count',
-              subtitle: 'Show notification badge on app icon',
-              value: _badgeEnabled,
-              onChanged: (value) => setState(() => _badgeEnabled = value),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNotificationTypes() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Choose which notifications to receive',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 16),
-            ...NotificationType.values.map((type) {
-              return _buildNotificationTypeTile(type);
-            }).toList(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNotificationTypeTile(NotificationType type) {
-    final enabled = _typeEnabled[type] ?? true;
-    final deliveryMethod = _typeDeliveryMethod[type] ?? DeliveryMethod.push;
-
-    return ExpansionTile(
-      title: Text(_getNotificationTypeText(type)),
-      subtitle: Text(_getNotificationTypeDescription(type)),
-      trailing: Switch(
-        value: enabled,
-        onChanged: (value) {
-          setState(() {
-            _typeEnabled[type] = value;
-          });
-        },
-        activeColor: Theme.of(context).primaryColor,
-      ),
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            if (preference.enabled) ...[
+              const SizedBox(height: 12),
               const Text(
-                'Delivery Method',
-                style: TextStyle(fontWeight: FontWeight.w600),
+                'Delivery Methods:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               const SizedBox(height: 8),
-              ...DeliveryMethod.values.map((method) {
-                return RadioListTile<DeliveryMethod>(
-                  title: Text(_getDeliveryMethodText(method)),
-                  subtitle: Text(_getDeliveryMethodDescription(method)),
-                  value: method,
-                  groupValue: deliveryMethod,
-                  onChanged: enabled
-                      ? (value) {
-                          if (value != null) {
-                            setState(() {
-                              _typeDeliveryMethod[type] = value;
-                            });
-                          }
-                        }
-                      : null,
-                );
-              }).toList(),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuietHoursSettings() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Quiet Hours',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Silence notifications during specific hours',
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            _buildSwitchTile(
-              title: 'Enable quiet hours',
-              subtitle: 'Silence notifications during specified times',
-              value: _quietHoursEnabled,
-              onChanged: (value) => setState(() => _quietHoursEnabled = value),
-            ),
-            if (_quietHoursEnabled) ...[
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: ListTile(
-                      title: const Text('Start Time'),
-                      subtitle: Text(
-                        _quietHoursStart?.format(context) ?? 'Not set',
-                      ),
-                      trailing: const Icon(Icons.access_time),
-                      onTap: _pickQuietHoursStart,
-                    ),
-                  ),
-                  Expanded(
-                    child: ListTile(
-                      title: const Text('End Time'),
-                      subtitle: Text(
-                        _quietHoursEnd?.format(context) ?? 'Not set',
-                      ),
-                      trailing: const Icon(Icons.access_time),
-                      onTap: _pickQuietHoursEnd,
-                    ),
-                  ),
-                ],
+              Wrap(
+                spacing: 8,
+                children: DeliveryMethod.values.map((method) {
+                  final isSelected = preference.deliveryMethods.contains(method);
+                  return FilterChip(
+                    label: Text(_getDeliveryMethodLabel(method)),
+                    selected: isSelected,
+                    onSelected: (selected) => _toggleDeliveryMethod(preference, method),
+                    avatar: Text(_getDeliveryMethodIcon(method)),
+                  );
+                }).toList(),
               ),
             ],
           ],
@@ -381,175 +171,25 @@ class _NotificationPreferencesState extends State<NotificationPreferences> {
     );
   }
 
-  Widget _buildTestNotifications() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Test Notifications',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: NotificationType.values.map((type) {
-                return ElevatedButton.icon(
-                  onPressed: _typeEnabled[type] ?? true
-                      ? () => _testNotification(type)
-                      : null,
-                  icon: const Icon(Icons.notifications),
-                  label: Text(_getNotificationTypeText(type)),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSwitchTile({
-    required String title,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return SwitchListTile(
-      title: Text(title),
-      subtitle: Text(subtitle),
-      value: value,
-      onChanged: onChanged,
-      activeColor: Theme.of(context).primaryColor,
-    );
-  }
-
-  String _getNotificationTypeText(NotificationType type) {
-    switch (type) {
-      case NotificationType.system:
-        return 'System Updates';
-      case NotificationType.messages:
-        return 'Messages';
-      case NotificationType.friendRequests:
-        return 'Friend Requests';
-      case NotificationType.comments:
-        return 'Comments';
-      case NotificationType.likes:
-        return 'Likes';
-      case NotificationType.mentions:
-        return 'Mentions';
-      case NotificationType.follows:
-        return 'Follows';
-      case NotificationType.commerce:
-        return 'Commerce';
-      case NotificationType.security:
-        return 'Security Alerts';
-      case NotificationType.marketing:
-        return 'Marketing';
-      case NotificationType.updates:
-        return 'App Updates';
-    }
-  }
-
-  String _getNotificationTypeDescription(NotificationType type) {
-    switch (type) {
-      case NotificationType.system:
-        return 'Important system and app updates';
-      case NotificationType.messages:
-        return 'New messages from other users';
-      case NotificationType.friendRequests:
-        return 'New friend requests and acceptances';
-      case NotificationType.comments:
-        return 'Comments on your posts';
-      case NotificationType.likes:
-        return 'Likes on your content';
-      case NotificationType.mentions:
-        return 'When someone mentions you';
-      case NotificationType.follows:
-        return 'When someone follows you';
-      case NotificationType.commerce:
-        return 'Commerce and purchase notifications';
-      case NotificationType.security:
-        return 'Security alerts and account activity';
-      case NotificationType.marketing:
-        return 'Promotional content and offers';
-      case NotificationType.updates:
-        return 'Feature updates and announcements';
-    }
-  }
-
-  String _getDeliveryMethodText(DeliveryMethod method) {
+  String _getDeliveryMethodLabel(DeliveryMethod method) {
     switch (method) {
       case DeliveryMethod.push:
-        return 'Push Notification';
+        return 'Push';
       case DeliveryMethod.email:
         return 'Email';
       case DeliveryMethod.inApp:
         return 'In-App';
-      case DeliveryMethod.sms:
-        return 'SMS';
     }
   }
 
-  String _getDeliveryMethodDescription(DeliveryMethod method) {
+  String _getDeliveryMethodIcon(DeliveryMethod method) {
     switch (method) {
       case DeliveryMethod.push:
-        return 'Instant notification on your device';
+        return '📱';
       case DeliveryMethod.email:
-        return 'Send notification via email';
+        return '📧';
       case DeliveryMethod.inApp:
-        return 'Show notification within the app';
-      case DeliveryMethod.sms:
-        return 'Send notification via text message';
-    }
-  }
-
-  Future<void> _pickQuietHoursStart() async {
-    final time = await showTimePicker(
-      context: context,
-      initialTime: _quietHoursStart ?? const TimeOfDay(hour: 22, minute: 0),
-    );
-    if (time != null) {
-      setState(() => _quietHoursStart = time);
-    }
-  }
-
-  Future<void> _pickQuietHoursEnd() async {
-    final time = await showTimePicker(
-      context: context,
-      initialTime: _quietHoursEnd ?? const TimeOfDay(hour: 8, minute: 0),
-    );
-    if (time != null) {
-      setState(() => _quietHoursEnd = time);
-    }
-  }
-
-  Future<void> _testNotification(NotificationType type) async {
-    final deliveryMethod = _typeDeliveryMethod[type] ?? DeliveryMethod.push;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Sending test ${_getNotificationTypeText(type)} notification via ${_getDeliveryMethodText(deliveryMethod)}...'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-
-    // Simulate test notification
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Test notification sent successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+        return '🔔';
     }
   }
 }
