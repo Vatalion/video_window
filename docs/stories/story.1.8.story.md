@@ -1,0 +1,152 @@
+# Story 1.8 - Device Management System
+
+**Status**: IN_QA
+
+## 1. Title
+Security-focused device management system with trust scoring and remote control capabilities.
+
+## 2. Context
+As account security threats continue to evolve, users need comprehensive tools to monitor and control access to their accounts across multiple devices. This story addresses the critical need for device visibility, trust assessment, and remote management capabilities. The system integrates with existing authentication (Story 1.1), biometric verification (Story 1.4), session management (Story 1.5), and profile management (Story 1.7) systems to provide a unified security experience.
+
+## 3. Requirements
+**PO Validated Requirements:**
+- Device fingerprinting using hardware ID, IP address, browser fingerprint, and installation ID
+- Device trust scoring system (0-100) based on usage patterns and behavior analysis
+- Remote device logout capabilities with confirmation dialogs
+- Real-time notifications for new device login attempts (< 5 seconds)
+- Custom device labeling and management interface
+- Automatic device logout after 30 days of inactivity (configurable)
+- Location tracking with explicit user consent
+- Integration with commerce system for risk-based authentication
+- All device management actions require biometric/PIN verification
+- Device data encryption at rest and comprehensive audit logging
+
+## 4. Acceptance Criteria
+**QA Validated Testable Criteria:**
+
+### 4.1 Device Management Interface
+- [ ] **Device List Display**: Users can view all devices connected to their account showing device name, type, last activity, location, and trust level
+- [ ] **Device Labeling**: Users can assign custom names to trusted devices and edit existing device labels
+- [ ] **Remote Logout**: Users can remotely logout from specific devices with confirmation dialog showing device details
+- [ ] **Real-time Notifications**: Users receive push notifications within 5 seconds of new device login attempts
+- [ ] **Authentication Verification**: All device management actions require biometric or PIN verification before execution
+
+### 4.2 Device Security Intelligence
+- [ ] **Device Fingerprinting**: System generates unique device fingerprints using hardware ID, IP address, browser fingerprint, and installation ID
+- [ ] **Trust Scoring**: System calculates device trust scores (0-100) based on usage frequency, location consistency, and behavior patterns
+- [ ] **Automatic Logout**: Devices automatically logout after 30 days of inactivity, with threshold configurable via admin settings
+- [ ] **Location Tracking**: Device location tracking with explicit user consent toggle and privacy settings for location data retention
+- [ ] **Security Compliance**: System implements device management security best practices including encryption, audit logging, and access controls
+
+### 4.3 Integration Requirements
+- [ ] **Profile Integration**: Device management accessible through profile management interface from Story 1.7
+- [ ] **Commerce Risk Assessment**: Device trust scores below 50 trigger additional authentication for commerce transactions
+- [ ] **Notification Preferences**: Device notifications respect user notification preferences configured in account settings
+
+## 5. Process & Rules
+**SM Validated Workflow Rules:**
+
+### 5.1 Device Registration Process
+1. Device fingerprint generated on first login
+2. User prompted to assign device name and trust level
+3. Device registered with comprehensive metadata
+4. Trust score initialized based on registration context
+
+### 5.2 Device Management Rules
+- All device actions require current session authentication
+- Biometric/PIN verification required for sensitive operations
+- Device trust scores updated based on usage patterns
+- Suspicious activity triggers immediate notifications
+- Location data requires explicit user consent
+- Audit logging maintained for all device operations
+
+### 5.3 Security Protocols
+- Device data encrypted at rest using industry standards
+- API endpoints protected by authentication middleware
+- Rate limiting applied to device management operations
+- Session validation for all device-related requests
+- Regular security audits of device management system
+
+## 6. Tasks / Breakdown
+**Implementation Tracking:**
+
+### 6.1 Core Device Management (AC: 1, 2)
+- [ ] **Task 1.1: Device Registration System**
+  - [ ] Create device fingerprinting service
+  - [ ] Implement device registration on login
+  - [ ] Build device information collection
+  - [ ] Add device authentication verification
+
+### 6.2 User Interface Components (AC: 1)
+- [ ] **Task 2.1: Device Management UI**
+  - [ ] Design device list interface
+  - [ ] Create device labeling system
+  - [ ] Implement remote logout functionality
+  - [ ] Add device information display
+
+### 6.3 Trust & Security System (AC: 2)
+- [ ] **Task 3.1: Device Trust Intelligence**
+  - [ ] Implement device trust scoring
+  - [ ] Create usage pattern analysis
+  - [ ] Add automatic logout logic
+  - [ ] Build trust level management
+
+### 6.4 Notification & Monitoring (AC: 1, 2)
+- [ ] **Task 4.1: Device Notification System**
+  - [ ] Implement new device notifications
+  - [ ] Create suspicious activity alerts
+  - [ ] Add device location tracking
+  - [ ] Build notification preferences
+
+### 6.5 Backend Services (AC: 1, 2)
+- [ ] **Task 5.1: Device API Services**
+  - [ ] Create device management API endpoints
+  - [ ] Implement device trust calculation
+  - [ ] Add device activity logging
+  - [ ] Create device security validation
+
+### 6.6 Security Features (AC: 2)
+- [ ] **Task 6.1: Device Security Enhancement**
+  - [ ] Implement suspicious device detection
+  - [ ] Create automatic logout triggers
+  - [ ] Add device access restrictions
+  - [ ] Build device security monitoring
+
+### 6.7 Testing & Quality Assurance (AC: 1, 2)
+- [ ] **Task 7.1: Comprehensive Testing**
+  - [ ] Unit tests for device management
+  - [ ] Integration tests for device tracking
+  - [ ] Security testing for device security
+  - [ ] Multi-device scenario testing
+
+## 7. Related Files
+**No additional 1.8.* files found.** This is a standalone story file.
+
+## 8. Notes
+**Consolidation Log & Clarifications:**
+
+### 8.1 Technical Implementation Notes
+- Device data models: Device, DeviceSession, DeviceTrust, DeviceActivity
+- API endpoints: GET/POST/PUT /api/devices, DELETE /api/devices/{device_id}/session
+- UI components: DeviceList, DeviceDetails, DeviceTrustIndicator, DeviceActivityLog
+- File locations: `/crypto_market/lib/features/auth/` (domain, data, presentation layers)
+- Testing location: `/crypto_market/test/features/auth/`
+
+### 8.2 Integration Dependencies
+- Story 1.1: User authentication system foundation
+- Story 1.4: Biometric authentication capabilities
+- Story 1.5: Session management infrastructure
+- Story 1.7: Profile management interface integration
+
+### 8.3 Security & Compliance
+- Device fingerprinting for unique identification
+- Encrypted storage of sensitive device data
+- Comprehensive audit logging for compliance
+- Regular security reviews and updates
+- Privacy-conscious location tracking with user consent
+
+### 8.4 Performance Considerations
+- Efficient device trust scoring algorithms
+- Optimized device list loading with pagination
+- Real-time notification delivery within SLA
+- Scalable device data storage and retrieval
