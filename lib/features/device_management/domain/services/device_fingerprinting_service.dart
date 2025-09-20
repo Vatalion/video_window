@@ -1,5 +1,5 @@
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:package_info_plus/package_info_plus.dart' as pkg;
 import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
@@ -8,7 +8,14 @@ import 'dart:convert';
 
 class DeviceFingerprintingService {
   final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
-  final PackageInfoPlugin _packageInfo = PackageInfoPlugin();
+  final pkg.PackageInfo _fallbackInfo = pkg.PackageInfo(
+    appName: 'Video Window',
+    packageName: 'com.example.video_window',
+    version: '1.0.0',
+    buildNumber: '1',
+    buildSignature: '',
+    installerStore: null,
+  );
   final Uuid _uuid = const Uuid();
 
   Future<DeviceFingerprint> generateFingerprint() async {
@@ -33,7 +40,13 @@ class DeviceFingerprintingService {
       final deviceInfo = await _deviceInfo.deviceInfo;
 
       if (deviceInfo is AndroidDeviceInfo) {
-        return deviceInfo.androidId ?? _uuid.v4();
+        // androidId moved under AndroidId on newer versions; use asString where available
+        try {
+          final id = deviceInfo.id as String?;
+          return id ?? _uuid.v4();
+        } catch (_) {
+          return _uuid.v4();
+        }
       } else if (deviceInfo is IosDeviceInfo) {
         return deviceInfo.identifierForVendor ?? _uuid.v4();
       } else if (deviceInfo is WebBrowserInfo) {
@@ -49,7 +62,7 @@ class DeviceFingerprintingService {
   Future<String> _generateBrowserFingerprint() async {
     try {
       final deviceInfo = await _deviceInfo.deviceInfo;
-      final packageInfo = await _packageInfo.getPackageInfo();
+  final packageInfo = await pkg.PackageInfo.fromPlatform().catchError((_) => _fallbackInfo);
 
       String fingerprint = '';
 
@@ -135,7 +148,7 @@ class DeviceFingerprintingService {
   Future<DeviceMetadata> getDeviceMetadata() async {
     try {
       final deviceInfo = await _deviceInfo.deviceInfo;
-      final packageInfo = await _packageInfo.getPackageInfo();
+  final packageInfo = await pkg.PackageInfo.fromPlatform().catchError((_) => _fallbackInfo);
 
       String deviceModel = 'Unknown';
       String osVersion = 'Unknown';

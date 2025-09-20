@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
 import '../entities/device_entity.dart';
 import '../entities/device_session_entity.dart';
-import '../../../core/error/failures.dart';
-import '../../../core/usecases/usecase.dart';
+import '../../../../core/error/failures.dart';
+import '../../../../core/usecases/usecase.dart';
 
 abstract class DeviceRepository {
   Future<Either<Failure, DeviceEntity>> registerDevice({
