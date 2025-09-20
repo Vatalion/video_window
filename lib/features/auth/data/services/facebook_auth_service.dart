@@ -110,18 +110,11 @@ class FacebookAuthServiceImpl implements FacebookAuthService {
         isNewUser: true, // Backend will determine if user exists
         state: state,
       );
-    } on FacebookAuthException catch (e) {
-      _logger.e('Facebook Sign-In exception: ${e.message}');
-      if (e.message?.toLowerCase().contains('cancel') ?? false) {
-        return SocialAuthResult.cancelled(state: state);
-      }
-      return SocialAuthResult.error(
-        errorMessage:
-            'Facebook Sign-In failed: ${e.message ?? 'Unknown error'}',
-        state: state,
-      );
     } catch (e) {
       _logger.e('Facebook Sign-In unexpected error: ${e.toString()}');
+      if (e.toString().toLowerCase().contains('cancel')) {
+        return SocialAuthResult.cancelled(state: state);
+      }
       return SocialAuthResult.error(
         errorMessage: 'Facebook Sign-In failed: ${e.toString()}',
         state: state,
@@ -185,7 +178,7 @@ class FacebookAuthServiceImpl implements FacebookAuthService {
     try {
       _logger.i('Attempting to refresh Facebook token');
 
-      final accessToken = _facebookAuth.accessToken;
+      final accessToken = await _facebookAuth.accessToken;
       if (accessToken == null) {
         _logger.w('No current Facebook access token to refresh');
         return null;
