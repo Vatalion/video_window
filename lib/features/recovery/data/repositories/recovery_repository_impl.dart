@@ -1,8 +1,6 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
-import 'package:mailer/mailer.dart';
-import 'package:mailer/smtp_server.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/models/recovery_models.dart';
 import '../../domain/repositories/recovery_repository.dart';
@@ -69,7 +67,7 @@ class RecoveryRepositoryImpl implements RecoveryRepository {
       );
 
       // Send recovery email
-      await _sendRecoveryEmail(email, token, expiresAt);
+  await _sendRecoveryEmail(email, token, expiresAt);
 
       // Log recovery attempt
       await logRecoveryAttempt(
@@ -441,34 +439,10 @@ class RecoveryRepositoryImpl implements RecoveryRepository {
 
   Future<void> _sendRecoveryEmail(String email, String token, DateTime expiresAt) async {
     // Configure SMTP settings (in production, these would be configurable)
-    final smtpServer = SmtpServer(
-      'smtp.example.com',
-      username: 'noreply@videowindow.com',
-      password: 'your-password',
-      port: 587,
-      ssl: false,
-      allowInsecure: true,
-    );
-
-    final message = Message()
-      ..from = Address('noreply@videowindow.com', 'VideoWindow Support')
-      ..recipients.add(email)
-      ..subject = 'Password Reset Request'
-      ..html = '''
-        <h2>Password Reset Request</h2>
-        <p>You have requested to reset your password for your VideoWindow account.</p>
-        <p>Click the link below to reset your password:</p>
-        <p><a href="https://app.videowindow.com/reset-password?token=$token&email=${Uri.encodeComponent(email)}">Reset Password</a></p>
-        <p>This link will expire on ${expiresAt.toLocal()}.</p>
-        <p>If you did not request this reset, please ignore this email or contact support.</p>
-        <p>Best regards,<br>VideoWindow Team</p>
-      ''';
-
-    try {
-      await send(message, smtpServer);
-    } catch (e) {
-      throw Exception('Failed to send recovery email: $e');
-    }
+    // Placeholder implementation: In production, integrate with an email service.
+    final link = 'https://app.videowindow.com/reset-password?token=$token&email=${Uri.encodeComponent(email)}';
+    // ignore: avoid_print
+    print('Send recovery email to $email with link: $link (expires ${expiresAt.toLocal()})');
   }
 
   Future<void> _sendRecoverySMS(String phoneNumber, String code) async {

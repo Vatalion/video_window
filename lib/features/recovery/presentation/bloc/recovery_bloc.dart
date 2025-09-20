@@ -11,7 +11,7 @@ class RecoveryBloc extends Bloc<RecoveryEvent, RecoveryState> {
   RecoveryBloc({required this.recoveryRepository}) : super(RecoveryInitial()) {
     on<EmailRecoveryRequested>(_onEmailRecoveryRequested);
     on<PhoneRecoveryRequested>(_onPhoneRecoveryRequested);
-    on<TokenVerified>(_onTokenVerified);
+  on<TokenVerified>(_onTokenVerified);
     on<PasswordResetCompleted>(_onPasswordResetCompleted);
     on<SecurityQuestionAnswered>(_onSecurityQuestionAnswered);
     on<BackupRecoveryMethodSelected>(_onBackupRecoveryMethodSelected);
@@ -97,7 +97,7 @@ class RecoveryBloc extends Bloc<RecoveryEvent, RecoveryState> {
         event.token,
       );
 
-      emit(TokenVerified(email: event.email, isValid: isValid));
+  emit(TokenVerificationResult(email: event.email, isValid: isValid));
     } catch (e) {
       emit(RecoveryFailed(
         error: 'Failed to verify token',
@@ -234,7 +234,7 @@ class RecoveryBloc extends Bloc<RecoveryEvent, RecoveryState> {
     emit(RecoveryLoading());
     try {
       final attempts = await recoveryRepository.getRecoveryAttempts(event.email);
-      emit(RecoveryAttemptsLoadedState(attempts));
+  emit(RecoveryAttemptsLoadedState(attempts));
     } catch (e) {
       emit(RecoveryFailed(
         error: 'Failed to load recovery attempts',
@@ -251,12 +251,4 @@ class RecoveryBloc extends Bloc<RecoveryEvent, RecoveryState> {
   }
 }
 
-// Helper class to distinguish between RecoveryAttemptsLoaded event and state
-class RecoveryAttemptsLoadedState extends RecoveryState {
-  final List<RecoveryAttempt> attempts;
-
-  const RecoveryAttemptsLoadedState(this.attempts);
-
-  @override
-  List<Object?> get props => [attempts];
-}
+// State class defined in recovery_state.dart

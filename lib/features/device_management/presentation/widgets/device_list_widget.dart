@@ -1,52 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/device_entity.dart';
-import '../bloc/device_management_bloc.dart';
 import 'device_trust_indicator.dart';
 import 'device_card.dart';
 
 class DeviceListWidget extends StatelessWidget {
-  const DeviceListWidget({super.key});
+  final List<DeviceEntity> devices;
+  final Future<void> Function()? onRefresh;
+
+  const DeviceListWidget({super.key, required this.devices, this.onRefresh});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DeviceManagementBloc, DeviceManagementState>(
-      builder: (context, state) {
-        if (state is DeviceManagementLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is DeviceManagementLoaded) {
-          return _buildDeviceList(context, state.devices);
-        } else if (state is DeviceManagementError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(
-                  'Failed to load devices',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  state.message,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    context.read<DeviceManagementBloc>().add(LoadDevices());
-                  },
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        }
-        return const Center(child: Text('No devices found'));
-      },
-    );
+    return _buildDeviceList(context, devices);
   }
 
   Widget _buildDeviceList(BuildContext context, List<DeviceEntity> devices) {
@@ -73,7 +38,9 @@ class DeviceListWidget extends StatelessWidget {
 
     return RefreshIndicator(
       onRefresh: () async {
-        context.read<DeviceManagementBloc>().add(LoadDevices());
+        if (onRefresh != null) {
+          await onRefresh!();
+        }
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -302,9 +269,7 @@ class DeviceCard extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              context.read<DeviceManagementBloc>().add(
-                LogoutDevice(device.id),
-              );
+              // TODO: Hook into BLoC or callback for remote logout
             },
             child: const Text('Logout'),
           ),
@@ -337,12 +302,7 @@ class DeviceCard extends StatelessWidget {
             onPressed: () {
               if (controller.text.trim().isNotEmpty) {
                 Navigator.pop(context);
-                context.read<DeviceManagementBloc>().add(
-                  UpdateDeviceName(
-                    deviceId: device.id,
-                    newName: controller.text.trim(),
-                  ),
-                );
+                // TODO: Hook into BLoC or callback for updating device name
               }
             },
             child: const Text('Save'),

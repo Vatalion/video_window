@@ -1,56 +1,114 @@
 import 'dart:io';
-import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:sqlite3/sqlite3.dart' as sqlite;
 
-class CartItems extends Table {
-  TextColumn get id => text().unique()();
-  TextColumn get cartId => text()();
-  TextColumn get productId => text()();
-  TextColumn get name => text()();
-  TextColumn get description => text()();
-  RealColumn get price => real()();
-  IntColumn get quantity => integer()();
-  TextColumn get imageUrl => text()();
-  TextColumn get variantId => text().nullable()();
-  TextColumn get customAttributes => text().nullable()();
-  DateTimeColumn get addedAt => dateTime()();
-  DateTimeColumn get updatedAt => dateTime()();
+class _SimpleSqlDb {
+  final sqlite.Database _db;
 
-  @override
-  Set<Column> get primaryKey => {id};
-}
+  _SimpleSqlDb(this._db);
 
-class ShoppingCarts extends Table {
-  TextColumn get id => text().unique()();
-  TextColumn get userId => text()();
-  TextColumn get sessionId => text()();
-  BoolColumn get isAnonymous => boolean()();
-  DateTimeColumn get createdAt => dateTime()();
-  DateTimeColumn get updatedAt => dateTime()();
-  DateTimeColumn get expiresAt => dateTime()();
-  RealColumn get subtotal => real()();
-  RealColumn get tax => real()();
-  RealColumn get shipping => real()();
-  RealColumn get total => real()();
-  TextColumn get currency => text()();
-  TextColumn get couponCode => text().nullable()();
-  RealColumn get discountAmount => real().nullable()();
-  TextColumn get syncStatus => text().withDefault(const Constant('pending'))();
-  DateTimeColumn get lastSyncedAt => dateTime().nullable()();
+  Future<void> customStatement(String sql, [List<Object?> params = const []]) async {
+    final stmt = _db.prepare(sql);
+    try {
+      stmt.execute(params);
+    } finally {
+      stmt.dispose();
+    }
+  }
 
-  @override
-  Set<Column> get primaryKey => {id};
+  Future<void> transaction(Future<void> Function() action) async {
+    try {
+      _db.execute('BEGIN');
+      await action();
+      _db.execute('COMMIT');
+    } catch (e) {
+      _db.execute('ROLLBACK');
+      rethrow;
+    }
+  }
+
+  Future<void> insert(String table, Map<String, Object?> values) async {
+    final cols = values.keys.toList();
+    final placeholders = List.filled(cols.length, '?').join(', ');
+    final sql = 'INSERT INTO $table (${cols.join(', ')}) VALUES ($placeholders)';
+    final stmt = _db.prepare(sql);
+    try {
+      stmt.execute(cols.map((c) => values[c]).toList());
+    } finally {
+      stmt.dispose();
+    }
+  }
+
+  Future<void> update(String table, Map<String, Object?> values, {required Map<String, Object?> where}) async {
+    final setSql = values.keys.map((k) => '$k = ?').join(', ');
+    final whereSql = where.keys.map((k) => '$k = ?').join(' AND ');
+    final sql = 'UPDATE $table SET $setSql WHERE $whereSql';
+    final stmt = _db.prepare(sql);
+    try {
+      stmt.execute([
+        ...values.keys.map((k) => values[k]),
+        ...where.keys.map((k) => where[k]),
+      ]);
+    } finally {
+      stmt.dispose();
+    }
+  }
+
+  Future<void> delete(String table, {required Map<String, Object?> where}) async {
+    final whereSql = where.keys.map((k) => '$k = ?').join(' AND ');
+    final sql = 'DELETE FROM $table WHERE $whereSql';
+    final stmt = _db.prepare(sql);
+    try {
+      stmt.execute(where.keys.map((k) => where[k]).toList());
+    } finally {
+      stmt.dispose();
+    }
+  }
+
+  Future<List<Map<String, Object?>>> query(
+    String table, {
+    Map<String, Object?> where = const {},
+    String? orderBy,
+    int? limit,
+  }) async {
+    final buffer = StringBuffer('SELECT * FROM $table');
+    final params = <Object?>[];
+    if (where.isNotEmpty) {
+      buffer.write(' WHERE ');
+      buffer.write(where.keys.map((k) => '$k = ?').join(' AND '));
+      params.addAll(where.keys.map((k) => where[k]));
+    }
+    if (orderBy != null) {
+      buffer.write(' ORDER BY $orderBy');
+    }
+    if (limit != null) {
+      buffer.write(' LIMIT $limit');
+    }
+    final result = _db.select(buffer.toString(), params);
+    final columns = result.columnNames;
+    return result.map((row) {
+      final map = <String, Object?>{};
+      for (var i = 0; i < columns.length; i++) {
+        map[columns[i]] = row[i];
+      }
+      return map;
+    }).toList();
+  }
+
+  Future<void> close() async {
+    _db.dispose();
+  }
 }
 
 class CartDatabase {
-  late Database _db;
+  late final _SimpleSqlDb _db;
 
   Future<void> init() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'shopping_cart.sqlite'));
-    _db = NativeDatabase(file);
+  final dbFolder = await getApplicationDocumentsDirectory();
+  final file = File(p.join(dbFolder.path, 'shopping_cart.sqlite'));
+  final sqliteDb = sqlite.sqlite3.open(file.path);
+  _db = _SimpleSqlDb(sqliteDb);
 
     // Run migration
     await _db.customStatement('''
@@ -170,37 +228,37 @@ class CartDatabase {
     );
 
     final items = itemsResult.map((item) => {
-      'id': item['id'],
-      'productId': item['product_id'],
-      'name': item['name'],
-      'description': item['description'],
-      'price': item['price'],
-      'quantity': item['quantity'],
-      'imageUrl': item['image_url'],
-      'variantId': item['variant_id'],
-      'customAttributes': item['custom_attributes'],
-      'addedAt': DateTime.fromMillisecondsSinceEpoch(item['added_at']),
-      'updatedAt': DateTime.fromMillisecondsSinceEpoch(item['updated_at']),
+      'id': item['id'] as String,
+      'productId': item['product_id'] as String,
+      'name': item['name'] as String,
+      'description': item['description'] as String,
+      'price': (item['price'] as num).toDouble(),
+      'quantity': item['quantity'] as int,
+      'imageUrl': item['image_url'] as String,
+      'variantId': item['variant_id'] as String?,
+      'customAttributes': item['custom_attributes'] as String?,
+      'addedAt': DateTime.fromMillisecondsSinceEpoch(item['added_at'] as int),
+      'updatedAt': DateTime.fromMillisecondsSinceEpoch(item['updated_at'] as int),
     }).toList();
 
     return {
-      'id': cart['id'],
-      'userId': cart['user_id'],
-      'sessionId': cart['session_id'],
+    'id': cart['id'] as String,
+    'userId': cart['user_id'] as String,
+    'sessionId': cart['session_id'] as String,
       'isAnonymous': cart['is_anonymous'] == 1,
-      'createdAt': DateTime.fromMillisecondsSinceEpoch(cart['created_at']),
-      'updatedAt': DateTime.fromMillisecondsSinceEpoch(cart['updated_at']),
-      'expiresAt': DateTime.fromMillisecondsSinceEpoch(cart['expires_at']),
-      'subtotal': cart['subtotal'],
-      'tax': cart['tax'],
-      'shipping': cart['shipping'],
-      'total': cart['total'],
-      'currency': cart['currency'],
-      'couponCode': cart['coupon_code'],
-      'discountAmount': cart['discount_amount'],
-      'syncStatus': cart['sync_status'],
-      'lastSyncedAt': cart['last_synced_at'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(cart['last_synced_at'])
+    'createdAt': DateTime.fromMillisecondsSinceEpoch(cart['created_at'] as int),
+    'updatedAt': DateTime.fromMillisecondsSinceEpoch(cart['updated_at'] as int),
+    'expiresAt': DateTime.fromMillisecondsSinceEpoch(cart['expires_at'] as int),
+    'subtotal': (cart['subtotal'] as num).toDouble(),
+    'tax': (cart['tax'] as num).toDouble(),
+    'shipping': (cart['shipping'] as num).toDouble(),
+    'total': (cart['total'] as num).toDouble(),
+    'currency': cart['currency'] as String,
+    'couponCode': cart['coupon_code'] as String?,
+    'discountAmount': (cart['discount_amount'] as num?)?.toDouble(),
+    'syncStatus': cart['sync_status'] as String,
+    'lastSyncedAt': cart['last_synced_at'] != null
+      ? DateTime.fromMillisecondsSinceEpoch(cart['last_synced_at'] as int)
           : null,
       'items': items,
     };
@@ -214,8 +272,8 @@ class CartDatabase {
       limit: 1,
     );
 
-    if (cartResult.isEmpty) return null;
-    return getCart(cartResult.first['id']);
+  if (cartResult.isEmpty) return null;
+  return getCart(cartResult.first['id'] as String);
   }
 
   Future<Map<String, dynamic>?> getCartBySession(String sessionId) async {
@@ -226,8 +284,8 @@ class CartDatabase {
       limit: 1,
     );
 
-    if (cartResult.isEmpty) return null;
-    return getCart(cartResult.first['id']);
+  if (cartResult.isEmpty) return null;
+  return getCart(cartResult.first['id'] as String);
   }
 
   Future<void> deleteCart(String cartId) async {
@@ -257,7 +315,7 @@ class CartDatabase {
 
     final carts = <Map<String, dynamic>>[];
     for (final cart in cartsResult) {
-      final fullCart = await getCart(cart['id']);
+  final fullCart = await getCart(cart['id'] as String);
       if (fullCart != null) {
         carts.add(fullCart);
       }

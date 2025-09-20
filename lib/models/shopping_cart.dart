@@ -40,12 +40,12 @@ class ShoppingCart extends Equatable {
     this.discountAmount,
   });
 
-  int get itemCount => items.fold(0, (sum, item) => sum + item.quantity);
+  int get itemCount => items.fold<int>(0, (sum, item) => sum + item.quantity);
 
   bool get isEmpty => items.isEmpty;
   bool get isNotEmpty => items.isNotEmpty;
 
-  double get getSubtotal => items.fold(0, (sum, item) => sum + item.totalPrice);
+  double get getSubtotal => items.fold<double>(0, (sum, item) => sum + item.totalPrice);
 
   bool get isExpired => DateTime.now().isAfter(expiresAt);
 
@@ -107,7 +107,7 @@ class ShoppingCart extends Equatable {
       updatedItems = [...items, item];
     }
 
-    final newSubtotal = updatedItems.fold(0, (sum, item) => sum + item.totalPrice);
+  final newSubtotal = updatedItems.fold<double>(0, (sum, item) => sum + item.totalPrice);
     final newTotal = newSubtotal + tax + shipping - (discountAmount ?? 0);
 
     return copyWith(
@@ -119,7 +119,7 @@ class ShoppingCart extends Equatable {
 
   ShoppingCart removeItem(String itemId) {
     final updatedItems = items.where((item) => item.id != itemId).toList();
-    final newSubtotal = updatedItems.fold(0, (sum, item) => sum + item.totalPrice);
+  final newSubtotal = updatedItems.fold<double>(0, (sum, item) => sum + item.totalPrice);
     final newTotal = newSubtotal + tax + shipping - (discountAmount ?? 0);
 
     return copyWith(
@@ -141,7 +141,7 @@ class ShoppingCart extends Equatable {
       return item;
     }).toList();
 
-    final newSubtotal = updatedItems.fold(0, (sum, item) => sum + item.totalPrice);
+  final newSubtotal = updatedItems.fold<double>(0, (sum, item) => sum + item.totalPrice);
     final newTotal = newSubtotal + tax + shipping - (discountAmount ?? 0);
 
     return copyWith(

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/models/recovery_models.dart';
 
@@ -99,31 +100,23 @@ class RecoveryLocalDataSourceImpl implements RecoveryLocalDataSource {
       attempts.removeRange(0, attempts.length - 50);
     }
 
-    final attemptsJson = attempts.map((a) => a.toJson()).toList();
-    await sharedPreferences.setString(key, attemptsJson.toString());
+  final attemptsJson = attempts.map((a) => a.toJson()).toList();
+  await sharedPreferences.setString(key, jsonEncode(attemptsJson));
   }
 
   @override
   Future<List<RecoveryAttempt>> getLocalRecoveryAttempts(String email) async {
     final key = '$_recoveryAttemptsPrefix${email.toLowerCase()}';
-    final attemptsString = sharedPreferences.getString(key);
+  final attemptsString = sharedPreferences.getString(key);
 
     if (attemptsString == null) return [];
 
     try {
-      final attemptsList = attemptsString
-          .substring(1, attemptsString.length - 1)
-          .split('},')
-          .map((s) => s.endsWith('}') ? s : '$s}')
+      final List<dynamic> decoded = jsonDecode(attemptsString);
+      return decoded
+          .whereType<Map<String, dynamic>>()
+          .map((m) => RecoveryAttempt.fromJson(m))
           .toList();
-
-      return attemptsList.map((json) {
-        final cleanJson = json.replaceAllMapped(
-          RegExp(r'(\w+):'),
-          (match) => '"${match.group(1)}":',
-        );
-        return RecoveryAttempt.fromJson(cleanJson);
-      }).toList();
     } catch (e) {
       return [];
     }
@@ -162,30 +155,22 @@ class RecoveryLocalDataSourceImpl implements RecoveryLocalDataSource {
     final questionsJson = questions.map((q) => q.toJson()).toList();
     await sharedPreferences.setString(
       _securityQuestionsKey,
-      questionsJson.toString(),
+      jsonEncode(questionsJson),
     );
   }
 
   @override
   Future<List<SecurityQuestion>?> getCachedSecurityQuestions() async {
-    final questionsString = sharedPreferences.getString(_securityQuestionsKey);
+  final questionsString = sharedPreferences.getString(_securityQuestionsKey);
 
     if (questionsString == null) return null;
 
     try {
-      final questionsList = questionsString
-          .substring(1, questionsString.length - 1)
-          .split('},')
-          .map((s) => s.endsWith('}') ? s : '$s}')
+      final List<dynamic> decoded = jsonDecode(questionsString);
+      return decoded
+          .whereType<Map<String, dynamic>>()
+          .map((m) => SecurityQuestion.fromJson(m))
           .toList();
-
-      return questionsList.map((json) {
-        final cleanJson = json.replaceAllMapped(
-          RegExp(r'(\w+):'),
-          (match) => '"${match.group(1)}":',
-        );
-        return SecurityQuestion.fromJson(cleanJson);
-      }).toList();
     } catch (e) {
       return null;
     }

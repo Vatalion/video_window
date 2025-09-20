@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:encrypt/encrypt.dart';
 import 'package:pointycastle/asymmetric/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,10 +13,10 @@ class CartEncryptionService {
   final Uuid _uuid = const Uuid();
 
   CartEncryptionService() {
-    _initializeEncryption();
+    initializeEncryption();
   }
 
-  Future<void> _initializeEncryption() async {
+  Future<void> initializeEncryption() async {
     final prefs = await SharedPreferences.getInstance();
 
     // Get or create encryption key
@@ -139,7 +140,7 @@ class CartEncryptionService {
     await prefs.setString(_ivKey, newIv);
 
     // Reinitialize encryption with new values
-    _initializeEncryption();
+    initializeEncryption();
   }
 
   bool isDataEncrypted(Map<String, dynamic> data) {

@@ -38,11 +38,11 @@ class PhoneRecoverySent extends RecoveryState {
   List<Object?> get props => [phoneNumber, expiresAt];
 }
 
-class TokenVerified extends RecoveryState {
+class TokenVerificationResult extends RecoveryState {
   final String email;
   final bool isValid;
 
-  const TokenVerified({
+  const TokenVerificationResult({
     required this.email,
     required this.isValid,
   });
@@ -110,10 +110,10 @@ class RecoveryStatusLoaded extends RecoveryState {
   List<Object?> get props => [availableMethods, currentStatus];
 }
 
-class RecoveryAttemptsLoaded extends RecoveryState {
+class RecoveryAttemptsLoadedState extends RecoveryState {
   final List<RecoveryAttempt> attempts;
 
-  const RecoveryAttemptsLoaded(this.attempts);
+  const RecoveryAttemptsLoadedState(this.attempts);
 
   @override
   List<Object?> get props => [attempts];

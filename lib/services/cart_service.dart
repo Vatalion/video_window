@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 import 'package:logger/logger.dart';
 import '../models/shopping_cart.dart';
@@ -20,7 +19,7 @@ class CartService {
 
   Future<void> initialize() async {
     await _database.init();
-    await _encryptionService._initializeEncryption();
+    await _encryptionService.initializeEncryption();
     await _syncService.initialize();
     _setupSyncListeners();
     _startCleanupTimer();
