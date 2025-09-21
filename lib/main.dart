@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
 import 'features/timeline/presentation/screens/timeline_editor_screen.dart';
+import 'features/commerce/presentation/screens/product_list_screen.dart';
+import 'features/publishing/presentation/screens/publishing_dashboard_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -63,6 +65,32 @@ class HomeScreen extends StatelessWidget {
               },
               icon: const Icon(Icons.view_timeline_outlined),
               label: const Text('Open Timeline Editor'),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProductListScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.shopping_cart),
+              label: const Text('Open Commerce'),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PublishingDashboardScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.publish),
+              label: const Text('Open Publishing Dashboard'),
             ),
           ],
         ),

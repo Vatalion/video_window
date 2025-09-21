@@ -2,75 +2,32 @@ name: Merge on Green (Fallback)
 
 on:
   workflow_run:
-<<<<<<< HEAD
-    workflows:
-      - Flutter CI
-    types:
-      - completed
-  workflow_dispatch:
-  schedule:
-    - cron: '0 * * * *'
-=======
     workflows: ["Flutter CI", "PR Lint", "Workflow Lint"]
     types: ["completed"]
   pull_request:
     types: [labeled, synchronize, reopened, ready_for_review]
   workflow_dispatch:
->>>>>>> origin/story/0.9.1-workflow-lint-and-flags
+  schedule:
+    - cron: '0 * * * *'
 
 permissions:
   contents: write
   pull-requests: write
   checks: read
-<<<<<<< HEAD
   actions: read
   statuses: read
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_branch || github.ref }}
-  cancel-in-progress: true
-
-jobs:
-  merge-on-green:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Trigger gate
-        id: trigger_gate
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ "${GITHUB_EVENT_NAME}" == "workflow_run" ]]; then
-            concl=$(jq -r '.workflow_run.conclusion' < "$GITHUB_EVENT_PATH" 2>/dev/null || echo "")
-            if [[ "$concl" != "success" ]]; then
-              echo "Upstream workflow_run conclusion is '$concl' (not success). Skipping."
-              echo "proceed=false" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-          fi
-          echo "proceed=true" >> "$GITHUB_OUTPUT"
-=======
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   merge-on-green:
-    if: ${{ vars.AUTO_MERGE_ENABLED != 'false' }}
     runs-on: ubuntu-latest
     steps:
-<<<<<<< HEAD
->>>>>>> origin/story/0.9.1-workflow-lint-and-flags
-=======
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
->>>>>>> origin/story/0.9.4-reliability-hardening
       - name: Prepare context
         id: ctx
         shell: bash
@@ -78,27 +35,11 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
-<<<<<<< HEAD
-<<<<<<< HEAD
-          # Pass potentially untrusted expressions via env vars per actionlint guidance
-          WR_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch || '' }}
-          WR_HEAD_SHA: ${{ github.event.workflow_run.head_sha || '' }}
-        run: |
-          set -euo pipefail
-          echo "::group::Prepare context"
-          printf "event_name=%s\n" "${EVENT_NAME}" >> "$GITHUB_OUTPUT"
-          case "${EVENT_NAME}" in
-            workflow_run)
-              BRANCH="${WR_HEAD_BRANCH}"
-              SHA="${WR_HEAD_SHA}"
-=======
-=======
           # Pass potentially untrusted expressions via env vars per actionlint guidance
           PR_HEAD_REF: ${{ github.event.pull_request.head.ref || '' }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
           WR_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch || '' }}
           WR_HEAD_SHA: ${{ github.event.workflow_run.head_sha || '' }}
->>>>>>> origin/story/0.9.3-auto-merge
         run: |
           set -euo pipefail
           echo "event_name=${EVENT_NAME}" >> "$GITHUB_OUTPUT"
@@ -108,14 +49,8 @@ jobs:
               SHA="${WR_HEAD_SHA}"
               ;;
             pull_request)
-<<<<<<< HEAD
-              BRANCH="${{ github.event.pull_request.head.ref }}"
-              SHA="${{ github.event.pull_request.head.sha }}"
->>>>>>> origin/story/0.9.1-workflow-lint-and-flags
-=======
               BRANCH="${PR_HEAD_REF}"
               SHA="${PR_HEAD_SHA}"
->>>>>>> origin/story/0.9.3-auto-merge
               ;;
             *)
               BRANCH="${GITHUB_REF_NAME:-}"

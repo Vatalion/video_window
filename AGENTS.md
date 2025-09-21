@@ -53,7 +53,7 @@ Operating flow (BMad‑aligned)
    - Create/switch: `scripts/story-flow.sh start <id> <slug>` → `story/<id>-<slug>` and set upstream.
    - Optional: keep in sync with `scripts/story-flow.sh watch-rebase 300 &` while coding.
 2) Develop (dev persona)
-   - Implement changes in `crypto_market` app; keep story file `docs/stories/<id>.*.md` updated (Tasks/Subtasks, Dev Agent Record, File List, Change Log).
+   - Implement changes in `crypto_market` app; keep the relevant story file (e.g., `docs/stories/<epic-id>.<epic-slug>/<story-id>-<slug>.md`) updated (Tasks/Subtasks, Dev Agent Record, File List, Change Log).
    - When ready, set Status: Ready for Review in the story file and halt changes.
 3) Verify locally (no‑network agent mode)
    - Run gates in app dir:
@@ -151,24 +151,24 @@ Chat shortcuts (for fast persona actions)
   - Command: persona‑specific action. Supported:
     - Dev: `*develop`, `*validate`, `*status`, `*open-pr`
     - QA: `*review`, `*validate`, `*status`
-  - Story: pass a Markdown link to the story file (`docs/stories/<id>.*.md`) or just the path/ID.
-  - Options (optional): `--branch story/<id>-<slug>` to override; otherwise derive from file.
+  - Story: pass a Markdown link to the story file (`docs/stories/<epic-id>.<epic-slug>/<story-id>-<slug>.md`) or just the story id (e.g., `05.08-subscription-bnpl`).
+  - Options (optional): `--branch story/<story-id>-<slug>` to override; otherwise derive from file.
 - Parsing rules:
-  - Derive `<id>` and `<slug>` from the file name `docs/stories/<id>.<slug>.md`.
+  - Derive `<story-id>` (dotted numbers) and `<slug>` from the filename `docs/stories/<epic>/<story-id>-<slug>.md`.
   - Slug rules: lowercase, spaces→`-`, allowed `[a-z0-9-]` (see `.bmad-core/core-config.yaml`).
-  - If only `<id>` is provided, auto‑locate `docs/stories/<id>.*.md` (prefer longest match).
-  - Helper: `scripts/story-from-file.sh` enforces path and naming: file under `docs/stories/`, `.md` extension, `<id>` as dotted numbers (e.g., `0.9.10`), `<slug>` as lowercase `[a-z0-9-]`. It splits on the last dot and outputs `story/<id>-<slug>`; exits non‑zero on invalid input.
+  - If only `<story-id>` is provided, auto-locate the matching file within `docs/stories/` (prefers deepest match).
+  - Helper: `scripts/story-from-file.sh` validates the new structure and echoes `story/<story-id>-<slug>`; ensure stories follow the updated naming before invoking.
 - Expected behavior:
-  - `dev *develop [...]` → switch/create `story/<id>-<slug>`, set Status: InProgress, plan scope, implement, then run local gates in `crypto_market`.
+  - `dev *develop [...]` → switch/create `story/<story-id>-<slug>`, set Status: InProgress, plan scope, implement, then run local gates in `crypto_market`.
   - `qa *review [...]` → read ACs, run local gates, update `## QA Results`, set Status: Done or InProgress with reasons.
   - `*validate` (dev/qa) → run: `dart format --output=none --set-exit-if-changed .`, `flutter analyze --fatal-infos --fatal-warnings`, `flutter test --no-pub` inside `crypto_market`.
 - Examples (copy/paste ready):
-  - `dev *develop [1.2.profile-and-reputation.md](docs/stories/1.2.profile-and-reputation.md)`
-  - `qa *review [1.2.profile-and-reputation.md](docs/stories/1.2.profile-and-reputation.md)`
-  - `dev *open-pr [3.1.initiate-swap-htlc.md](docs/stories/3.1.initiate-swap-htlc.md)`
+  - `dev *develop [01.02-social-login.md](docs/stories/01.identity-access/01.02-social-login.md)`
+  - `qa *review [05.01-multi-step-checkout.md](docs/stories/05.checkout-fulfillment/05.01-multi-step-checkout.md)`
+  - `dev *open-pr [09.01-rest-api-architecture.md](docs/stories/09.platform-infrastructure/09.01-rest-api-architecture.md)`
   - `dev *open-pr --base main --head develop` (open release PR)
   - `dev *label release:approved` (apply release label)
-  - `dev *status [0.5.icp-service-layer-bootstrap.md](docs/stories/0.5.icp-service-layer-bootstrap.md)`
+  - `dev *status [08.04-app-performance-optimization.md](docs/stories/08.mobile-experience/08.04-app-performance-optimization.md)`
 
 Notes
 - This file is intentionally concise and prescriptive to improve reliability.

@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:video_window/services/mfa_service.dart';
-import 'package:video_window/models/two_factor_configuration.dart';
 
 void main() {
   group('MfaService', () {
@@ -83,7 +82,7 @@ void main() {
 
         // For testing purposes, let's assume any 6-digit code is valid
         // In production, this would use proper TOTP validation
-        final testResult = await mfaService.verifyTotpSetup(testUserId, '654321');
+  await mfaService.verifyTotpSetup(testUserId, '654321');
         // This may still fail in tests, which is expected for a real implementation
         // The important thing is that the method doesn't crash
 
@@ -107,10 +106,7 @@ void main() {
 
       test('backup codes should be single-use', () async {
         // Manually setup configuration with backup codes for testing
-        final config = TwoFactorConfiguration(
-          userId: testUserId,
-          backupCodes: ['12345678', '87654321'],
-        );
+        // Prepare example backup codes (not persisted in this simplified test)
 
         // Use a backup code
         final result = await mfaService.verify2faCode(testUserId, '12345678');
