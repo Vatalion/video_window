@@ -44,3 +44,17 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 # BMAD (local only)
+/.bmad-backups/
+/.bmad-source.path
+/.bmad-player/
+/.bmad-logs/
+/.parallel_draft_context/
+parallel_draft_context/
+
+# Local tooling caches
+/.bin/
+/.cursor/
+/.claude/
+/.gemini/
+/.qwen/
+/.metadata

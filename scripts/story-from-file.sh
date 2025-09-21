@@ -2,9 +2,13 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: $0 docs/stories/<id>.<slug>.md" >&2
-  echo "  - <id>: dotted numbers, e.g. 0.9.10" >&2
-  echo "  - <slug>: lowercase, [a-z0-9-] only" >&2
+  cat <<'USAGE' >&2
+Usage: $0 docs/stories/<epic-id>.<epic-slug>/<story-id>-<slug>.md
+  - <epic-id>: digits (usually 01-09) that group stories by epic
+  - <epic-slug>: lowercase `[a-z0-9-]+`
+  - <story-id>: dotted numbers (e.g., 05.08 or 05.08.01)
+  - <slug>: lowercase `[a-z0-9-]+`
+USAGE
 }
 
 if [[ $# -ne 1 ]]; then
@@ -14,7 +18,6 @@ fi
 
 file="$1"
 
-# Must be a file and live under docs/stories
 if [[ ! -f "$file" ]]; then
   echo "Error: file not found: $file" >&2
   usage
@@ -30,38 +33,59 @@ case "$file" in
     ;;
 esac
 
-base="$(basename "$file")"
+base_dir="$(basename "$(dirname "$file")")"
+base_file="$(basename "$file")"
 
-# Must end with .md
-if [[ "$base" != *.md ]]; then
-  echo "Error: not a Markdown file: $base" >&2
+if [[ "$base_file" != *.md ]]; then
+  echo "Error: not a Markdown file: $base_file" >&2
   usage
   exit 1
 fi
 
-name="${base%.md}"
-
-# Require a dot separating <id> and <slug>
-if [[ "$name" != *.* ]]; then
-  echo "Error: filename must be <id>.<slug>.md, got: $base" >&2
+# Validate epic directory naming (allow digits + slug separated by dot)
+if [[ "$base_dir" != *.* ]]; then
+  echo "Error: epic directory must be <id>.<slug>, got: $base_dir" >&2
   usage
   exit 1
 fi
 
-# Derive id as everything before the last dot; slug as everything after
-id="${name%.*}"
-slug="${name##*.}"
+epic_id="${base_dir%%.*}"
+epic_slug="${base_dir#*.}"
 
-# Validate id: dotted numbers
-if [[ ! "$id" =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
-  echo "Error: invalid id '$id' (expected dotted numbers like 0.9.10)" >&2
+if [[ ! "$epic_id" =~ ^[0-9]+$ ]]; then
+  echo "Error: invalid epic id '$epic_id' (expected digits)." >&2
   exit 1
 fi
 
-# Validate slug: lowercase and [a-z0-9-]
+if [[ ! "$epic_slug" =~ ^[a-z0-9-]+$ ]]; then
+  echo "Error: invalid epic slug '$epic_slug' (allowed: lowercase [a-z0-9-])." >&2
+  exit 1
+fi
+
+name="${base_file%.md}"
+
+if [[ "$name" != *-* ]]; then
+  echo "Error: story filename must be <story-id>-<slug>.md, got: $base_file" >&2
+  usage
+  exit 1
+fi
+
+story_id="${name%%-*}"
+slug="${name#${story_id}-}"
+
+if [[ -z "$story_id" || -z "$slug" ]]; then
+  echo "Error: could not parse story id/slug from $base_file" >&2
+  exit 1
+fi
+
+if [[ ! "$story_id" =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
+  echo "Error: invalid story id '$story_id' (expected dotted numbers)." >&2
+  exit 1
+fi
+
 if [[ ! "$slug" =~ ^[a-z0-9-]+$ ]]; then
-  echo "Error: invalid slug '$slug' (allowed: lowercase [a-z0-9-])" >&2
+  echo "Error: invalid slug '$slug' (allowed: lowercase [a-z0-9-])." >&2
   exit 1
 fi
 
-echo "story/${id}-${slug}"
+echo "story/${story_id}-${slug}"
