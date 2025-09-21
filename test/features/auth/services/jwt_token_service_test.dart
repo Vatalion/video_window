@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decode/jwt_decode.dart';
-import 'package:crypto_market/lib/features/auth/data/services/jwt_token_service.dart';
-import 'package:crypto_market/lib/features/auth/domain/models/session_token_model.dart';
+import 'package:video_window/features/auth/data/services/jwt_token_service.dart';
+import 'package:video_window/features/auth/domain/models/session_token_model.dart';
 
 class MockFlutterSecureStorage extends Mock implements FlutterSecureStorage {}
 

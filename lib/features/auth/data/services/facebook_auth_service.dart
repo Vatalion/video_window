@@ -137,7 +137,7 @@ class FacebookAuthServiceImpl implements FacebookAuthService {
   @override
   Future<bool> isSignedIn() async {
     try {
-      final accessToken = _facebookAuth.accessToken;
+      final accessToken = await _facebookAuth.accessToken;
       final isSignedIn = accessToken != null && !accessToken.isExpired;
       _logger.i('Facebook Sign-In status: $isSignedIn');
       return isSignedIn;
@@ -150,7 +150,7 @@ class FacebookAuthServiceImpl implements FacebookAuthService {
   @override
   Future<Map<String, dynamic>?> getCurrentUser() async {
     try {
-      final accessToken = _facebookAuth.accessToken;
+      final accessToken = await _facebookAuth.accessToken;
       if (accessToken == null || accessToken.isExpired) {
         return null;
       }

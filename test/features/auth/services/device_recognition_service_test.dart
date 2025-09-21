@@ -4,8 +4,8 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:ui' as ui;
-import 'package:crypto_market/lib/features/auth/data/services/device_recognition_service.dart';
-import 'package:crypto_market/lib/features/auth/domain/models/device_model.dart';
+import 'package:video_window/features/auth/data/services/device_recognition_service.dart';
+import 'package:video_window/features/auth/domain/models/device_model.dart';
 
 class MockDeviceInfoPlugin extends Mock implements DeviceInfoPlugin {}
 
