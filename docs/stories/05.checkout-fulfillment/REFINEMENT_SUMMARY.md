@@ -186,3 +186,37 @@ The refined Checkout & Fulfillment stories now reflect a modern, social-commerce
 The refinements address all critical PO feedback points while maintaining technical feasibility and clear business value. The stories are now properly structured for development with measurable success criteria and clear implementation paths.
 
 **Overall Impact**: The refined stories represent a significant improvement in readiness for development, with clear social commerce differentiation, measurable success criteria, and proper technical specification.
+
+## Status
+TBD
+
+
+## Priority
+TBD
+
+
+## Tasks / Subtasks
+- [ ] Add task breakdown aligned to Acceptance Criteria
+
+
+## Definition of Done
+- All Acceptance Criteria validated
+- Telemetry hooked per analytics schema
+- Unit/Widget/Integration tests added and passing
+- Accessibility and performance checks completed
+- Documentation updated (README/CHANGELOG as needed)
+
+
+## QA Results
+- Owner: TBD
+- Test window: TBD
+- Summary: Pending
+
+
+## Dev Agent Record
+- Engineer: TBD
+- Dates: TBD
+- Notes: TBD
+
+
+<!-- Consistency Sweep: status=added, priority=added, tasks=added, dod=added, qa=added, devrec=added -->
