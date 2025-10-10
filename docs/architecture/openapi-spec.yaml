@@ -1,0 +1,1394 @@
+openapi: 3.0.3
+info:
+  title: Video Marketplace API
+  description: |
+    RESTful API for the Video Marketplace platform supporting video content auctions, user management, and payment processing.
+
+    ## Overview
+    This API provides comprehensive functionality for:
+    - User authentication and profile management
+    - Video content creation and management
+    - Real-time auction system
+    - Payment processing with Stripe integration
+    - Order fulfillment and tracking
+
+    ## Authentication
+    The API uses JWT tokens for authentication. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <your-jwt-token>
+    ```
+
+    ## Rate Limiting
+    - Standard endpoints: 100 requests per minute
+    - Authentication endpoints: 10 requests per minute
+    - Payment endpoints: 20 requests per minute
+
+    ## Pagination
+    List endpoints support cursor-based pagination:
+    - `limit`: Number of items to return (max 100)
+    - `cursor`: Pagination cursor from previous response
+
+    ## Error Handling
+    All errors follow a consistent format:
+    ```json
+    {
+      "error": {
+        "code": "ERROR_CODE",
+        "message": "Human-readable error message",
+        "timestamp": "2025-10-09T10:30:00Z",
+        "requestId": "req_123456789"
+      }
+    }
+    ```
+
+  version: 1.0.0
+  contact:
+    name: Video Marketplace API Team
+    email: api-support@videomarketplace.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://api.videomarketplace.com/v1
+    description: Production server
+  - url: https://staging-api.videomarketplace.com/v1
+    description: Staging server
+  - url: https://dev-api.videomarketplace.com/v1
+    description: Development server
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Creates a new user account with email verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Authenticate user
+      description: Authenticates a user and returns JWT tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Generates a new access token using a refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Revokes the current access token
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Get current user profile
+      description: Retrieves the profile of the authenticated user
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      tags:
+        - Users
+      summary: Update current user profile
+      description: Updates the profile of the authenticated user
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auctions:
+    get:
+      tags:
+        - Auctions
+      summary: List auctions
+      description: Retrieves a paginated list of active auctions
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by auction category
+        - name: min_price
+          in: query
+          schema:
+            type: number
+            format: double
+            minimum: 0
+          description: Minimum current bid amount
+        - name: max_price
+          in: query
+          schema:
+            type: number
+            format: double
+            minimum: 0
+          description: Maximum current bid amount
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+            enum: [created_at, ending_at, current_bid, bid_count]
+            default: created_at
+          description: Sort field
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Sort order
+      responses:
+        '200':
+          description: Auctions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuctionListResponse'
+
+    post:
+      tags:
+        - Auctions
+      summary: Create new auction
+      description: Creates a new auction for a video content item
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAuctionRequest'
+      responses:
+        '201':
+          description: Auction created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Auction'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auctions/{auctionId}:
+    get:
+      tags:
+        - Auctions
+      summary: Get auction details
+      description: Retrieves detailed information about a specific auction
+      parameters:
+        - name: auctionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Auction ID
+      responses:
+        '200':
+          description: Auction retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuctionDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Auctions
+      summary: Update auction
+      description: Updates an existing auction (seller only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: auctionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Auction ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAuctionRequest'
+      responses:
+        '200':
+          description: Auction updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Auction'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /auctions/{auctionId}/bids:
+    get:
+      tags:
+        - Bids
+      summary: List auction bids
+      description: Retrieves a paginated list of bids for a specific auction
+      parameters:
+        - name: auctionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Auction ID
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Bids retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BidListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags:
+        - Bids
+      summary: Place bid
+      description: Places a bid on an auction
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: auctionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Auction ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceBidRequest'
+      responses:
+        '201':
+          description: Bid placed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bid'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /payments/create-intent:
+    post:
+      tags:
+        - Payments
+      summary: Create payment intent
+      description: Creates a Stripe payment intent for auction purchase
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentIntentRequest'
+      responses:
+        '200':
+          description: Payment intent created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentIntentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /payments/{paymentId}/confirm:
+    post:
+      tags:
+        - Payments
+      summary: Confirm payment
+      description: Confirms a payment after Stripe checkout completion
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Payment ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmPaymentRequest'
+      responses:
+        '200':
+          description: Payment confirmed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders:
+    get:
+      tags:
+        - Orders
+      summary: List user orders
+      description: Retrieves a paginated list of user's orders
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, confirmed, shipped, delivered, cancelled]
+          description: Filter by order status
+      responses:
+        '200':
+          description: Orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderListResponse'
+
+  /orders/{orderId}:
+    get:
+      tags:
+        - Orders
+      summary: Get order details
+      description: Retrieves detailed information about a specific order
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Order ID
+      responses:
+        '200':
+          description: Order retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Orders
+      summary: Update order status
+      description: Updates the status of an order (seller only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Order ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrderRequest'
+      responses:
+        '200':
+          description: Order updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /webhooks/stripe:
+    post:
+      tags:
+        - Webhooks
+      summary: Stripe webhook handler
+      description: Processes webhook events from Stripe
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Stripe webhook event payload
+      responses:
+        '200':
+          description: Webhook processed successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /videos:
+    post:
+      tags:
+        - Videos
+      summary: Upload video
+      description: Uploads a video file for auction content
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - video
+              properties:
+                video:
+                  type: string
+                  format: binary
+                  description: Video file (max 100MB)
+                title:
+                  type: string
+                  description: Video title
+                description:
+                  type: string
+                  description: Video description
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: Video tags
+      responses:
+        '201':
+          description: Video uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Video'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+
+  /videos/{videoId}/presigned-url:
+    get:
+      tags:
+        - Videos
+      summary: Get video presigned URL
+      description: Generates a secure presigned URL for video streaming
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: videoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Video ID
+        - name: quality
+          in: query
+          schema:
+            type: string
+            enum: [360p, 480p, 720p, 1080p]
+            default: 720p
+          description: Video quality
+      responses:
+        '200':
+          description: Presigned URL generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresignedUrlResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        accessToken:
+          type: string
+          description: JWT access token
+        refreshToken:
+          type: string
+          description: JWT refresh token
+        expiresIn:
+          type: integer
+          format: int32
+          description: Access token expiration time in seconds
+
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+        refreshToken:
+          type: string
+          description: JWT refresh token
+        expiresIn:
+          type: integer
+          format: int32
+          description: Access token expiration time in seconds
+
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - username
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+        password:
+          type: string
+          minLength: 8
+          description: User password (min 8 characters)
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+          description: Unique username
+        fullName:
+          type: string
+          maxLength: 100
+          description: User's full name
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+        password:
+          type: string
+          description: User password
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: JWT refresh token
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: User ID
+        email:
+          type: string
+          format: email
+          description: User email address
+        username:
+          type: string
+          description: Username
+        fullName:
+          type: string
+          description: User's full name
+        avatarUrl:
+          type: string
+          format: uri
+          description: Profile avatar URL
+        bio:
+          type: string
+          description: User biography
+        isVerified:
+          type: boolean
+          description: Whether the user is verified
+        sellerRating:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 5
+          description: Seller rating (0-5)
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+          maxLength: 100
+          description: User's full name
+        bio:
+          type: string
+          maxLength: 500
+          description: User biography
+        avatarUrl:
+          type: string
+          format: uri
+          description: Profile avatar URL
+
+    Auction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Auction ID
+        title:
+          type: string
+          description: Auction title
+        description:
+          type: string
+          description: Auction description
+        videoId:
+          type: string
+          format: uuid
+          description: Associated video ID
+        sellerId:
+          type: string
+          format: uuid
+          description: Seller user ID
+        category:
+          type: string
+          description: Auction category
+        startingPrice:
+          type: number
+          format: double
+          minimum: 0
+          description: Starting bid price
+        currentBid:
+          type: number
+          format: double
+          minimum: 0
+          description: Current highest bid
+        bidCount:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Number of bids placed
+        status:
+          type: string
+          enum: [draft, active, ended, sold, cancelled]
+          description: Auction status
+        startTime:
+          type: string
+          format: date-time
+          description: Auction start time
+        endTime:
+          type: string
+          format: date-time
+          description: Auction end time
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    AuctionDetail:
+      allOf:
+        - $ref: '#/components/schemas/Auction'
+        - type: object
+          properties:
+            video:
+              $ref: '#/components/schemas/Video'
+            seller:
+              $ref: '#/components/schemas/User'
+            shippingInfo:
+              $ref: '#/components/schemas/ShippingInfo'
+            tags:
+              type: array
+              items:
+                type: string
+              description: Auction tags
+
+    CreateAuctionRequest:
+      type: object
+      required:
+        - title
+        - description
+        - videoId
+        - startingPrice
+        - duration
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          description: Auction title
+        description:
+          type: string
+          maxLength: 2000
+          description: Auction description
+        videoId:
+          type: string
+          format: uuid
+          description: Associated video ID
+        category:
+          type: string
+          description: Auction category
+        startingPrice:
+          type: number
+          format: double
+          minimum: 0
+          description: Starting bid price
+        reservePrice:
+          type: number
+          format: double
+          minimum: 0
+          description: Reserve price (optional)
+        duration:
+          type: integer
+          format: int32
+          minimum: 3600
+          maximum: 604800
+          description: Auction duration in seconds (1 hour to 7 days)
+        shippingInfo:
+          $ref: '#/components/schemas/ShippingInfo'
+        tags:
+          type: array
+          items:
+            type: string
+          description: Auction tags
+
+    UpdateAuctionRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          description: Auction title
+        description:
+          type: string
+          maxLength: 2000
+          description: Auction description
+        category:
+          type: string
+          description: Auction category
+        reservePrice:
+          type: number
+          format: double
+          minimum: 0
+          description: Reserve price
+        tags:
+          type: array
+          items:
+            type: string
+          description: Auction tags
+
+    AuctionListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Auction'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Bid:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Bid ID
+        auctionId:
+          type: string
+          format: uuid
+          description: Associated auction ID
+        bidderId:
+          type: string
+          format: uuid
+          description: Bidder user ID
+        amount:
+          type: number
+          format: double
+          minimum: 0
+          description: Bid amount
+        message:
+          type: string
+          maxLength: 500
+          description: Bid message (optional)
+        isWinning:
+          type: boolean
+          description: Whether this is the current winning bid
+        createdAt:
+          type: string
+          format: date-time
+          description: Bid placement timestamp
+
+    PlaceBidRequest:
+      type: object
+      required:
+        - amount
+      properties:
+        amount:
+          type: number
+          format: double
+          minimum: 0
+          description: Bid amount
+        message:
+          type: string
+          maxLength: 500
+          description: Bid message (optional)
+
+    BidListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bid'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Video:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Video ID
+        title:
+          type: string
+          description: Video title
+        description:
+          type: string
+          description: Video description
+        duration:
+          type: integer
+          format: int32
+          description: Video duration in seconds
+        size:
+          type: integer
+          format: int64
+          description: File size in bytes
+        format:
+          type: string
+          description: Video format (e.g., mp4, mov)
+        thumbnailUrl:
+          type: string
+          format: uri
+          description: Thumbnail image URL
+        uploaderId:
+          type: string
+          format: uuid
+          description: Uploader user ID
+        isPublic:
+          type: boolean
+          description: Whether video is publicly accessible
+        tags:
+          type: array
+          items:
+            type: string
+          description: Video tags
+        createdAt:
+          type: string
+          format: date-time
+          description: Upload timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    ShippingInfo:
+      type: object
+      required:
+        - address
+        - city
+        - state
+        - postalCode
+        - country
+      properties:
+        address:
+          type: string
+          description: Street address
+        city:
+          type: string
+          description: City
+        state:
+          type: string
+          description: State/Province
+        postalCode:
+          type: string
+          description: Postal/ZIP code
+        country:
+          type: string
+          description: Country code (ISO 3166-1 alpha-2)
+        phoneNumber:
+          type: string
+          description: Contact phone number
+        instructions:
+          type: string
+          description: Delivery instructions
+
+    CreatePaymentIntentRequest:
+      type: object
+      required:
+        - auctionId
+        - amount
+      properties:
+        auctionId:
+          type: string
+          format: uuid
+          description: Auction ID
+        amount:
+          type: number
+          format: double
+          minimum: 0
+          description: Payment amount
+        currency:
+          type: string
+          default: USD
+          description: Currency code (ISO 4217)
+        shippingInfo:
+          $ref: '#/components/schemas/ShippingInfo'
+
+    PaymentIntentResponse:
+      type: object
+      properties:
+        clientSecret:
+          type: string
+          description: Stripe client secret for checkout
+        paymentId:
+          type: string
+          format: uuid
+          description: Internal payment ID
+        amount:
+          type: number
+          format: double
+          description: Payment amount
+        currency:
+          type: string
+          description: Currency code
+
+    ConfirmPaymentRequest:
+      type: object
+      required:
+        - stripePaymentIntentId
+      properties:
+        stripePaymentIntentId:
+          type: string
+          description: Stripe payment intent ID
+        paymentMethodId:
+          type: string
+          description: Payment method ID (if applicable)
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Payment ID
+        orderId:
+          type: string
+          format: uuid
+          description: Associated order ID
+        userId:
+          type: string
+          format: uuid
+          description: User ID
+        stripePaymentIntentId:
+          type: string
+          description: Stripe payment intent ID
+        amount:
+          type: number
+          format: double
+          description: Payment amount
+        currency:
+          type: string
+          description: Currency code
+        status:
+          type: string
+          enum: [pending, processing, succeeded, failed, cancelled, refunded]
+          description: Payment status
+        createdAt:
+          type: string
+          format: date-time
+          description: Payment creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Order ID
+        auctionId:
+          type: string
+          format: uuid
+          description: Associated auction ID
+        buyerId:
+          type: string
+          format: uuid
+          description: Buyer user ID
+        sellerId:
+          type: string
+          format: uuid
+          description: Seller user ID
+        finalPrice:
+          type: number
+          format: double
+          description: Final auction price
+        status:
+          type: string
+          enum: [pending, confirmed, shipped, delivered, cancelled, refunded]
+          description: Order status
+        paymentId:
+          type: string
+          format: uuid
+          description: Associated payment ID
+        trackingNumber:
+          type: string
+          description: Shipping tracking number
+        shippingInfo:
+          $ref: '#/components/schemas/ShippingInfo'
+        createdAt:
+          type: string
+          format: date-time
+          description: Order creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    OrderDetail:
+      allOf:
+        - $ref: '#/components/schemas/Order'
+        - type: object
+          properties:
+            auction:
+              $ref: '#/components/schemas/AuctionDetail'
+            buyer:
+              $ref: '#/components/schemas/User'
+            seller:
+              $ref: '#/components/schemas/User'
+            payment:
+              $ref: '#/components/schemas/Payment'
+
+    OrderListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    UpdateOrderRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [shipped, delivered, cancelled]
+          description: New order status
+        trackingNumber:
+          type: string
+          description: Shipping tracking number (when status is shipped)
+
+    PresignedUrlResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Presigned video URL
+        expiresAt:
+          type: string
+          format: date-time
+          description: URL expiration time
+
+    Pagination:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          description: Cursor for next page (null if last page)
+        hasMore:
+          type: boolean
+          description: Whether more pages are available
+        totalCount:
+          type: integer
+          format: int64
+          description: Total number of items (if available)
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        timestamp:
+          type: string
+          format: date-time
+          description: Error timestamp
+        requestId:
+          type: string
+          description: Request ID for tracking
+
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Number of items to return (max 100)
+
+    Cursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+      description: Pagination cursor from previous response
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token
+
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for webhook authentication
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Conflict:
+      description: Resource conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    TooManyRequests:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    PayloadTooLarge:
+      description: Request payload too large
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization endpoints
+  - name: Users
+    description: User profile management endpoints
+  - name: Auctions
+    description: Auction creation and management endpoints
+  - name: Bids
+    description: Bidding functionality endpoints
+  - name: Payments
+    description: Payment processing endpoints
+  - name: Orders
+    description: Order management endpoints
+  - name: Videos
+    description: Video content management endpoints
+  - name: Webhooks
+    description: External webhook processing endpoints

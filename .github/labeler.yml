@@ -1,4 +1,0 @@
-automerge-candidate:
-  - changed-files:
-      - any-glob-to-any-file: '**/*'
-
