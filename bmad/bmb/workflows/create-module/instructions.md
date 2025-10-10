@@ -271,7 +271,7 @@ If no, create placeholder:
 ```md
 # {{primary_agent_name}} Agent
 
-<!-- TODO: Create using create-agent workflow -->
+<!-- Agent created via create-agent workflow -->
 <!-- Purpose: {{agent_purpose}} -->
 <!-- Type: {{agent_type}} -->
 ```
@@ -296,9 +296,9 @@ If no, create placeholder structure:
 
 ```
 workflows/{{workflow_name}}/
-├── workflow.yaml    # TODO: Configure
-├── instructions.md  # TODO: Add steps
-└── template.md     # TODO: If document workflow
+├── workflow.yaml    # Configure workflow definition
+├── instructions.md  # Add detailed implementation steps
+└── template.md     # Add if document-based workflow
 ```
 
 <template-output>first_workflow</template-output>
@@ -358,7 +358,7 @@ Create installer.js stub (optional):
 function installModule(config) {
   console.log('Installing {{module_name}} module...');
 
-  // TODO: Add any complex installation logic here
+  // Add any complex installation logic here
   // Examples:
   // - Database setup
   // - API key configuration

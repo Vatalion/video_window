@@ -429,8 +429,16 @@ def {function_name}():
     # When: {test['when']}
     # Then: {test['then']}
 
-    # TODO: Implement test logic
-    assert True  # Replace with actual assertion
+    # Placeholder: Implement test logic based on acceptance criteria
+    # This is a generated template - actual implementation should include:
+    # 1. Setup test data and mocks
+    # 2. Execute the function/method being tested
+    # 3. Assert expected outcomes based on AC
+    # Example:
+    # mock_service = Mock()
+    # result = function_under_test(test_data, mock_service)
+    # assert result.expected_property == test['expected_value']
+    pytest.skip("Test implementation needed - replace with actual test logic")
 '''
 
         # Generate integration test functions
@@ -449,8 +457,10 @@ def {function_name}():
     # When: {test['when']}
     # Then: {test['then']}
 
-    # TODO: Implement integration test logic
-    assert True  # Replace with actual assertion
+    # Placeholder: Implement integration test logic
+    # This should test the interaction between multiple components
+    # Include setup of test environment, API mocking, database interactions
+    pytest.skip("Integration test implementation needed")
 '''
 
         # Generate E2E test functions
@@ -469,8 +479,10 @@ def {function_name}():
     # When: {test['when']}
     # Then: {test['then']}
 
-    # TODO: Implement E2E test logic
-    assert True  # Replace with actual assertion
+    # Placeholder: Implement E2E test logic
+    # This should test complete user workflows through the UI
+    # Include browser automation, user interactions, and full stack testing
+    pytest.skip("E2E test implementation needed - requires browser/automation setup")
 '''
 
         # Generate performance test functions
@@ -489,8 +501,10 @@ def {function_name}():
     # When: {test['when']}
     # Then: {test['then']}
 
-    # TODO: Implement performance test logic
-    assert True  # Replace with actual assertion
+    # Placeholder: Implement performance test logic
+    # This should test response times, throughput, and resource usage
+    # Include load testing, stress testing, and benchmarking
+    pytest.skip("Performance test implementation needed - requires performance testing setup")
 '''
 
         # Generate security test functions
@@ -509,8 +523,10 @@ def {function_name}():
     # When: {test['when']}
     # Then: {test['then']}
 
-    # TODO: Implement security test logic
-    assert True  # Replace with actual assertion
+    # Placeholder: Implement security test logic
+    # This should test authentication, authorization, input validation, and vulnerabilities
+    # Include penetration testing, input fuzzing, and security scan integration
+    pytest.skip("Security test implementation needed - requires security testing expertise")
 '''
 
         return content

@@ -442,8 +442,9 @@ def {function_name}():
     # When: {test['when']}
     # Then: {test['then']}
 
-    # TODO: Implement test logic
-    assert True  # Replace with actual assertion
+    # Placeholder: Implement test logic based on acceptance criteria
+    # Generated template - implement actual test logic during development
+    pytest.skip("Test implementation needed")
 '''
 
         # Generate integration test functions
@@ -462,8 +463,9 @@ def {function_name}():
     # When: {test['when']}
     # Then: {test['then']}
 
-    # TODO: Implement integration test logic
-    assert True  # Replace with actual assertion
+    # Placeholder: Implement integration test logic
+    # Test component interactions and integrations
+    pytest.skip("Integration test implementation needed")
 '''
 
         # Generate E2E test functions
@@ -482,8 +484,9 @@ def {function_name}():
     # When: {test['when']}
     # Then: {test['then']}
 
-    # TODO: Implement E2E test logic
-    assert True  # Replace with actual assertion
+    # Placeholder: Implement E2E test logic
+    # Test complete user workflows and UI interactions
+    pytest.skip("E2E test implementation needed")
 '''
 
         # Generate performance test functions
@@ -502,8 +505,9 @@ def {function_name}():
     # When: {test['when']}
     # Then: {test['then']}
 
-    # TODO: Implement performance test logic
-    assert True  # Replace with actual assertion
+    # Placeholder: Implement performance test logic
+    # Test response times, load capacity, and resource usage
+    pytest.skip("Performance test implementation needed")
 '''
 
         # Generate security test functions
@@ -522,8 +526,9 @@ def {function_name}():
     # When: {test['when']}
     # Then: {test['then']}
 
-    # TODO: Implement security test logic
-    assert True  # Replace with actual assertion
+    # Placeholder: Implement security test logic
+    # Test authentication, authorization, and vulnerability prevention
+    pytest.skip("Security test implementation needed")
 '''
 
         return content

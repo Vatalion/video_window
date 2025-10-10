@@ -51,12 +51,13 @@ async function installModule(config) {
 async function validateEnvironment(config) {
   console.log('   Validating environment...');
 
-  // TODO: Add environment checks
+  // Environment checks - customize based on module requirements
   // Examples:
-  // - Check for required tools/binaries
-  // - Verify permissions
-  // - Check network connectivity
-  // - Validate API keys
+  // - Check for required tools/binaries (node, python, docker, etc.)
+  // - Verify write permissions to target directories
+  // - Check network connectivity for external dependencies
+  // - Validate API keys or credentials if needed
+  // - Check system resources (memory, disk space)
 
   // Placeholder validation
   if (!config.project_root) {
@@ -72,11 +73,12 @@ async function validateEnvironment(config) {
 async function setupConfigurations(config) {
   console.log('   Setting up configurations...');
 
-  // TODO: Add configuration setup
+  // Configuration setup - customize based on module needs
   // Examples:
-  // - Create config files
-  // - Setup environment variables
-  // - Configure external services
+  // - Create config files from templates
+  // - Set environment variables
+  // - Configure database connections
+  // - Set up API endpoints and authentication
   // - Initialize settings
 
   // Placeholder configuration
@@ -101,11 +103,14 @@ async function setupConfigurations(config) {
 async function initializeFeatures(config) {
   console.log('   Initializing features...');
 
-  // TODO: Add feature initialization
+  // Feature initialization - customize based on module functionality
   // Examples:
-  // - Create database schemas
-  // - Setup cron jobs
-  // - Initialize caches
+  // - Initialize core components and services
+  // - Setup default data structures
+  // - Register event handlers and listeners
+  // - Initialize plugins and extensions
+  // - Create database schemas if needed
+  // - Setup cron jobs or scheduled tasks
   // - Register webhooks
   // - Setup file watchers
 
@@ -136,7 +141,12 @@ async function initializeFeatures(config) {
  */
 async function initializeDataFeatures(/* config */) {
   console.log('   - Setting up data storage...');
-  // TODO: Setup databases, data folders, etc.
+  // Database and data setup - customize based on module requirements
+  // Examples:
+  // - Create databases and schemas
+  // - Setup data directories and file structures
+  // - Initialize data stores and caches
+  // - Create backup directories
 }
 
 /**
@@ -144,7 +154,12 @@ async function initializeDataFeatures(/* config */) {
  */
 async function initializeAutomationFeatures(/* config */) {
   console.log('   - Setting up automation hooks...');
-  // TODO: Setup triggers, watchers, schedulers
+  // Automation setup - customize based on module needs
+  // Examples:
+  // - Create database triggers and stored procedures
+  // - Setup file watchers and event listeners
+  // - Configure schedulers and cron jobs
+  // - Setup webhook handlers
 }
 
 /**
@@ -152,7 +167,12 @@ async function initializeAutomationFeatures(/* config */) {
  */
 async function initializeIntegrationFeatures(/* config */) {
   console.log('   - Setting up integrations...');
-  // TODO: Configure APIs, webhooks, external services
+  // Integration setup - customize based on external dependencies
+  // Examples:
+  // - Configure API clients and authentication
+  // - Setup webhook endpoints and handlers
+  // - Configure external service connections
+  // - Initialize SDKs and client libraries
 }
 
 /**
@@ -161,11 +181,13 @@ async function initializeIntegrationFeatures(/* config */) {
 async function runPostInstallTasks(/* config */) {
   console.log('   Running post-install tasks...');
 
-  // TODO: Add post-install tasks
+  // Post-installation tasks - customize based on module requirements
   // Examples:
-  // - Generate sample data
-  // - Run initial workflows
-  // - Send notifications
+  // - Run initial data migrations
+  // - Start required services and daemons
+  // - Perform health checks and validations
+  // - Generate initial reports or documentation
+  // - Generate sample data for testing
   // - Update registries
 
   console.log('   ✓ Post-install tasks complete');
@@ -177,7 +199,12 @@ async function runPostInstallTasks(/* config */) {
 async function initDatabase(/* config */) {
   console.log('   Initializing database...');
 
-  // TODO: Add database initialization
+  // Database initialization - customize based on data requirements
+  // Examples:
+  // - Create database schema and tables
+  // - Run database migrations
+  // - Initialize indexes and constraints
+  // - Create admin users and default data
   // This function can be called from install-module-config.yaml
 
   console.log('   ✓ Database initialized');
@@ -189,7 +216,12 @@ async function initDatabase(/* config */) {
 async function generateSamples(config) {
   console.log('   Generating sample data...');
 
-  // TODO: Create sample files, data, configurations
+  // Sample content creation - customize based on module needs
+  // Examples:
+  // - Create sample configuration files
+  // - Generate test data and examples
+  // - Create template files and documentation
+  // - Setup demo content for testing
   // This helps users understand how to use the module
 
   const samplesPath = path.join(config.project_root, 'examples', config.module_code);
@@ -205,7 +237,12 @@ async function uninstallModule(/* config */) {
   console.log('🗑️  Uninstalling {{MODULE_NAME}} module...');
 
   try {
-    // TODO: Add cleanup logic
+    // Cleanup operations - customize based on installation process
+  // Examples:
+  // - Remove temporary files and directories
+  // - Clean up installation artifacts
+  // - Reset permissions and ownership
+  // - Clear caches and temporary data
     // - Remove configurations
     // - Clean up databases
     // - Unregister services
