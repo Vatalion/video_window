@@ -1,0 +1,13 @@
+name: video_workspace_root
+description: Root package for Video Window monorepo
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+
+dev_dependencies:
+  melos: ^6.2.0
+
+# This package is used for the workspace root only
+flutter:
+  # No Flutter code in the root package

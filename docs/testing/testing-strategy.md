@@ -1,12 +1,12 @@
-# Testing Strategy & Framework Guide
+# Testing Strategy for Video Window
 
-**Effective Date:** 2025-10-09
-**Target Framework:** Flutter 3.19.6, Serverpod 2.9.x
+**Effective Date:** 2025-10-14
+**Target Framework:** Flutter 3.35.0+, Serverpod 2.9.x
 **Coverage Target:** 80%+ overall, 90%+ for critical business logic
 
 ## Overview
 
-This comprehensive testing strategy ensures reliability, performance, and user experience across the Craft Video Marketplace platform. We implement a multi-layered testing approach covering unit, integration, and end-to-end scenarios.
+This document outlines the comprehensive testing strategy for the Video Window Flutter application. The strategy ensures high-quality code, reliable features, and excellent user experience through systematic testing at all levels.
 
 ## Testing Architecture
 

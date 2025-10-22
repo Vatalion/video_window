@@ -1,7 +1,7 @@
 installation:
   version: 6.0.0-alpha.0
-  installDate: '2025-10-07T10:53:28.592Z'
-  lastUpdated: '2025-10-07T10:53:28.592Z'
+  installDate: '2025-10-22T09:05:48.375Z'
+  lastUpdated: '2025-10-22T09:05:48.375Z'
 modules:
   - core
   - bmb
@@ -9,3 +9,6 @@ modules:
   - cis
 ides:
   - claude-code
+  - gemini
+  - github-copilot
+  - codex

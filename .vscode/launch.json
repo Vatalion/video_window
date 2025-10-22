@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Video Window (Debug)",
+      "request": "launch",
+      "type": "dart",
+      "program": "packages/mobile_client/lib/main.dart",
+      "cwd": "packages/mobile_client"
+    },
+    {
+      "name": "Video Window (Profile)",
+      "request": "launch",
+      "type": "dart",
+      "program": "packages/mobile_client/lib/main.dart",
+      "cwd": "packages/mobile_client",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "Video Window (Release)",
+      "request": "launch",
+      "type": "dart",
+      "program": "packages/mobile_client/lib/main.dart",
+      "cwd": "packages/mobile_client",
+      "flutterMode": "release"
+    }
+  ]
+}

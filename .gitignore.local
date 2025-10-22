@@ -1,0 +1,39 @@
+# Local configuration
+.env.local
+.env.development
+.env.staging
+.env.production
+
+# IDE files (local)
+.vscode/settings.json
+.idea/workspace.xml
+
+# Logs
+logs/
+*.log
+
+# Build artifacts (local)
+build/
+*.apk
+*.ipa
+
+# Coverage reports
+coverage/
+
+# Flutter tool
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~

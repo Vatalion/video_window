@@ -1,8 +1,29 @@
 {
-  "chat.agent.enabled": true,
-  "chat.agent.maxRequests": 15,
-  "github.copilot.chat.agent.runTasks": true,
-  "chat.mcp.discovery.enabled": true,
-  "github.copilot.chat.agent.autoFix": true,
-  "chat.tools.autoApprove": false
+  "dart.flutterSdkPath": ".fvm/flutter_sdk",
+  "search.exclude": {
+    "**/.fvm": true,
+    "**/build": true,
+    "**/.dart_tool": true,
+    "**/coverage": true,
+    "**/logs": true
+  },
+  "files.exclude": {
+    "**/.fvm": true
+  },
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "dart.lineLength": 80,
+  "editor.rulers": [
+    80
+  ],
+  "dart.debugExternalPackageLibraries": false,
+  "dart.debugSdkLibraries": false,
+  "files.watcherExclude": {
+    "**/build": true,
+    "**/.dart_tool": true,
+    "**/.pub-cache": true
+  }
 }
