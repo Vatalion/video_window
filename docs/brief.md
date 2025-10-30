@@ -56,24 +56,25 @@ Date: 2025-09-26
 
 ## MVP Scope
 ### Core Features (Must Have)
-- Story listing: Overview (required); Process, Materials/Tools, Notes, Location (optional). “I want this” CTA.
-- Minimal in-app capture/composer: Creator records with the device camera inside our app or uploads raw clips from the device; trim/merge and basic captions to compose a short feed video. No external editors or external hardware ingest in MVP; all creation happens in our app.
+- Story listing: Overview (required); Process Timeline (vertical-scroll development journal), Materials/Tools, Notes, Location (optional). "I want this" CTA.
+- Video Carousel: 3-7 videos per story with dot navigation, context labels ("In Use," "Details," "Making Process," etc.), and primary video selection.
+- Minimal in-app capture/composer: Creator records with the device camera inside our app or uploads raw clips from the device; trim/merge and basic captions to compose multiple clips for carousel. No external editors or external hardware ingest in MVP; all creation happens in our app.
 - Clip Creator: In-app timeline to stitch and trim in-app clips; drag-to-reorder; choose Local (offline) or Server processing. See Technical Considerations → Clip Creator (MVP).
 - Offers/Auction mechanics: first qualified offer (≥ maker minimum) opens a 72h auction; 15‑minute soft close (extends by 15 on late bids, max +24h); min next bid = max(1%, 5 units); maker can accept the current high bid anytime to end the auction.
 - Payments/Checkout: via Stripe Checkout (hosted) with a 24h payment window; collect shipping address at payment; show fees/tax lines; webhook-driven state; retry/cancel on timeout.
-- Orders & Shipping: tracking capture; ship‑by 72h; delivered→auto‑complete 7d; issues window 48h.
 - Maker Dashboard: offers queue, active auctions, to-ship list, offer auto‑reject policy.
 - Social login: Sign in with Apple and Google; minimal profile + email (consent); link to existing accounts.
-- Analytics: event set across feed→story→offer→bid→accept→pay→ship.
+- Push Notifications: Real-time alerts for offers, bids, auction endings, order updates, and maker activity.
+- Analytics: event set across feed→story→offer→bid→accept→pay→ship (consent); link to existing accounts.
 
 ### Out of Scope for MVP
-- External NLE/editor workflows, third-party ingest hardware, and advanced timeline editing; comments and real-time chat; integrated shipping label purchase; push notifications delivery (prefs only); saved payment methods; offline downloads/playback; robust search.
+- External NLE/editor workflows, third-party ingest hardware, and advanced timeline editing; comments and real-time chat; integrated shipping label purchase; SMS authentication; saved payment methods; offline downloads/playback; robust search.
 
 ### MVP Success Criteria
 A cohort of listings converts from Story views to offers, auctions, and paid orders with SLA adherence (72h ship, 48h issues), demonstrating viable conversion and operational feasibility.
 
 ## Auction Rules (MVP)
-- Auction start: First qualified offer (≥ maker‑set minimum) opens a base 48h auction (with popularity tiers 48/72/96h).
+- Auction start: First qualified offer (≥ maker‑set minimum) opens a base 72h auction (popular listings may extend post-MVP, but MVP assumes 72h default).
 - Bidding: Visible current high bid; min next bid = max(1% of current, 5 currency units).
 - Soft close: Any bid in the final 15m extends the end time by 15m; total extensions capped at +24h; total auction cap is 7 days.
 - Maker accept: Maker may accept the current high bid at any time; acceptance ends the auction and triggers a 24h payment window for the winner.
@@ -85,7 +86,7 @@ A cohort of listings converts from Story views to offers, auctions, and paid ord
 - Launch geos: Worldwide; multi-currency support with dynamic currency conversion. Sellers/makers are responsible for all shipping operations including international customs documentation and delivery logistics.
 - Methods: Cards (Visa/Mastercard/AmEx) plus Apple Pay and Google Pay; no BNPL/ACH in MVP.
 - Checkout: Hosted Stripe Checkout opened in in-app webview; collects shipping address; success/cancel deep links back to app. 3DS/SCA handled by Stripe; PCI scope SAQ A.
-- 24h window: Create Checkout Session with expires_at = now + 24h; on timeout cancel the underlying PaymentIntent and return order to offers queue. Allow one retry by regenerating a session within the window.
+- 24h window: Create Checkout Session with expires_at = now + 24h; on timeout cancel the underlying PaymentIntent and return order to offers queue. Allow up to 3 retry attempts by regenerating sessions within the window with exponential backoff.
 - Server endpoints: Create Checkout Session; verify and persist on webhooks (checkout.session.completed, payment_intent.succeeded/failed, charge.dispute.created). Drive state machine transitions.
 - Payouts: Makers onboard via Connect Express; hold funds in platform balance until delivery + 48h issues window, then transfer to maker. If no tracking after 7d, allow manual review or delayed transfer.
 - Fees: Use application_fee_amount; marketplace fee structure: 5% commission on successful sales, minimum $0.50, maximum $50 per transaction; reconcile with per-order metadata (listing_id, maker_id, buyer_id, order_id).
@@ -94,7 +95,7 @@ A cohort of listings converts from Story views to offers, auctions, and paid ord
 
 ## Post-MVP Vision
 ### Phase 2 Features
-- Saved cards/wallets; push notifications; label purchase integration; moderation and trust signals; richer search and discovery.
+- Saved cards/wallets; SMS authentication; label purchase integration; moderation and trust signals; richer search and discovery.
 
 ### Long-term Vision
 - Creator tools for multi-episode stories, drops, and series; marketplace reputation; category expansion; internationalization and multi-currency/tax support.

@@ -1,0 +1,44 @@
+services:
+  # Development services
+  postgres:
+    image: pgvector/pgvector:pg16
+    ports:
+      - "8090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: video_window
+      POSTGRES_PASSWORD: "Q9i79T4dGkpypurtwOs8r_HAhww3E68Z"
+    volumes:
+      - video_window_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6.2.6
+    ports:
+      - "8091:6379"
+    command: redis-server --requirepass "JLLDNS1puOSFsmtR7AePtBQt9huXBltb"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+  # Test services
+  postgres_test:
+    image: pgvector/pgvector:pg16
+    ports:
+      - "9090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: video_window_test
+      POSTGRES_PASSWORD: "UvY-cHGz8dlZ5GfHp_VwyTakurIQuH6y"
+    volumes:
+      - video_window_test_data:/var/lib/postgresql/data
+
+  redis_test:
+    image: redis:6.2.6
+    ports:
+      - "9091:6379"
+    command: redis-server --requirepass "e7qtwVJcd9gkrfakVNaXVqnpJqE8BhlK"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+volumes:
+  video_window_data:
+  video_window_test_data:

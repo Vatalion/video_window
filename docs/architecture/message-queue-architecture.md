@@ -953,7 +953,7 @@ spec:
 
 **Related Documents:**
 - [Background Job Processing System](../background_jobs/)
-- [Event-Driven Architecture](../adr/ADR-002-event-driven-architecture.md)
+- [Event-Driven Architecture](../adr/ADR-0012-event-driven-architecture.md)
 - [API Gateway Implementation](../adr/ADR-001-api-gateway.md)
 
 **Next Steps:**

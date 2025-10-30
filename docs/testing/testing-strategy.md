@@ -1,7 +1,7 @@
 # Testing Strategy for Video Window
 
 **Effective Date:** 2025-10-14
-**Target Framework:** Flutter 3.35.0+, Serverpod 2.9.x
+**Target Framework:** Flutter 3.19.6, Serverpod 2.9.x
 **Coverage Target:** 80%+ overall, 90%+ for critical business logic
 
 ## Overview
@@ -36,202 +36,72 @@ This document outlines the comprehensive testing strategy for the Video Window F
 
 #### 3. End-to-End Tests (10%)
 - **Critical User Journeys** - Discovery → Purchase → Delivery
-- **Cross-Platform Testing** - iOS, Android, Web compatibility
-- **Performance Testing** - Load testing, memory usage
-- **Accessibility Testing** - Screen readers, navigation
-
-## Testing Framework Setup
-
-### Dependencies
-
-```yaml
-# pubspec.yaml
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-
-  # Testing frameworks
-  integration_test:
-    sdk: flutter
-  mocktail: ^1.0.3
-  golden_toolkit: ^0.15.0
-  bloc_test: ^9.1.7
-
-  # Testing utilities
-  fake_async: ^1.3.1
-  clock: ^1.1.1
-  network_image_mock: ^2.1.1
-
-  # Performance testing
-  test_api: ^0.7.0
-  flutter_driver:
-    sdk: flutter
-
-  # Code coverage
-  coverage: ^1.8.0
-
-  # Static analysis
-  very_good_analysis: ^5.1.0
-```
-
-### Test Directory Structure
-
-```
-test/
-├── unit/
-│   ├── features/
-│   │   ├── auth/
-│   │   │   ├── bloc/
-│   │   │   ├── data/
-│   │   │   └── domain/
-│   │   ├── feed/
-│   │   ├── auction/
-│   │   └── payment/
-│   ├── shared/
-│   │   ├── utils/
-│   │   ├── widgets/
-│   │   └── models/
-│   └── helpers/
-│       ├── mock_helpers.dart
-│       ├── test_data.dart
-│       └── fixtures.dart
-├── integration/
-│   ├── features/
-│   │   ├── auth_flow_test.dart
-│   │   ├── auction_flow_test.dart
-│   │   ├── payment_flow_test.dart
-│   │   └── video_playback_test.dart
-│   ├── api/
-│   │   ├── auth_endpoint_test.dart
-│   │   ├── auction_endpoint_test.dart
-│   │   └── payment_endpoint_test.dart
-│   └── helpers/
-│       ├── integration_test_helpers.dart
-│       └── test_server.dart
-├── widget/
-│   ├── auth/
-│   │   ├── login_page_test.dart
-│   │   └── register_page_test.dart
-│   ├── feed/
-│   │   ├── video_feed_test.dart
-│   │   └── story_page_test.dart
-│   └── common/
-│       ├── loading_widget_test.dart
-│       └── error_widget_test.dart
-├── golden/
-│   ├── themes/
-│   ├── components/
-│   └── screens/
-└── performance/
-    ├── memory_test.dart
-    ├── startup_time_test.dart
-    └── scroll_performance_test.dart
-```
-
-## Unit Testing Implementation
-
-### BLoC Testing Strategy
+### Repository Testing (Core Package)
 
 ```dart
-// test/unit/features/auth/bloc/auth_bloc_test.dart
+// video_window_flutter/packages/core/test/data/repositories/auth_repository_impl_test.dart
 
+import 'package:core/data/repositories/auth_repository_impl.dart';
+import 'package:core/data/sources/auth_cache.dart';
+import 'package:core/data/sources/auth_endpoint.dart';
+import 'package:core/domain/entities/auth_session.dart';
+import 'package:core/domain/value_objects/email_address.dart';
+import 'package:core/domain/value_objects/password.dart';
+import 'package:core/error/auth_failure.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:bloc_test/bloc_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:video_window/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:video_window/features/auth/domain/entities/user_entity.dart';
-import 'package:video_window/features/auth/domain/usecases/sign_in_usecase.dart';
-import 'package:video_window/features/auth/domain/repositories/auth_repository.dart';
 
-class MockAuthRepository extends Mock implements AuthRepository {}
+class _MockAuthEndpoint extends Mock implements AuthEndpoint {}
+class _MockAuthCache extends Mock implements AuthCache {}
+class _AuthSessionFake extends Fake implements AuthSession {}
 
 void main() {
-  late AuthBloc authBloc;
-  late MockAuthRepository mockAuthRepository;
+  late AuthRepositoryImpl repository;
+  late _MockAuthEndpoint endpoint;
+  late _MockAuthCache cache;
+
+  setUpAll(() {
+    registerFallbackValue(_AuthSessionFake());
+  });
 
   setUp(() {
-    mockAuthRepository = MockAuthRepository();
-    authBloc = AuthBloc(
-      signInWithEmail: SignInWithEmailUseCase(repository: mockAuthRepository),
-      signUpWithEmail: SignUpWithEmailUseCase(repository: mockAuthRepository),
-      signInWithSocial: SignInWithSocialUseCase(repository: mockAuthRepository),
-      signOut: SignOutUseCase(repository: mockAuthRepository),
-    );
+    endpoint = _MockAuthEndpoint();
+    cache = _MockAuthCache();
+    repository = AuthRepositoryImpl(endpoint: endpoint, cache: cache);
   });
 
-  tearDown(() {
-    authBloc.close();
+  test('persists session after successful sign in', () async {
+    final session = _AuthSessionFake();
+
+    when(() => endpoint.signInWithEmail(
+      email: any(named: 'email'),
+      password: any(named: 'password'),
+    )).thenAnswer((_) async => Right(session));
+    when(() => cache.write(session)).thenAnswer((_) async {});
+
+    final result = await repository.signInWithEmail(
+      email: const EmailAddress('maker@example.com'),
+      password: const Password('p@ssw0rd!'),
+    );
+
+    expect(result.isRight(), isTrue);
+    verify(() => cache.write(session)).called(1);
   });
 
-  group('AuthBloc - Authentication Flow', () {
-    const testUser = UserEntity(
-      id: '1',
-      email: 'test@example.com',
-      displayName: 'Test User',
-      isEmailVerified: true,
-      isMaker: false,
-      createdAt: DateTime(2025, 1, 1),
-      updatedAt: DateTime(2025, 1, 1),
-      providers: ['email'],
+  test('maps endpoint errors to domain failures', () async {
+    when(() => endpoint.signInWithEmail(
+      email: any(named: 'email'),
+      password: any(named: 'password'),
+    )).thenAnswer((_) async => Left(AuthFailure.invalidCredentials()));
+
+    final result = await repository.signInWithEmail(
+      email: const EmailAddress('maker@example.com'),
+      password: const Password('wrong'),
     );
 
-    blocTest<AuthBloc, AuthState>(
-      'emits [AuthLoading, Authenticated] when sign in succeeds',
-      setUp: () {
-        when(() => mockAuthRepository.signInWithEmail(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-        )).thenAnswer((_) async => testUser);
-      },
-      build: () => authBloc,
-      act: (bloc) => bloc.add(const SignInEmailRequested(
-        email: 'test@example.com',
-        password: 'password123',
-      )),
-      expect: () => [
-        AuthLoading(),
-        Authenticated(user: testUser),
-      ],
-      verify: (_) {
-        verify(() => mockAuthRepository.signInWithEmail(
-          email: 'test@example.com',
-          password: 'password123',
-        )).called(1);
-      },
-    );
-
-    blocTest<AuthBloc, AuthState>(
-      'emits [AuthLoading, AuthError] when sign in fails',
-      setUp: () {
-        when(() => mockAuthRepository.signInWithEmail(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-        )).thenThrow(AuthException('Invalid credentials'));
-      },
-      build: () => authBloc,
-      act: (bloc) => bloc.add(const SignInEmailRequested(
-        email: 'test@example.com',
-        password: 'wrongpassword',
-      )),
-      expect: () => [
-        AuthLoading(),
-        const AuthError(message: 'Invalid credentials'),
-      ],
-    );
-
-    blocTest<AuthBloc, AuthState>(
-      'emits [AuthLoading, Unauthenticated] when sign out succeeds',
-      setUp: () {
-        when(() => mockAuthRepository.signOut())
-            .thenAnswer((_) async {});
-      },
-      build: () => authBloc,
-      act: (bloc) => bloc.add(const SignOutRequested()),
-      expect: () => [
-        AuthLoading(),
-        Unauthenticated(),
-      ],
-    );
+    expect(result.isLeft(), isTrue);
+    verifyNever(() => cache.write(any()));
   });
 }
 ```
@@ -243,87 +113,14 @@ void main() {
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:video_window/features/auth/domain/entities/user_entity.dart';
-import 'package:video_window/features/auth/domain/repositories/auth_repository.dart';
-import 'package:video_window/features/auth/domain/usecases/sign_in_usecase.dart';
+import 'package:auth/domain/entities/user_entity.dart';
+import 'package:auth/domain/repositories/auth_repository.dart';
+import 'package:auth/domain/usecases/sign_in_usecase.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 
 void main() {
   late SignInWithEmailUseCase useCase;
-  late MockAuthRepository mockRepository;
-
-  setUp(() {
-    mockRepository = MockAuthRepository();
-    useCase = SignInWithEmailUseCase(repository: mockRepository);
-  });
-
-  const testUser = UserEntity(
-    id: '1',
-    email: 'test@example.com',
-    displayName: 'Test User',
-    isEmailVerified: true,
-    isMaker: false,
-    createdAt: DateTime(2025, 1, 1),
-    updatedAt: DateTime(2025, 1, 1),
-    providers: ['email'],
-  );
-
-  group('SignInWithEmailUseCase', () {
-    test('should return user when sign in succeeds', () async {
-      // Arrange
-      when(() => mockRepository.signInWithEmail(
-        email: any(named: 'email'),
-        password: any(named: 'password'),
-      )).thenAnswer((_) async => testUser);
-
-      // Act
-      final result = await useCase(
-        email: 'test@example.com',
-        password: 'password123',
-      );
-
-      // Assert
-      expect(result, equals(testUser));
-      verify(() => mockRepository.signInWithEmail(
-        email: 'test@example.com',
-        password: 'password123',
-      )).called(1);
-    });
-
-    test('should throw AuthException when credentials are invalid', () async {
-      // Arrange
-      when(() => mockRepository.signInWithEmail(
-        email: any(named: 'email'),
-        password: any(named: 'password'),
-      )).thenThrow(AuthException('Invalid credentials'));
-
-      // Act
-      final call = useCase.call;
-
-      // Assert
-      expect(
-        () => call(email: 'test@example.com', password: 'wrong'),
-        throwsA(isA<AuthException>()),
-      );
-    });
-  });
-}
-```
-
-### Repository Testing
-
-```dart
-// test/unit/features/auth/data/repositories/auth_repository_impl_test.dart
-
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:video_window/features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:video_window/features_auth/data/datasources/auth_remote_data_source.dart';
-import 'package:video_window/features/auth/data/datasources/auth_local_data_source.dart';
-import 'package:video_window/features_auth/data/models/user_model.dart';
-import 'package:video_window/features/auth/domain/entities/user_entity.dart';
-
 class MockRemoteDataSource extends Mock implements AuthRemoteDataSource {}
 class MockLocalDataSource extends Mock implements AuthLocalDataSource {}
 
@@ -388,13 +185,13 @@ void main() {
 ### Model Testing
 
 ```dart
-// test/unit/features/auth/data/models/user_model_test.dart
+// video_window_flutter/packages/core/test/data/models/auth_user_model_test.dart
 
+import 'package:core/data/models/auth/auth_user_model.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:video_window/features/auth/data/models/user_model.dart';
 
 void main() {
-  group('UserModel', () {
+  group('AuthUserModel', () {
     const testJson = {
       'id': '1',
       'email': 'test@example.com',
@@ -408,7 +205,7 @@ void main() {
       'metadata': {'key': 'value'},
     };
 
-    const testUserModel = UserModel(
+  const testUserModel = AuthUserModel(
       id: '1',
       email: 'test@example.com',
       displayName: 'Test User',
@@ -423,7 +220,7 @@ void main() {
 
     test('should deserialize from JSON correctly', () {
       // Act
-      final result = UserModel.fromJson(testJson);
+  final result = AuthUserModel.fromJson(testJson);
 
       // Assert
       expect(result, equals(testUserModel));
@@ -431,7 +228,7 @@ void main() {
 
     test('should serialize to JSON correctly', () {
       // Act
-      final result = testUserModel.toJson();
+  final result = testUserModel.toJson();
 
       // Assert
       expect(result, equals(testJson));
@@ -439,7 +236,7 @@ void main() {
 
     test('should convert to entity correctly', () {
       // Act
-      final entity = testUserModel.toEntity();
+  final entity = testUserModel.toEntity();
 
       // Assert
       expect(entity.id, equals(testUserModel.id));
@@ -452,7 +249,7 @@ void main() {
       final entity = testUserModel.toEntity();
 
       // Act
-      final result = UserModel.fromEntity(entity);
+  final result = AuthUserModel.fromEntity(entity);
 
       // Assert
       expect(result, equals(testUserModel));
@@ -466,14 +263,14 @@ void main() {
 ### Page Widget Testing
 
 ```dart
-// test/widget/auth/login_page_test.dart
+// video_window_flutter/packages/features/auth/test/presentation/pages/login_page_test.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:video_window/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:video_window/features/auth/presentation/pages/login_page.dart';
+import 'package:auth/presentation/bloc/auth_bloc.dart';
+import 'package:auth/presentation/pages/login_page.dart';
 
 class MockAuthBloc extends MockBloc<AuthEvent, AuthState> implements AuthBloc {}
 
@@ -593,12 +390,12 @@ void main() {
 ### Custom Widget Testing
 
 ```dart
-// test/widget/common/video_player_widget_test.dart
+// video_window_flutter/packages/features/timeline/test/presentation/widgets/video_player_widget_test.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:network_image_mock/network_image_mock.dart';
-import 'package:video_window/features/feed/presentation/widgets/video_player_widget.dart';
+import 'package:timeline/presentation/widgets/video_player_widget.dart';
 
 void main() {
   group('VideoPlayerWidget', () {
@@ -682,56 +479,44 @@ void main() {
 ### API Integration Testing
 
 ```dart
-// test/integration/api/auth_endpoint_test.dart
+// video_window_server/test/integration/api/auth_endpoint_test.dart
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:serverpod_test_serverpod/serverpod_test_serverpod.dart';
-import 'package:video_window_server/generated/endpoints.dart';
-import 'package:video_window_server/generated/protocol.dart';
+import 'package:serverpod_test/serverpod_test.dart';
+import 'package:video_window_client/video_window_client.dart';
 
 void main() {
-  late ServerpodTestServerpod testServerpod;
+  late ServerpodTestServer server;
+  late VideoWindowClient client;
 
   setUpAll(() async {
-    testServerpod = ServerpodTestServerpod(
-      runServer: true,
-      port: 8081,
-    );
-    await testServerpod.start();
+    server = ServerpodTestServer(runServer: true, port: 8081);
+    await server.start();
+    client = VideoWindowClient(Uri.parse('http://localhost:8081/'));
   });
 
   tearDownAll(() async {
-    await testServerpod.stop();
+    await server.stop();
   });
 
-  group('Auth Endpoint Integration Tests', () {
-    late Session session;
-
-    setUp(() {
-      session = testServerpod.createSession();
-    });
-
-    test('should sign up new user successfully', () async {
-      // Arrange
-      final request = EmailSignUpRequest(
-        email: 'integrationtest@example.com',
-        password: 'password123',
-        displayName: 'Integration Test User',
-        isMaker: false,
+  group('AuthEndpoint', () {
+    test('signs up new user', () async {
+      final response = await client.auth.signUpWithEmail(
+        EmailSignUpRequest(
+          email: 'integrationtest@example.com',
+          password: 'password123',
+          displayName: 'Integration Test User',
+          isMaker: false,
+        ),
       );
 
-      // Act
-      final user = await session.auth.signUpWithEmail(request);
-
-      // Assert
-      expect(user.email, equals(request.email));
-      expect(user.displayName, equals(request.displayName));
-      expect(user.isEmailVerified, isFalse);
-      expect(user.providers, contains('email'));
+      expect(response.email, equals('integrationtest@example.com'));
+      expect(response.displayName, equals('Integration Test User'));
+      expect(response.isEmailVerified, isFalse);
+      expect(response.providers, contains('email'));
     });
 
-    test('should sign in existing user successfully', () async {
-      // Arrange
+    test('signs in existing user', () async {
       final signUpRequest = EmailSignUpRequest(
         email: 'signinintegration@example.com',
         password: 'password123',
@@ -739,56 +524,29 @@ void main() {
         isMaker: false,
       );
 
-      await session.auth.signUpWithEmail(signUpRequest);
+      await client.auth.signUpWithEmail(signUpRequest);
 
       final signInRequest = EmailSignInRequest(
         email: 'signinintegration@example.com',
         password: 'password123',
       );
 
-      // Act
-      final user = await session.auth.signInWithEmail(signInRequest);
+      final session = await client.auth.signInWithEmail(signInRequest);
 
-      // Assert
-      expect(user.email, equals(signInRequest.email));
-      expect(user.isAuthenticated, isTrue);
+      expect(session.email, equals(signInRequest.email));
+      expect(session.isAuthenticated, isTrue);
     });
 
-    test('should fail sign in with invalid credentials', () async {
-      // Arrange
+    test('fails sign in with invalid credentials', () async {
       final request = EmailSignInRequest(
         email: 'nonexistent@example.com',
         password: 'wrongpassword',
       );
 
-      // Act & Assert
       expect(
-        () => session.auth.signInWithEmail(request),
-        throwsA(isA<UnauthorizedException>()),
+        () => client.auth.signInWithEmail(request),
+        throwsException,
       );
-    });
-
-    test('should create user session after successful sign in', () async {
-      // Arrange
-      final signUpRequest = EmailSignUpRequest(
-        email: 'sessiontest@example.com',
-        password: 'password123',
-        displayName: 'Session Test User',
-        isMaker: false,
-      );
-
-      final user = await session.auth.signUpWithEmail(signUpRequest);
-
-      // Act - Create new session to test session persistence
-      final newSession = testServerpod.createSession();
-      newSession.authenticatedUserId = user.id;
-      await newSession.save(newSession);
-
-      final refreshedUser = await newSession.auth.refreshSession();
-
-      // Assert
-      expect(refreshedUser.id, equals(user.id));
-      expect(refreshedUser.email, equals(user.email));
     });
   });
 }
@@ -802,10 +560,11 @@ void main() {
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:video_window/main.dart' as app;
-import 'package:video_window_server/generated/endpoints.dart';
-import 'package:video_window_server/generated/protocol.dart';
+import 'package:video_window_flutter/main.dart' as app;
+import 'package:timeline/presentation/pages/feed_page.dart';
+import 'package:timeline/presentation/pages/story_page.dart';
+import 'package:timeline/presentation/widgets/video_thumbnail.dart';
+import 'package:commerce/presentation/pages/payment_page.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -903,7 +662,8 @@ void main() {
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:video_window/features/feed/presentation/pages/feed_page.dart';
+import 'package:timeline/presentation/pages/feed_page.dart';
+import 'package:timeline/presentation/widgets/video_thumbnail.dart';
 
 void main() {
   group('Performance Tests', () {
@@ -984,9 +744,9 @@ void main() {
 ```dart
 // test/unit/helpers/test_data.dart
 
-import 'package:video_window/features/auth/domain/entities/user_entity.dart';
-import 'package:video_window/features/feed/domain/entities/story_entity.dart';
-import 'package:video_window/features/auction/domain/entities/auction_entity.dart';
+import 'package:auth/domain/entities/user.dart';
+import 'package:timeline/domain/entities/story.dart';
+import 'package:commerce/domain/entities/auction.dart';
 
 class TestData {
   // User test data
@@ -1121,7 +881,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:network_image_mock/network_image_mock.dart';
-import 'package:video_window/features/feed/presentation/widgets/video_thumbnail.dart';
+import 'package:timeline/presentation/widgets/video_thumbnail.dart';
 
 void main() {
   setUpAll(() async {

@@ -16,11 +16,91 @@
 - **External Services:** Widevine, FairPlay, PlayReady, Anti-piracy monitoring
 
 ### Technology Stack
-- **Video Processing:** AWS MediaConvert, FFmpeg, HLS adaptive streaming
-- **Content Protection:** AES-256-GCM encryption, Widevine DRM, FairPlay Streaming, PlayReady
-- **Storage:** AWS S3 with intelligent tiering, CloudFront CDN with signed URLs
-- **Security:** Hardware Security Modules (HSM), forensic watermarking, content fingerprinting
-- **Monitoring:** AWS CloudWatch, anti-piracy detection, audit logging
+- **Media Processing:** AWS MediaConvert 2025.09 template `vw-media-hls-v3`, FFmpeg 6.1.1 (EKS job image `ghcr.io/videowindow/ffmpeg:6.1.1-gpu`), AWS Elemental PeerLink `v3.4` for live handoffs, Shaka Packager 2.6.1 for manifest packaging.
+- **Storage & Delivery:** AWS S3 bucket `vw-media-origin-prod` (intelligent tiering), CloudFront distribution `d3vw-media.cloudfront.net` with signed cookies, AWS Global Accelerator GA-05F3 to reduce startup latency.
+- **Content Protection:** AWS KMS multi-Region key `alias/media-content-aes256`, Google Widevine CAS SDK 17.0.0, Apple FairPlay Streaming SDK 4.1.0, Microsoft PlayReady Server SDK 4.5.3, NAGRA NexGuard forensic watermark SaaS v7.4.
+- **Security & Key Management:** AWS CloudHSM cluster `cloudhsm-media-prod` firmware 7.2, HashiCorp Vault 1.15.3 (1Password Connect bridge v1.7.3) for DRM signing keys, Forter anti-piracy fingerprinting agent 3.2.2.
+- **Monitoring & Analytics:** Datadog Agent 7.53.0 with synthetic monitor `story-startup`, AWS CloudWatch metrics, Segment backend ingestion 4.5.1, Kibana 8.14 for security dashboards.
+- **Workflow Orchestration:** AWS Step Functions `media-transcode-orchestrator@2025-09`, EventBridge bus `media-pipeline-events`, SQS queue `media-transcode-work-queue` with dead-letter queue retention 14 days.
+
+### Source Tree & File Directives
+```text
+video_window_server/
+  lib/
+    src/
+      endpoints/
+        media/
+          media_upload_endpoint.dart             # Modify: enforce KMS envelope encryption workflow (Story 6.1)
+          media_transcode_endpoint.dart          # Create: orchestrate MediaConvert jobs + status (Story 6.2)
+          media_protection_endpoint.dart         # Create: DRM token issuance + forensic watermark requests (Story 6.3)
+      services/
+        media_pipeline/
+          upload_service.dart                   # Modify: chunk ingestion + ClamAV scan (Story 6.1)
+          transcode_service.dart                # Create: MediaConvert template builder (Story 6.2)
+          drm_license_service.dart              # Create: Widevine/FairPlay/PlayReady issuance (Story 6.3)
+          watermark_service.dart                # Modify: integrate NexGuard forensic payloads (Story 6.3)
+      workflows/
+        media_pipeline_step_function.dart       # Create: Step Functions client & state machine definitions (Story 6.2)
+      security/
+        content_security_service.dart           # Modify: AES-256-GCM + capture deterrence hooks (Story 6.1)
+      monitoring/
+        media_pipeline_observer.dart            # Create: emit Datadog/Segment events (Story 6.3)
+    test/
+      endpoints/media/
+        media_transcode_endpoint_test.dart      # Create: verifies auth + job orchestration
+        media_protection_endpoint_test.dart     # Create: DRM issuance + rate limit tests
+      services/media_pipeline/
+        transcode_service_test.dart             # Create: template construction + fallback renditions
+        drm_license_service_test.dart           # Create: license responses + error handling
+
+video_window_flutter/
+  packages/
+    core/
+      lib/
+        data/
+          services/
+            media/
+              media_upload_service.dart          # Modify: resumable upload with KMS metadata (Story 6.1)
+              media_playback_service.dart        # Modify: multi-DRM playback negotiation (Story 6.3)
+        security/
+          forensic_watermark_client.dart         # Create: attach forensic watermark claims (Story 6.3)
+      test/
+        data/services/media/
+          media_upload_service_test.dart         # Modify: chunk retry + checksum tests
+          media_playback_service_test.dart       # Create: DRM negotiation matrix
+
+infrastructure/
+  terraform/
+    media_pipeline.tf                            # Modify: S3, MediaConvert, Step Functions resources (Stories 6.1, 6.2)
+    media_drm.tf                                 # Create: CloudHSM, DRM license servers, NexGuard integration (Story 6.3)
+  ci/
+    media_pipeline_checks.yaml                   # Create: triggers ClamAV, ffmpeg smoke tests, DRM lints
+```
+
+## Component-Level Implementation
+
+### Implementation Guide
+1. **Secure Upload & Storage Foundations**
+   - Update `media_upload_endpoint.dart` and `upload_service.dart` to enforce per-chunk checksum validation, ClamAV malware scans, and envelope encryption via AWS KMS (Stories 6.1).
+   - Configure S3 bucket `vw-media-origin-prod` with object lock, versioning, and lifecycle transitions (hot→warm→cold) through Terraform (`media_pipeline.tf`). (Story 6.1)
+2. **Transcoding Orchestration**
+   - Implement `transcode_service.dart` to assemble MediaConvert job settings from template `vw-media-hls-v3`, create renditions (360/720/1080/2160), and push to Step Functions `media-transcode-orchestrator@2025-09`. (Story 6.2)
+   - Add `media_transcode_endpoint.dart` for job submission, status polling, and failure retry logic with DLQ fallback. (Story 6.2)
+3. **Advanced Optimization & Packaging**
+   - Integrate Shaka Packager to emit DASH manifests alongside HLS, enabling multi-DRM distribution. Cache manifests in S3 `manifests/` prefix with CloudFront invalidations. (Story 6.2)
+   - Enable GPU-accelerated FFmpeg pods (EKS node group `g5-media-transcode`) and benchmark transcode times, adjusting concurrency in `transcode_service_test.dart`. (Story 6.2)
+4. **DRM & Forensic Watermarking**
+   - Build `drm_license_service.dart` to interface with Widevine, FairPlay, and PlayReady SDKs, issuing licenses with per-user entitlements and 5-minute TTL. (Story 6.3)
+   - Enhance `watermark_service.dart` to request NexGuard forensic payloads, embed identifiers (userId, deviceId, sessionId), and log tokens for audit. (Story 6.3)
+5. **Client Playback Integration**
+   - Update Flutter `media_playback_service.dart` to negotiate DRM (FairPlay on iOS, Widevine on Android/web, PlayReady on supported web) and attach forensic watermark claims to requests. (Story 6.3)
+   - Extend capture deterrence by wiring `forensic_watermark_client.dart` with platform channels to dim playback or lock when screen capture detected. (Stories 6.1, 6.3)
+6. **Monitoring & Anti-Piracy Response**
+   - Implement `media_pipeline_observer.dart` to emit Segment events (`media_upload_started`, `media_transcode_completed`, `media_drm_license_issued`, `media_piracy_alert`) and Datadog metrics (`media.transcode.duration_ms`). (Stories 6.1–6.3)
+   - Configure Forter fingerprinting agent to monitor CDN traffic, forwarding alerts to Lambda `piracy-escalation@2025-10` for automated DMCA workflows. (Story 6.3)
+7. **Testing & Compliance**
+   - Build end-to-end integration tests simulating upload→transcode→DRM playback using mock CDN URLs. (Stories 6.1–6.3)
+   - Run resilience tests via `media_pipeline_checks.yaml` (ClamAV, ffmpeg sanity, DRM smoke). Document pass/fail criteria in Test Traceability. (Stories 6.1–6.3)
 
 ## Data Models
 
@@ -1074,6 +1154,18 @@ class SecureCDNService {
 - **Streaming Performance:** Test concurrent streams and CDN performance
 - **Watermarking Performance:** Test real-time watermarking and extraction
 
+### Test Traceability Matrix
+| Acceptance Criterion | Verification Assets | Notes |
+| -------------------- | ------------------- | ----- |
+| AC1 – Secure upload & metadata pipeline | `media_upload_service_test.dart`, integration `media_upload_flow_test` | Validates chunk checksum, ClamAV scan, metadata extraction.
+| AC2 – Signed URLs & watermark MVP | `content_security_service_test.dart`, Sentry smoke `media_pipeline_checks.yaml` | Ensures AES-256-GCM envelope encryption and visible watermark overlay.
+| AC3 – Storage lifecycle & retention | Terraform integration tests `testinfra/test_media_storage.py`, AWS Config rule `media-storage-lifecycle` | Confirms tier transitions + secure deletion.
+| AC4 – CDN delivery & access control | `media_transcode_endpoint_test.dart`, load test `k6/cdn_signed_url.js` | Measures signature validation, concurrent stream limits.
+| AC5 – Encryption at rest/in transit | `kms_envelope_integration_test.dart`, CloudHSM audit checks | Verifies master key rotation & TLS 1.3 enforcement.
+| AC6 – Transcoding & packaging | `transcode_service_test.dart`, Step Functions integration test `media_state_machine_test.dart` | Ensures renditions + manifest generation.
+| AC7 – Monitoring & audit logging | `media_pipeline_observer_test.dart`, Datadog monitor `media.upload.success_rate` | Confirms analytic events + log retention.
+| AC8 – Anti-piracy response | `piracy_detection_integration_test.dart`, Lambda `piracy-escalation@2025-10` canary | Validates fingerprint alert ingestion + DMCA ticket creation.
+
 ## Error Handling
 
 ### Error Types
@@ -1118,43 +1210,63 @@ class PiracyDetectionException extends MediaException { }
 
 ## Monitoring and Analytics
 
-### Key Metrics
-- **Upload Success Rate:** Percentage of successful uploads
-- **Transcoding Time:** Average time from upload to ready state
-- **Content Protection Success:** Rate of successful DRM license issuance
-- **Piracy Detection:** Number of piracy incidents detected and resolved
-- **Streaming Performance:** Buffer rate, startup time, and quality switches
+### Analytics Events (Segment)
+- `media_upload_started`: `assetId`, `uploaderId`, `fileSizeBytes`, `ingestRegion`, `uploadMethod`.
+- `media_transcode_completed`: `assetId`, `renditionsGenerated`, `totalDurationMs`, `qualityProfile`, `gpuNodeId`.
+- `media_drm_license_issued`: `assetId`, `userId`, `drmType`, `ttlSeconds`, `deviceClass`.
+- `media_watermark_embedded`: `assetId`, `watermarkId`, `provider`, `embeddingLatencyMs`.
+- `media_piracy_alert`: `assetId`, `fingerprintHash`, `confidenceScore`, `alertId`, `escalationState`.
+
+### Observability & Dashboards
+- Grafana dashboard `Media Pipeline` tracks MediaConvert queue depth, transcode duration p95 (target ≤ 8 min for 10 min asset), and Step Functions failure rate (<1%).
+- Datadog monitors: `media.upload.success_rate` (SLO ≥ 99%), `media.transcode.duration_ms` (p95 ≤ 480000), `media.drm.license_latency_ms` (p95 ≤ 250), `media.piracy.alert_count` trending.
+- CloudWatch metric filters trigger alarms for failed MediaConvert jobs and CloudHSM key access anomalies.
+- Kibana security dashboard aggregates forensic watermark verifications and DMCA takedown timelines.
 
 ### Logging Strategy
-- **Structured JSON Logs:** Consistent logging format across all services
-- **Security Events:** All security-related events with detailed context
-- **Performance Metrics:** Transcoding and streaming performance data
-- **Error Tracking:** Comprehensive error logging with stack traces
+- Structured JSON logs via OpenTelemetry collector 0.96.0 with correlation IDs (`uploadId`, `assetId`).
+- Security events streamed to AWS Security Lake with 365-day retention; DMCA workflow logs retained 7 years for legal compliance.
+- Performance metrics exported to Datadog and long-term S3 cold storage for capacity planning.
+- Error tracking via Sentry backend DSN `op://observability/Sentry/VIDEO_WINDOW_BACKEND_DSN` with release tagging `media-pipeline@{gitSha}`.
 
 ## Deployment Considerations
 
-### Environment Variables
-```dart
-// AWS Configuration
-AWS_REGION=us-east-1
-S3_BUCKET_NAME=video-content-bucket
-CLOUDFRONT_DISTRIBUTION_ID=E1234567890ABC
-MEDIACONVERT_ROLE_ARN=arn:aws:iam::account:role/MediaConvertRole
+### Environment Configuration
+```yaml
+VIDEO_PIPELINE_CONFIG:
+  AWS_REGION: "us-east-1"
+  MEDIA_ORIGIN_BUCKET: "vw-media-origin-prod"
+  MEDIA_MANIFEST_BUCKET: "vw-media-manifests-prod"
+  CLOUDFRONT_DISTRIBUTION_ID: "E3VW6MEDIA0AB1"
+  MEDIACONVERT_TEMPLATE_ARN: "arn:aws:mediaconvert:us-east-1:921533885321:presets/vw-media-hls-v3"
+  STEP_FUNCTION_ARN: "arn:aws:states:us-east-1:921533885321:stateMachine:media-transcode-orchestrator"
+  TRANSCODE_QUEUE_URL: "https://sqs.us-east-1.amazonaws.com/921533885321/media-transcode-work-queue"
 
-// DRM Configuration
-WIDEVINE_KEY_SERVER_URL=https://widevine-license.example.com
-FAIRPLAY_KEY_SERVER_URL=https://fairplay-license.example.com
-PLAYREADY_KEY_SERVER_URL=https://playready-license.example.com
-DRM_PRIVATE_KEY_PATH=/path/to/drm-private-key.pem
+DRM_CONFIG:
+  WIDEVINE_LICENSE_URL: "https://license.widevine.videowindow.com/v1/issue"
+  WIDEVINE_SIGNING_KEY: "vault://drm/widevine/signing_key"
+  FAIRPLAY_LICENSE_URL: "https://fairplay.videowindow.com/license"
+  FAIRPLAY_CERTIFICATE: "vault://drm/fairplay/certificate_pem"
+  PLAYREADY_LICENSE_URL: "https://playready.videowindow.com/rightsmanager.asmx"
+  PLAYREADY_SIGNING_KEY: "vault://drm/playready/signing_key"
 
-// Security Configuration
-HSM_ENDPOINT=https://hsm.example.com
-ENCRYPTION_KEY_ID=content-encryption-key-id
-WATERMARK_KEY_ID=watermark-key-id
+FORENSIC_WATERMARK:
+  PROVIDER_ENDPOINT: "https://api.nexguard.videowindow.com/v7"
+  PROVIDER_API_KEY: "vault://content-protection/nexguard/api_key"
+  TEMPLATE_ID: "vw-forensic-watermark-v2"
+  PAYLOAD_TTL_SECONDS: 300
 
-// Monitoring Configuration
-PIRACY_DETECTION_WEBHOOK=https://security.example.com/webhooks/piracy
-SECURITY_ALERT_EMAIL=security@example.com
+SECURITY_CONFIG:
+  CLOUDHSM_CLUSTER_ID: "cluster-7nmediaprod"
+  KMS_KEY_ALIAS: "alias/media-content-aes256"
+  CAPTURE_DETER_TOPIC: "arn:aws:sns:us-east-1:921533885321:media-capture-alerts"
+  CONCURRENT_STREAM_LIMIT: 2
+
+MONITORING_CONFIG:
+  DATADOG_API_KEY: "vault://observability/datadog/api_key"
+  SEGMENT_BACKEND_WRITE_KEY: "op://video-window-feed/Analytics/SEGMENT_FEED_WRITE_KEY"
+  PIRACY_ALERT_SNS_TOPIC: "arn:aws:sns:us-east-1:921533885321:piracy-escalations"
+  GRAFANA_DASHBOARD_UID: "media-pipeline-main"
 ```
 
 ### Infrastructure Requirements
@@ -1222,11 +1334,11 @@ Resources:
 - ✅ Piracy detection within 24 hours of infringement
 
 ### Success Metrics
-- Upload success rate > 99%
-- Transcoding success rate > 98%
-- Content protection effectiveness > 99.5%
-- Piracy detection accuracy > 95%
-- User streaming experience score > 4.5/5
+- Upload success rate ≥ 99.5% (Datadog `media.upload.success_rate`).
+- MediaConvert job success rate ≥ 99% with p95 transcode duration ≤ 8 minutes for 10-minute assets.
+- DRM license issuance success ≥ 99.7% with p95 license latency ≤ 250 ms.
+- Forensic watermark verification success ≥ 99% and piracy alert false-positive rate ≤ 2%.
+- Streaming startup time p95 ≤ 2.5 seconds measured via synthetic `story-startup` monitor.
 
 ## Next Steps
 
@@ -1239,6 +1351,11 @@ Resources:
 
 **Dependencies:** Epic 1 (Viewer Authentication) for user access control, Epic 2 (Maker Auth) for content ownership verification
 **Blocks:** Epic 7 (Admin Analytics) for content performance analytics, Epic 8 (Mobile Experience) for native video player integration
+
+## Change Log
+| Date       | Version | Description                                                                                                            | Author            |
+| ---------- | ------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| 2025-10-29 | v1.0    | Elevated spec to definitive status with pinned stack, source directives, implementation plan, observability, and tests | GitHub Copilot AI |
 
 ---
 *This technical specification provides the foundation for implementing a secure, scalable media pipeline with comprehensive content protection and anti-piracy measures.*

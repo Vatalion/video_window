@@ -1,105 +1,207 @@
-# Melos Configuration Guide
+# Melos Configuration Guide# Melos Configuration Guide
 
-## Overview
 
-Melos is a tool for managing Dart packages with multiple packages. This document provides the complete Melos configuration for the Craft Video Marketplace project to enable efficient multi-package development, testing, and deployment.
 
-## Melos Setup
+Melos orchestrates the Flutter workspace located in `video_window_flutter/`. This guide captures the canonical configuration and workflows for the Craft Video Marketplace monorepo.## Overview
 
-### 1. Installation
 
-```bash
-# Install Melos globally
-dart pub global activate melos
 
-# Verify installation
-melos --version
+## Workspace StructureMelos is a tool for managing Dart packages with multiple packages. This document provides the complete Melos configuration for the Craft Video Marketplace project to enable efficient multi-package development, testing, and deployment.
+
 ```
 
-### 2. Project Initialization
+video_window/## Melos Setup
 
-```bash
-# Initialize Melos in project root
-melos init
+├── video_window_flutter/
 
-# This creates melos.yaml and sets up basic configuration
+│   ├── lib/                        # App shell + global state### 1. Installation
+
+│   └── packages/
+
+│       ├── core/```bash
+
+│       ├── shared/# Install Melos globally
+
+│       └── features/*dart pub global activate melos
+
+├── video_window_server/
+
+└── video_window_shared/# Verify installation
+
+```melos --version
+
 ```
 
-## Complete Melos Configuration
+## melos.yaml (authoritative example)
+
+```yaml### 2. Project Initialization
+
+name: video_window_flutter
+
+repository: https://github.com/vatalion/video_window```bash
+
+packages:# Initialize Melos in project root
+
+  - packages/coremelos init
+
+  - packages/shared
+
+  - packages/features/*# This creates melos.yaml and sets up basic configuration
+
+```
+
+environment:
+
+  sdk: '>=3.5.6 <4.0.0'## Complete Melos Configuration
+
+  flutter: '>=3.19.6'
 
 ### melos.yaml
-```yaml
-name: video_window
-description: Craft Video Marketplace - Flutter multi-package workspace
-repository: https://github.com/your-org/video_window
-sdk: '>=3.8.0 <4.0.0'
-environment:
-  sdk: '>=3.8.0 <4.0.0'
-  flutter: '>=3.35.0'
 
-# Package discovery patterns
-packages:
-  - packages/mobile_client
-  - packages/core
-  - packages/shared_models
-  - packages/design_system
-  - packages/features/*
-  - serverpod/packages/modules/*
+scripts:```yaml
 
-# Command scripts
-scripts:
-  # Development commands
-  setup:
-    description: Set up the development environment
-    run: |
-      melos exec --flutter pub get
-      melos exec --dart run build_runner build
-      echo "✅ Development environment setup complete"
+  setup: |name: video_window
+
+    melos exec --flutter pub getdescription: Craft Video Marketplace - Flutter multi-package workspace
+
+    melos exec --dart run build_runner build --delete-conflicting-outputsrepository: https://github.com/your-org/video_window
+
+  clean: |sdk: '>=3.8.0 <4.0.0'
+
+    melos exec --flutter cleanenvironment:
+
+    melos exec -- bash -c 'rm -rf .dart_tool build'  sdk: '>=3.8.0 <4.0.0'
+
+  analyze: melos exec --flutter analyze --fatal-infos --fatal-warnings  flutter: '>=3.35.0'
+
+  format: melos exec --dart format . --set-exit-if-changed
+
+  test: melos run test:unit# Package discovery patterns
+
+  test:unit: melos exec --flutter test test/unit --coveragepackages:
+
+  test:widget: melos exec --flutter test test/widget --reporter=expanded  - packages/mobile_client
+
+  test:integration: melos exec --flutter test test/integration --reporter=expanded  - packages/core
+
+  test:coverage: |  - packages/shared_models
+
+    melos run test:unit  - packages/design_system
+
+    melos run coverage:merge  - packages/features/*
+
+    melos run coverage:report  - serverpod/packages/modules/*
+
+  coverage:merge: |
+
+    mkdir -p coverage# Command scripts
+
+    find packages -name "lcov.info" -print0 | xargs -0 cat > coverage/lcov.infoscripts:
+
+  coverage:report: |  # Development commands
+
+    if command -v genhtml >/dev/null 2>&1; then  setup:
+
+      genhtml coverage/lcov.info -o coverage/html    description: Set up the development environment
+
+    else    run: |
+
+      echo "Install lcov to render HTML coverage reports."      melos exec --flutter pub get
+
+    fi      melos exec --dart run build_runner build
+
+  generate: melos exec --dart run build_runner build --delete-conflicting-outputs      echo "✅ Development environment setup complete"
+
+  generate:watch: melos exec --dart run build_runner watch --delete-conflicting-outputs
 
   clean:
-    description: Clean all packages
-    run: |
-      melos exec --flutter clean
-      melos exec --rm -rf .dart_tool
-      melos exec --rm -rf build
+
+command:    description: Clean all packages
+
+  bootstrap:    run: |
+
+    runPubGetInParallel: true      melos exec --flutter clean
+
+    failFast: true      melos exec --rm -rf .dart_tool
+
+```      melos exec --rm -rf build
+
       echo "✅ All packages cleaned"
 
+> **Note:** `serverpod generate` is run inside `video_window_server/` and is intentionally not part of Melos scripts.
+
   # Analysis and formatting
-  analyze:
-    description: Analyze all packages for issues
-    run: melos exec --flutter analyze --fatal-infos --fatal-warnings
-    packageFilters:
-      dirExists: lib
+
+## First-Time Setup  analyze:
+
+```bash    description: Analyze all packages for issues
+
+cd video_window/video_window_flutter    run: melos exec --flutter analyze --fatal-infos --fatal-warnings
+
+melos run setup    packageFilters:
+
+```      dirExists: lib
+
+This command installs dependencies across all packages and runs `build_runner` once to generate any required code.
 
   format:
-    description: Format all Dart code
-    run: melos exec --dart format . --set-exit-if-changed
-    packageFilters:
-      dirExists: lib
 
-  format-check:
-    description: Check if code is properly formatted
-    run: melos exec --dart format . --set-exit-if-changed
-    packageFilters:
-      dirExists: lib
+## Common Workflows    description: Format all Dart code
 
-  # Testing commands
-  test:
-    description: Run all tests
-    run: melos exec --flutter test --coverage
-    packageFilters:
-      dirExists: test
+| Task | Command | Notes |    run: melos exec --dart format . --set-exit-if-changed
 
-  test:watch:
-    description: Run tests in watch mode
+|------|---------|-------|    packageFilters:
+
+| Format code | `melos run format` | Enforced before PR merge |      dirExists: lib
+
+| Static analysis | `melos run analyze` | Fails on warnings due to `--fatal-*` flags |
+
+| Unit tests | `melos run test:unit` | Generates coverage data under `packages/*/coverage` |  format-check:
+
+| Widget tests | `melos run test:widget` | Requires a Flutter shell |    description: Check if code is properly formatted
+
+| Integration tests | `melos run test:integration` | Used for offer → auction → checkout flows |    run: melos exec --dart format . --set-exit-if-changed
+
+| Code generation | `melos run generate` | Run after updating freezed/json_serializable models |    packageFilters:
+
+| Clean workspace | `melos run clean` | Removes build artifacts (Flutter + build_runner) |      dirExists: lib
+
+
+
+## Package Discovery Rules  # Testing commands
+
+- Packages must declare a unique `name` in their pubspec (e.g., `core`, `shared`, `auth`).  test:
+
+- Feature packages live under `video_window_flutter/packages/features/` and are discovered automatically by the glob.    description: Run all tests
+
+- Do not add Serverpod modules to Melos; they are part of the Dart/Serverpod toolchain instead.    run: melos exec --flutter test --coverage
+
+    packageFilters:
+
+## CI Expectations      dirExists: test
+
+- CI pipelines call `melos run format`, `melos run analyze`, and `melos run test`.
+
+- Coverage reports are uploaded from `coverage/lcov.info`.  test:watch:
+
+- Dependency graph validation ensures there are no feature ⇄ feature edges.    description: Run tests in watch mode
+
     run: melos exec --flutter test --watch
-    packageFilters:
-      dirExists: test
 
-  test:coverage:
-    description: Run tests with coverage report
+## Troubleshooting    packageFilters:
+
+- **Build runner conflicts**: run `melos exec --dart run build_runner clean`, then `melos run generate`.      dirExists: test
+
+- **Stale generated code**: rerun `melos run generate` after deleting the offending `.g.dart` or `.freezed.dart`.
+
+- **Dependency mismatch**: execute `melos exec --flutter pub outdated` to locate conflicts.  test:coverage:
+
+- **Serverpod protocol changes**: regenerate via `cd ../video_window_server && serverpod generate` before re-running Melos commands.    description: Run tests with coverage report
+
     run: |
-      melos exec --flutter test --coverage
+
+Keeping Melos configuration aligned with this guide ensures consistent workflows across the team and prevents accidental drift from the documented architecture.      melos exec --flutter test --coverage
+
       melos run coverage:merge
       melos run coverage:report
 

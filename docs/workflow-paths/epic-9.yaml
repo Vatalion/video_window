@@ -1,0 +1,10 @@
+workflows:
+  - name: Epic 9 Tech Spec Definitiveness
+    command: "*tech-spec-epic-9"
+    agent: Bob (Scrum Master)
+  - name: Story Suite Readiness – Offers
+    command: "*story-ready epic-9"
+    agent: Bob (Scrum Master)
+  - name: Validation Cleanup – Epic 9
+    command: "*validation-check epic-9"
+    agent: Murat (Master Test Architect)

@@ -16,11 +16,142 @@
 - **External:** CDN for HLS delivery, social media APIs for sharing, analytics service
 
 ### Technology Stack
-- **Flutter:** video_player 2.8.0, chewie 1.7.0, share_plus 7.2.0, url_launcher 6.2.0
-- **Video Streaming:** HLS with adaptive bitrate, signed URLs, watermark overlay enforcement
-- **Content Protection:** JWT-based token authentication, client-side capture deterrence
-- **Accessibility:** WCAG 2.1 AA compliance, screen reader support, keyboard navigation
-- **State Management:** BLoC pattern for story state, video player state, and UI interactions
+- **Flutter 3.19.6:** `video_player` 2.8.1 for HLS playback, `chewie` 1.7.0 for custom controls, `share_plus` 7.2.0 for platform share sheets, `url_launcher` 6.2.5 for outbound links, `flutter_screen_capture_detector` 1.1.0 to block screenshots, `screen_brightness` 0.2.3 for accessibility dimming.
+- **Serverpod 2.9.2:** Story endpoint package `video_window_server/lib/src/endpoints/story/story_endpoint.dart`, media signed-URL service in `video_window_server/lib/src/services/media_token_service.dart`, analytics ingestion via `video_window_server/lib/src/services/story_analytics_service.dart`.
+- **Streaming & DRM:** AWS MediaConvert template `vw-story-hls-v2` producing 360p/720p/1080p renditions in S3 bucket `vw-story-hls-prod`, delivered through CloudFront distribution `d3vw-story.cloudfront.net` with signed cookies (policy version 2025-09) and token TTL 300s.
+- **Watermark & Capture Deterrence:** Watermark microservice container `video-window/watermark-service:3.2.0`, overlay presets stored in Redis 7.2.4 cluster `vw-content-protection`, and mobile capture deterrence using `SecureFlag` Android SDK 1.3.1 plus iOS ReplayKit hooks (custom plugin `secure_capture_channel` v0.3.0).
+- **Accessibility Tooling:** WCAG 2.1 AA checklist baked into `packages/shared/lib/accessibility/`, `flutter_a11y` lint rules 0.5.0, caption/transcript parsing with `webvtt_parser` 0.6.2.
+- **Analytics & Observability:** Segment Flutter SDK 4.5.1, Datadog RUM 1.13.0, Firebase Analytics 11.8.0, Sentry Flutter 8.7.0, Grafana dashboards fed by Story Analytics materialized view `dw.story_engagement_v1`.
+- **Secrets & Config Management:** 1Password Connect 1.7.3 (service account `svc-story-spec@video-window`), AWS Parameter Store namespace `/prod/story/` for non-secret toggles, Terraform module `infra/story_content_protection` v0.4.6.
+- **Deep Link & Sharing:** Firebase Dynamic Links 5.5.0 (domain `https://stories.videowindow.page.link`), social preview renderer Lambda `story-share-renderer@2025.10`, Universal Links/Android App Links managed via `go_router` 12.1.3 route table.
+
+### Source Tree & File Directives
+```text
+video_window_flutter/
+  packages/
+    features/
+      story/
+        lib/
+          presentation/
+            pages/
+              story_detail_page.dart                  # Modify: wire full layout, CTA anchoring, analytics hooks (Story 5.1)
+              story_accessibility_page.dart           # Create: debug surface for accessibility states (Story 5.2)
+            widgets/
+              story_video_player.dart                 # Modify: integrate secure player + caption toggles (Stories 5.1, 5.2)
+              transcript_panel.dart                   # Create: synchronized transcript & search (Story 5.2)
+              story_share_sheet.dart                  # Create: native share sheet + deep link preview (Story 5.3)
+            bloc/
+              story_bloc.dart                         # Modify: include accessibility + share events (Stories 5.1–5.3)
+              video_player_bloc.dart                  # Modify: expose caption, transcript, and error states (Stories 5.1, 5.2)
+          use_cases/
+            load_story_detail_use_case.dart           # Modify: request signed URLs + section metadata (Story 5.1)
+            prepare_accessibility_assets_use_case.dart# Create: fetch captions/transcripts, cache offline (Story 5.2)
+            generate_story_deep_link_use_case.dart    # Create: issue Firebase Dynamic Link, persist share audit (Story 5.3)
+            toggle_story_save_use_case.dart           # Modify: persist wishlist/save state (Story 5.3)
+        test/
+          presentation/
+            pages/
+              story_detail_page_test.dart             # Modify: coverage for layout + accessibility focus traps
+            widgets/
+              transcript_panel_test.dart              # Create: verifies sync + keyboard navigation (Story 5.2)
+              story_share_sheet_test.dart             # Create: validates deep link preview + copy workflow (Story 5.3)
+          use_cases/
+            prepare_accessibility_assets_use_case_test.dart # Create: ensures caption caching + fallback (Story 5.2)
+
+video_window_flutter/
+  packages/
+    core/
+      lib/
+        data/
+          repositories/
+            story/
+              story_repository.dart                   # Modify: hydrate StoryAggregate with captions/transcripts (Stories 5.1, 5.2)
+              share_repository.dart                   # Create: manage deep link tokens + audit log (Story 5.3)
+          services/
+            media/media_token_service.dart            # Modify: include DRM watermark claims (Story 5.1)
+            accessibility/caption_service.dart        # Create: parse/store WebVTT + transcript search index (Story 5.2)
+            analytics/story_analytics_service.dart    # Modify: emit view/share/caption events (Stories 5.1–5.3)
+            sharing/deep_link_service.dart            # Create: Firebase Dynamic Link integration (Story 5.3)
+        security/
+          capture_deter_service.dart                  # Create: platform channels for screenshot deterrence (Story 5.1)
+      test/
+        data/
+          repositories/
+            story/
+              story_repository_test.dart              # Modify: cover transcript/caption hydration
+              share_repository_test.dart              # Create: validate deep link expiration + analytics payloads
+        services/
+          accessibility/caption_service_test.dart     # Create: WebVTT parsing + caching tests (Story 5.2)
+
+video_window_server/
+  lib/
+    src/
+      endpoints/
+        story/
+          story_endpoint.dart                         # Modify: include transcript download + share audit (Stories 5.1–5.3)
+          story_share_endpoint.dart                   # Create: issue deep links, enforce rate limits (Story 5.3)
+      services/
+        story_transcript_service.dart                 # Create: orchestrate caption/transcript retrieval (Story 5.2)
+        watermark_policy_service.dart                 # Modify: align watermark presets with mobile clients (Story 5.1)
+        story_share_service.dart                      # Create: deep link + analytics publish (Story 5.3)
+      cache/
+        transcript_cache.dart                         # Create: Redis-backed transcript cache (Story 5.2)
+      analytics/
+        story_event_sink.dart                         # Create: push engagement events to Segment + Datadog (Stories 5.1–5.3)
+
+infrastructure/
+  terraform/
+    story_content.tf                                  # Modify: add CloudFront distribution `d3vw-story.cloudfront.net`
+    story_sharing.tf                                  # Create: Firebase Dynamic Links domain + Lambda renderer (Story 5.3)
+  ci/
+    story_accessibility_checks.yaml                   # Create: run a11y golden tests nightly (Story 5.2)
+```
+
+## Implementation Details
+
+### Implementation Guide
+1. **Flutter Presentation Layer Foundations**
+   - Update `story_detail_page.dart` and associated widgets to honor the layout, sticky CTA, and analytics events defined in Stories 5.1–5.3. Ensure navigation accepts `storyId`, `section`, and `source` parameters. (Story 5.1)
+   - Introduce `story_video_player.dart` enhancements for DRM token refresh, caption toggles, and secure playback flags (`SecureFlag` + `flutter_screen_capture_detector`). (Stories 5.1, 5.2)
+2. **Accessibility & Transcript Delivery**
+   - Implement `prepare_accessibility_assets_use_case.dart` to fetch caption tracks via `story_transcript_service.dart`, cache responses, and expose offline fallback for transcript viewing. (Story 5.2)
+   - Build `transcript_panel.dart` with synchronized scrolling, search, and keyboard shortcuts (space to toggle playback, `Shift+F` to focus search). Mirror coverage in `transcript_panel_test.dart`. (Story 5.2)
+3. **Share & Save Workflows**
+   - Create `generate_story_deep_link_use_case.dart` to call `deep_link_service.dart`, persist `story_shares` records via Serverpod, and return share preview metadata. (Story 5.3)
+   - Extend `toggle_story_save_use_case.dart` to drive wishlist state and analytics `story_saved` events, ensuring idempotent server updates. (Story 5.3)
+4. **Serverpod Enhancements**
+   - Expand `story_endpoint.dart` to join captions/transcripts, signed URLs, and maker data in a single payload while respecting user access controls. Introduce rate limits for transcript downloads (60/minute per user). (Stories 5.1, 5.2)
+   - Add `story_share_endpoint.dart` to mint Firebase Dynamic Links, enforce 24-hour expiry, and publish analytics payloads to `story.share.events`. (Story 5.3)
+5. **Security & Content Protection**
+   - Update `media_token_service.dart` and `watermark_policy_service.dart` to embed user-specific watermark claims (userId, timestamp, sessionId) and enforce TTL at 5 minutes. Ensure fallback to 720p when HD requests fail signature verification. (Story 5.1)
+   - Wire `capture_deter_service.dart` platform hooks to respond to screenshot attempts (log via Sentry, dim playback, prompt user). (Story 5.1)
+6. **Analytics & Observability Hooks**
+   - Integrate Segment events `story_viewed`, `story_video_playback`, `story_caption_toggled`, `story_shared`, and `story_saved`. Map Datadog RUM custom timings for video startup and transcript load times. (Stories 5.1–5.3)
+    - Configure Grafana dashboard panels for HLS error rate, average watch duration, caption opt-in rate, and share conversion metrics using `story_event_sink.dart`. (Stories 5.1–5.3)
+    - Emit SLO metrics to Datadog (`story.playback.success_rate`, `story.caption.load_time_ms`, `story.share.conversion_rate`) with weekly rollups consumed by leadership dashboards.
+7. **Testing & Quality Gates**
+   - Create golden tests for caption rendering, story layout at 320px/768px/1280px widths, and full integration tests covering share flows. Add instrumentation tests verifying screenshot deterrence events fire. (Stories 5.1–5.3)
+   - Update CI pipeline (`story_accessibility_checks.yaml`) to run widget accessibility audits and ensure no regressions before release.
+
+  ## Analytics & Observability
+
+  ### Analytics Events (Segment)
+  - `story_viewed`: `storyId`, `makerId`, `source`, `sectionEntered`, `hlsRendition`, `watchSessionId`.
+  - `story_video_playback`: `storyId`, `mediaId`, `quality`, `playbackDurationMs`, `startupTimeMs`, `bufferCount`, `errorCode` (if any).
+  - `story_caption_toggled`: `storyId`, `language`, `wasEnabled`, `timestamp`, `userAccessibilityProfile`.
+  - `story_transcript_viewed`: `storyId`, `language`, `searchTerm`, `deviceAccessibilitySettings`.
+  - `story_shared`: `storyId`, `channel`, `deepLink`, `utmCampaign`, `shareId`.
+  - `story_saved`: `storyId`, `saveState`, `wishlistId`, `ctaSurface`.
+
+  ### Monitoring & Dashboards
+  - Grafana dashboard `Story Experience` tracks HLS error rate (<1%), average watch duration (target ≥ 68%), caption opt-in rate (target ≥ 35%), transcript load latency (p95 < 1.2s), and share conversion rate (target ≥ 12%).
+  - Datadog RUM dashboard `Story Playback` tags sessions by `source` (feed, share, deep_link) and surfaces largest contentful paint, startup latency, and buffer stall counts.
+  - CloudWatch metrics from Lambda `story-share-renderer@2025.10` expose share generation latency and error frequency, forwarded to Datadog via metric stream.
+
+  ### Alerting & On-Call
+  - Datadog alert `story-hls-errors` triggers when `story.playback.success_rate` < 98% over 15 minutes; routes to `#alerts-story` Playback squad.
+  - Alert `story-caption-latency` fires when p95 caption load > 1.5s for 3 consecutive intervals; includes runbook `runbooks/story_caption_latency.md`.
+  - PagerDuty service `Story Experience` escalates DRM or sharing failures to Media Pipeline on-call after 10 minutes if unresolved.
 
 ## Data Models
 
@@ -1301,6 +1432,18 @@ class AccessibilityTest {
 }
 ```
 
+### Test Traceability Matrix
+| Acceptance Criterion | Verification Tests | Notes |
+| ------------------- | ------------------ | ----- |
+| AC1 – Story layout & navigation | `story_detail_page_test.dart`, golden screenshots (`story_detail_layout_mobile.png`, `story_detail_layout_tablet.png`) | Validates sticky CTA behavior and section navigation fidelity. |
+| AC2 – Secure HLS playback | `video_player_bloc_test.dart`, integration test `story_integration_test` (playback flow) | Confirms adaptive bitrate, DRM token refresh, and watermark enforcement. |
+| AC3 – Accessibility compliance | `AccessibilityTest.should meet WCAG 2.1 AA standards`, `transcript_panel_test.dart`, axe-core CI run (`story_accessibility_checks.yaml`) | Ensures screen reader, keyboard navigation, and caption toggles function. |
+| AC4 – Content protection | `capture_deter_service_test.dart`, instrumentation test `story_secure_playback_test` | Asserts screenshot deterrence events and watermark claims. |
+| AC5 – Share & deep links | `story_share_sheet_test.dart`, server test `story_share_endpoint_test.dart` | Validates expiring links, analytics payloads, and share preview rendering. |
+| AC6 – Performance optimization | `performance/story_preload_benchmark.dart`, Datadog synthetic monitor `story-startup` | Guards startup <2s and buffer rate targets. |
+| AC7 – Error handling | `story_error_state_test.dart`, integration test `story_integration_test` (network failure scenario) | Checks fallback messaging, retry flows, and analytics logging. |
+| AC8 – Analytics instrumentation | `story_analytics_service_test.dart`, Segment QA dashboard `Story Experience QA` | Confirms events fire with correct schema + sample payloads. |
+
 ## Performance Optimization
 
 ### Video Loading Optimization
@@ -1535,25 +1678,32 @@ class ErrorRecoveryService {
 ```yaml
 # Production Environment Variables
 VIDEO_STREAMING_CONFIG:
-  CDN_BASE_URL: "https://cdn.videowindow.com"
-  SIGNED_URL_SECRET: "your-jwt-secret-key"
-  WATERMARK_SERVICE_URL: "https://watermark.videowindow.com"
+  CDN_BASE_URL: "https://d3vw-story.cloudfront.net"
+  SIGNED_URL_SECRET: "vault://content-protection/story_hls_jwt_secret_v3"
+  WATERMARK_SERVICE_URL: "https://watermark.video-window.internal/render"
+  TOKEN_TTL_SECONDS: 300
 
 CONTENT_PROTECTION:
   ENABLE_WATERMARKING: true
+  WATERMARK_TEMPLATE_ID: "story-watermark-v5"
   WATERMARK_OPACITY: 0.7
   CAPTURE_DETERRENCE_ENABLED: true
+  SCREEN_CAPTURE_EVENT_TOPIC: "story.security.capture"
 
 ACCESSIBILITY_CONFIG:
-  CAPTIONS_ENABLED: true
+  DEFAULT_CAPTION_LANGUAGE: "en"
+  CAPTION_CACHE_BUCKET: "vw-story-captions-prod"
+  CAPTION_CACHE_TTL_SECONDS: 86400
   HIGH_CONTRAST_MODE: true
   SCREEN_READER_SUPPORT: true
+  TRANSCRIPT_SEARCH_INDEX: "story-transcripts-prod"
 
 PERFORMANCE_CONFIG:
   VIDEO_PRELOAD_ENABLED: true
   ADAPTIVE_BITRATE_ENABLED: true
   MAX_CONCURRENT_STREAMS: 3
-  BUFFER_SIZE: "10MB"
+  BUFFER_SIZE_BYTES: 10485760
+  PREFETCH_DISTANCE: 1
 ```
 
 ### Database Schema
@@ -1647,13 +1797,12 @@ CREATE INDEX idx_story_shares_expires_at ON story_shares(expires_at);
 - ✅ Comprehensive error handling with user-friendly recovery options
 
 ### Success Metrics
-- Story view completion rate > 85%
-- Video playback success rate > 95%
-- Average video load time < 3 seconds
-- Share conversion rate > 10%
-- Accessibility compliance score 100%
-- User satisfaction score > 4.2/5
-- Content protection violation rate < 0.1%
+- Story view completion rate ≥ 80% with average watch duration ≥ 68% of story length.
+- Video playback success rate ≥ 98% (no fatal errors) with HLS startup time p95 ≤ 1.8s.
+- Share conversion rate ≥ 12% measured by `story_shared` → `story_viewed` attribution.
+- Caption opt-in rate ≥ 35% and transcript load latency p95 ≤ 1.2s.
+- Accessibility audit score 100% (axe-core, Flutter a11y lints) across target devices.
+- Content protection violation rate < 0.1% (screen capture attempts resolved) with zero unsigned URL usage.
 
 ## Next Steps
 
@@ -1668,3 +1817,25 @@ CREATE INDEX idx_story_shares_expires_at ON story_shares(expires_at);
 **Dependencies:** Epic F2 (Core Platform Services) for design tokens and navigation, Epic 1 (Viewer Authentication) for user identification and analytics, Epic 6 (Media Pipeline) for video processing and content protection
 
 **Blocks:** Epic 9 (Offer Submission Flow) depends on story CTA implementation, Epic 11 (Notifications) for story engagement notifications
+
+## Change Log
+| Date       | Version | Description                                                   | Author             |
+| ---------- | ------- | ------------------------------------------------------------- | ------------------ |
+| 2025-10-09 | v0.1    | Initial draft captured architecture sketches                  | Claude Code Assistant |
+| 2025-10-29 | v1.0    | Finalized stack, source tree, implementation guide, analytics | GitHub Copilot AI |
+
+## Dev Agent Record
+### Agent Model Used
+_(To be completed by Dev Agent)_
+
+### Debug Log References
+_(To be completed by Dev Agent)_
+
+### Completion Notes List
+_(To be completed by Dev Agent)_
+
+### File List
+_(To be completed by Dev Agent)_
+
+## QA Results
+_(To be completed by QA Agent)_

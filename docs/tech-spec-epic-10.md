@@ -17,10 +17,78 @@
 - **Infrastructure:** Redis for timer persistence, WebSocket for real-time updates
 
 ### Technology Stack
-- **Flutter:** Timer widgets, WebSocket integration, BLoC state management
-- **Serverpod:** Scheduled tasks, Redis integration, WebSocket support
-- **Database:** PostgreSQL for transaction integrity, Redis for timer state
-- **Real-time:** WebSocket for live updates, Redis pub/sub for event distribution
+- **Flutter SDK & Packages:** Flutter 3.19.6, Dart 3.5.6, `flutter_bloc` 9.1.0 for timer state orchestration, `rxdart` 0.27.7 for stream throttling, `web_socket_channel` 2.4.0 for auction updates, `intl` 0.19.0 for localized countdowns, `equatable` 2.0.5 for state comparison.
+- **Client Timing & Storage:** `clock` 1.1.1 for deterministic testing, `synchronized` 3.1.0 for drift correction mutexes, `flutter_secure_storage` 9.2.1 for trace token persistence, `sentry_flutter` 8.4.0 for crash reporting.
+- **Server Platform:** Serverpod 2.9.2, `serverpod_cloud` 2.9.2 task scheduler, `redis_client` 3.3.0 (Redis 7.2.4 cluster), `web_socket_serverpod` 2.9.2 for real-time push, `cronet_adapter` 1.2.0 for high precision HTTP callbacks.
+- **Scheduling & Workers:** AWS EventBridge Scheduler (cron `rate(1 minute)`), Serverpod task queue, Redis streams for timer reconciliation.
+- **Observability:** Datadog Agent 7.53.0 (`auctions.timer.drift_ms`, `auctions.soft_close.trigger_count`), CloudWatch metrics for scheduler execution, Kibana 8.14 dashboards (`auction-timer-*` index), PagerDuty service `Auction Timer`.
+- **Security & Secrets:** HashiCorp Vault 1.15.3 for WebSocket signing keys, 1Password Connect 1.7.3 for API tokens.
+
+### Source Tree & File Directives
+```text
+video_window_flutter/
+  packages/
+    features/
+      commerce/
+        lib/
+          presentation/
+            pages/
+              auction_timer_page.dart             # Modify: render countdown + soft-close indicators (Story 10.1)
+            widgets/
+              auction_timer_banner.dart           # Create: countdown + latency badge (Story 10.1)
+              soft_close_indicator.dart          # Create: highlight extension windows (Story 10.2)
+            bloc/
+              auction_timer_bloc.dart             # Modify: drift correction + WebSocket handling (Story 10.1)
+              auction_soft_close_bloc.dart        # Create: extension state machine (Story 10.2)
+              auction_state_bloc.dart             # Create: status transitions + UI hooks (Story 10.3)
+          use_cases/
+            sync_auction_timer_use_case.dart      # Create: client drift correction (Story 10.4)
+            subscribe_auction_updates_use_case.dart # Modify: WebSocket subscription with trace context (Story 10.1)
+    core/
+      lib/
+        data/
+          repositories/
+            auctions_repository.dart              # Modify: timer fetch + soft-close operations (Story 10.1-10.3)
+          services/
+            auction_timer_service.dart            # Create: reconciliation helpers (Story 10.4)
+            websocket_connection_service.dart     # Modify: heartbeat + backoff tweaks (Story 10.1)
+        telemetry/
+          drift_monitor.dart                     # Create: aggregates drift metrics (Story 10.4)
+
+video_window_server/
+  lib/
+    src/
+      endpoints/
+        auctions/
+          auction_timer_endpoint.dart            # Modify: status fetch incl. soft-close metadata (Story 10.1)
+          auction_soft_close_endpoint.dart       # Create: manual override API (Story 10.2)
+      services/
+        auctions/
+          auction_timer_scheduler.dart           # Create: cron scheduler for timer ticks (Story 10.1)
+          soft_close_service.dart                # Create: extension evaluation logic (Story 10.2)
+          auction_state_service.dart             # Modify: transitions + audit logging (Story 10.3)
+          timer_reconciliation_service.dart      # Create: drift detection & Redis reconciliation (Story 10.4)
+      websocket/
+        auction_updates_channel.dart             # Modify: push timer + state payloads (Story 10.1)
+      tasks/
+        auction_timer_task.dart                  # Create: background worker executing timer ticks (Story 10.1)
+    test/
+      endpoints/auctions/
+        auction_timer_endpoint_test.dart         # Create: timer fetch scenarios
+        auction_soft_close_endpoint_test.dart    # Create: extension eligibility tests
+      services/auctions/
+        auction_timer_scheduler_test.dart        # Create: scheduler accuracy tests
+        soft_close_service_test.dart             # Create: extension rules coverage
+        auction_state_service_test.dart          # Expand: transition sequencing tests
+        timer_reconciliation_service_test.dart   # Create: drift correction + conflict resolution tests
+
+infrastructure/
+  terraform/
+    auctions_timer.tf                            # Modify: EventBridge schedule, Redis cluster params, WebSocket scaling
+    auctions_observability.tf                    # Create: Datadog monitors, CloudWatch alarms
+  ci/
+    auctions_checks.yaml                         # Create: timer integration + drift regression suite
+```
 
 ## Data Models
 
@@ -197,6 +265,77 @@ class TimerError extends AuctionTimerState {
   final String error;
 }
 ```
+
+### Implementation Guide
+1. **Auction Timer Creation & Baseline (Story 10.1)**
+   - Extend `auction_timer_scheduler.dart` to register auctions when Story 9 emits `offers.auction.started`, persisting timer metadata (start/end, soft-close rules) in Redis hash `auction:timer:{id}` with versioning.
+   - Implement `auction_timer_task.dart` to poll active timers every 15 seconds, decrement remaining duration, and publish updates to `auction_updates_channel.dart` with `TimerTick` payloads.
+   - Update `auction_timer_bloc.dart` to consume WebSocket ticks, reconcile with local monotonic clock (`clock.now()`), and surface drift via `auction_timer_banner.dart`.
+   - Modify `auctions_repository.dart` to expose `fetchTimerStatus()` and `subscribeToTimer()` bridging HTTP fallback plus WebSocket subscription for high availability.
+2. **Soft-Close Extension Logic (Story 10.2)**
+   - Create `soft_close_service.dart` evaluating incoming bids: extend auction by `SOFT_CLOSE_EXTENSION_MINUTES` when bids arrive within final 15 minutes, capping at `SOFT_CLOSE_MAX_EXTENSION_MINUTES`.
+   - Persist soft-close windows in Redis sorted set to avoid duplicate extensions; record audit entries in `auction_state_service.dart`.
+   - Build `auction_soft_close_bloc.dart` to display active extensions and countdown UI animations via `soft_close_indicator.dart`.
+   - Introduce manual override endpoint `auction_soft_close_endpoint.dart` for operations to extend/terminate soft-close windows; secure with admin RBAC.
+3. **Auction State Transitions & Notifications (Story 10.3)**
+   - Enhance `auction_state_service.dart` to manage state machine: `pending → active → ended|accepted → completed`, with transitions triggered by timer expiry, maker acceptance, or cancellation.
+   - Emit EventBridge events (`auctions.state.changed`) and SNS notifications for maker/buyer updates.
+   - Update `auction_state_bloc.dart` to respond to state events, refreshing UI and disabling bid controls accordingly.
+   - Ensure `auction_timer_endpoint.dart` includes state + bid delta metadata so client can rehydrate after reconnects.
+4. **Timer Precision & Synchronization (Story 10.4)**
+   - Implement `timer_reconciliation_service.dart` to detect drift >250ms between Redis clock and Serverpod `DateTime.now()`; schedule corrective writes and raise Datadog events when thresholds exceeded.
+   - Add `sync_auction_timer_use_case.dart` to request `POST /timers/sync` when client drift >500ms, applying `synchronized` mutex to prevent concurrent adjustments.
+   - Create `drift_monitor.dart` to aggregate client drift metrics and ship to Datadog using `offers.client.validation_latency_ms` equivalent metric `auctions.client.timer_drift_ms`.
+   - Expand CI workflow `auctions_checks.yaml` with integration test `auction_timer_drift_test.dart` simulating clock skew and ensuring recovery within SLA.
+5. **Infrastructure & Operations**
+   - Update Terraform `auctions_timer.tf` provisioning Redis with replica, enable multi-AZ, and configure EventBridge Scheduler `rate(1 minute)` for reconciliation tasks.
+   - Add Datadog monitors/CloudWatch alarms in `auctions_observability.tf` for drift, task failures, and WebSocket disconnect spikes.
+   - Document operational procedures in `docs/runbooks/auction-timer.md` and analytics coverage in `docs/analytics/auction-timer-dashboard.md`.
+
+### Monitoring & Analytics
+- **Datadog Metrics:** `auctions.timer.drift_ms` (p95 ≤ 250ms), `auctions.timer.tick_delay_ms` (p95 ≤ 1200ms), `auctions.soft_close.trigger_count`, `auctions.state.transition_count`, `auctions.websocket.active_connections`, `auctions.scheduler.failures`.
+- **Client Metrics:** `auctions.client.timer_drift_ms`, `auctions.client.websocket_reconnects_per_hour` via Sentry breadcrumbs + Datadog custom series.
+- **Segment Events:** `auction_timer_started`, `auction_soft_close_extended`, `auction_state_changed`, `auction_timer_resynced` with `submission_trace_id` and `drift_ms` properties.
+- **Kibana Dashboards:** Index `auction-timer-*` monitoring soft-close decisions, scheduler logs, and reconciliation adjustments.
+- **Alerting:** Slack `#eng-offers` alerts when drift p95 > 300ms (5min), PagerDuty `Auction Timer` triggered on scheduler failures or timer success rate < 99%, Opsgenie on WebSocket disconnect surge > 20% of clients.
+- **Synthetic Checks:** Nightly cron verifying timer start → soft-close → completion using staging auctions; results stored in Datadog service checks.
+
+### Environment Configuration
+```yaml
+auction_timer_service:
+  REDIS_CLUSTER_ENDPOINT: "rediss://auction-timer.${REGION}.amazonaws.com:6379"
+  TIMER_TICK_INTERVAL_SECONDS: 15
+  SOFT_CLOSE_THRESHOLD_MINUTES: 15
+  SOFT_CLOSE_EXTENSION_MINUTES: 15
+  SOFT_CLOSE_MAX_EXTENSION_MINUTES: 1440
+  TIMER_RECONCILIATION_INTERVAL_SECONDS: 60
+  MAX_ALLOWED_DRIFT_MS: 250
+  AUCTION_STATE_EVENT_BUS: "commerce-auctions-events@2025-09"
+  WEBSOCKET_HEARTBEAT_INTERVAL_SECONDS: 20
+
+integrations:
+  DATADOG_API_KEY: "op://video-window-observability/datadog/API_KEY"
+  SEGMENT_WRITE_KEY: "op://video-window-commerce/segment/AUCTIONS_WRITE_KEY"
+  PAGERDUTY_SERVICE_ID: "PD_AUCTION_TIMER_SERVICE"
+  SLACK_ALERT_WEBHOOK: "op://video-window-ops/slack/AUCTION_TIMER_WEBHOOK"
+
+security:
+  WEBSOCKET_SIGNING_KEY: "vault://auction-timer/keys/websocket"
+  REDIS_TLS_CA_CERT: "vault://auction-timer/redis/ca_cert"
+
+client:
+  TIMER_RESYNC_THRESHOLD_MS: 500
+  WEBSOCKET_BACKOFF_SECONDS: [1, 2, 4, 8]
+  CLOCK_SKEW_SAMPLE_SIZE: 5
+```
+
+### Test Traceability
+| Story | Acceptance Criteria | Automated Coverage |
+| ----- | ------------------- | ------------------ |
+| 10.1 Auction Timer Creation & Management | AC1 timer registration, AC2 WebSocket updates, AC3 drift reporting | Unit tests `auction_timer_scheduler_test.dart`, integration `auction_timer_task_test.dart`, widget tests `auction_timer_page_test.dart`, WebSocket contract test `auction_updates_channel_test.dart` |
+| 10.2 Soft-Close Extension Logic | AC1 extension eligibility, AC2 cap enforcement, AC3 audit logging | Service tests `soft_close_service_test.dart`, endpoint tests `auction_soft_close_endpoint_test.dart`, repository tests `auctions_repository_test.dart` |
+| 10.3 Auction State Transitions | AC1 state machine coverage, AC2 notifications, AC3 audit trail | Service tests `auction_state_service_test.dart`, EventBridge contract test `auctions_state_event_test.dart`, bloc tests `auction_state_bloc_test.dart` |
+| 10.4 Timer Precision & Synchronization | AC1 drift detection, AC2 resync flow, AC3 monitoring | Service tests `timer_reconciliation_service_test.dart`, use case tests `sync_auction_timer_use_case_test.dart`, synthetic integration `auction_timer_drift_test.dart`, Datadog reporter tests `drift_monitor_test.dart` |
 
 #### Real-time Timer Widget
 ```dart
@@ -750,6 +889,14 @@ class RateLimitExceededException extends BidException { }
 
 ## Next Steps
 
+
+## Change Log
+| Date       | Version | Description                                                                                           | Author            |
+| ---------- | ------- | ----------------------------------------------------------------------------------------------------- | ----------------- |
+| 2025-10-29 | v0.5    | Promoted to definitive: pinned stack, source directives, implementation guide, monitoring, environment, traceability | GitHub Copilot AI |
+
+---
+*This technical specification defines the definitive implementation plan for Auction Timer & State Management and must be kept in sync with related stories, workflows, and operational playbooks.*
 1. **Implement Timer Service** - Core timer logic and Redis integration
 2. **Develop State Machine** - Auction state transitions and validation
 3. **Build WebSocket Infrastructure** - Real-time event broadcasting

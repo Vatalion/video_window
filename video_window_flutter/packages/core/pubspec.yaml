@@ -1,0 +1,23 @@
+name: core
+description: Core data layer, repositories, and domain models for Video Window
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+  flutter: '>=3.24.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  serverpod_flutter: ^2.9.1
+  video_window_client:
+    path: ../../../video_window_client
+  equatable: ^2.0.5
+  dartz: ^0.10.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  mocktail: ^1.0.0

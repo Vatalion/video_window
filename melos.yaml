@@ -1,19 +1,19 @@
 name: video_window
 description: Craft Video Marketplace - Flutter multi-package workspace
 repository: https://github.com/your-org/video_window
-sdk: '>=3.8.0 <4.0.0'
+sdk: ">=3.8.0 <4.0.0"
 environment:
-  sdk: '>=3.8.0 <4.0.0'
-  flutter: '>=3.35.0'
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.35.0"
 
 # Package discovery patterns
 packages:
-  - packages/mobile_client
-  - packages/core
-  - packages/shared_models
-  - packages/design_system
-  - packages/features/*
-  - serverpod
+  - video_window_flutter
+  - video_window_flutter/packages/core
+  - video_window_flutter/packages/shared
+  - video_window_flutter/packages/features/*
+  - video_window_server
+  - video_window_client
 
 # Command scripts
 scripts:

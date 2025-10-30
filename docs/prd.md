@@ -1,5 +1,31 @@
 # Craft Video Marketplace Product Requirements Document (PRD)
 
+## Document Status & Epic Alignment
+
+**Document Version:** v0.4  
+**Status:** ⚠️ **PENDING STAKEHOLDER APPROVAL**  
+**Last Updated:** 2025-10-30  
+**Next Review:** Upon completion of Epic 8 & 13 story development
+
+**⚠️ CRITICAL MVP BLOCKERS:**
+- **Epic 8** (Story Publishing): No stories defined - Required for content publishing flow
+- **Epic 13** (Shipping & Tracking): No stories defined - Required for order fulfillment
+
+**Current Epic Status:** 11 of 13 MVP epics have complete stories (84.6% story coverage)  
+**Technical Validation:** Epic 12 (Payments) approved - 12 remaining epics pending validation  
+**Business Approval:** All epics pending stakeholder sign-off per [epic-validation-backlog.md](process/epic-validation-backlog.md)
+
+### Required Approvals Process
+Epic validation and stakeholder approvals follow the workflow defined in [story-approval-workflow.md](process/story-approval-workflow.md):
+
+1. **Technical Validation** - Epic tech specs and stories reviewed by technical team
+2. **Business Approval** - Product Owner, Executive Sponsor, Legal/Compliance sign-off
+3. **Development Authorization** - Both validations complete before implementation begins
+
+**Approval Timeline:** Foundation Epics (01, 1, 4) → Core Features (2, 7, 5) → Commerce (9, 10, 12) → Content (6, 8, 13)
+
+---
+
 ## Goals and Background Context
 
 ### Goals
@@ -19,16 +45,18 @@ By pairing in-app creation tools with transparent bidding and strong content pro
 | ---------- | ------- | ------------------------------------- | ------ |
 | 2025-09-27 | v0.1    | Initial PRD draft scaffold from brief | PM     |
 | 2025-09-30 | v0.2    | Expanded epic stories, architecture alignment, and UX/Dev handoff updates | PM     |
+| 2025-10-28 | v0.3    | MVP scope alignment (email-only auth, simplified maker access, DRM deferral) | Product Team |
+| 2025-10-30 | v0.4    | Epic status alignment, critical MVP gap identification, updated approval process references | Documentation Team |
 
 ## Requirements
 
 ### Functional Requirements
 - FR1: Present a TikTok-style feed of maker-created shorts with a persistent "View Story" entry point that suppresses price/auction details in-feed.
-- FR2: Provide Story pages with Overview plus optional Process, Materials/Tools, Notes, and Location sections, anchored by an "I want this" CTA that opens the offer/bid flow.
-- FR3: Enable makers to create listings via the in-app composer, recording/importing app-captured clips, stitching, trimming, captioning, and publishing to the feed/Story.
+- FR2: Provide Story pages with video carousel (3-7 clips with dot navigation), Overview, optional Process Timeline (vertical-scroll development journal with sketches/photos/thoughts), Materials/Tools, Notes, and Location sections, anchored by an "I want this" CTA that opens the offer/bid flow.
+- FR3: Enable makers to create listings via the in-app composer, recording/importing app-captured clips, creating multiple videos for carousel, stitching, trimming, captioning, and publishing to the feed/Story.
 - FR4: Open a 72-hour auction automatically when the first qualified offer (>= maker minimum) is submitted, applying 15-minute soft-close extensions up to +24h.
 - FR5: Allow makers to accept the current high bid at any time, immediately transitioning the listing into a 24-hour payment window for the winning buyer.
-- FR6: Process payments through Stripe-hosted Checkout that collects shipping details, enforces 24-hour payment window expirations, and supports retries when allowed.
+- FR6: Process payments through Stripe-hosted Checkout that collects shipping details, enforces 24-hour payment window expirations, and supports up to 3 retry attempts with exponential backoff.
 - FR7: Manage orders through To Ship -> Shipped -> Delivered -> Completed/Issue states, requiring tracking within 72 hours and auto-completing 7 days post-delivery absent disputes.
 - FR8: Surface maker dashboards summarizing active listings, auctions, offers, payments, and fulfillment tasks with real-time status updates and SLAs.
 - FR9: Instrument analytics events (feed_view, story_view, offer_open, bid_place, offer_accept, payment_success, tracking_added, delivered, issue_opened) to feed weekly KPI reporting.
@@ -99,23 +127,23 @@ Full testing pyramid: Dart unit tests for domain/UI layers, integration tests fo
 ## Epic List
 
 ### Foundational Epics
-1. **Epic F1: Environment & CI/CD Enablement** – Initialize repo structure, branching policy, automated format/analyze/test gates, secrets management, and release channels so the team can ship safely from day one.
-2. **Epic F2: Core Platform Services** – Stand up shared design tokens, navigation shell, configuration/feature-flag framework, localization hooks, and telemetry scaffolding to support future features consistently.
-3. **Epic F3: Observability & Compliance Baseline** – Implement logging, metrics, alerting hooks, privacy/legal disclosures, and data retention controls so the platform meets governance guardrails prior to feature launch.
+1. **Epic 01: Environment & CI/CD Enablement** – Initialize repo structure, branching policy, automated format/analyze/test gates, secrets management, and release channels so the team can ship safely from day one.
+2. **Epic 02: Core Platform Services** – Stand up shared design tokens, navigation shell, configuration/feature-flag framework, localization hooks, and telemetry scaffolding to support future features consistently.
+3. **Epic 03: Observability & Compliance Baseline** – Implement logging, metrics, alerting hooks, privacy/legal disclosures, and data retention controls so the platform meets governance guardrails prior to feature launch.
 
 ### Feature Epics
-1. **Epic 1: Viewer Authentication & Session Handling** – Email/SMS/social sign-in, session refresh, secure storage, logout, and account recovery for viewers.
-2. **Epic 2: Maker Authentication & Access Control** – Maker onboarding, invite/approval flow, role-based access, and session management distinct from viewer auth.
+1. **Epic 1: Viewer Authentication & Session Handling** – Email OTP and social sign-in (Apple, Google), session refresh, secure storage, logout, and account recovery for viewers.
+2. **Epic 2: Maker Authentication & Access Control** – Unified authentication (same as viewers), maker profile setup, and basic role flag (simplified RBAC for MVP).
 3. **Epic 3: Profile & Settings Management** – Viewer and maker profile editing, avatar/media updates, notification preferences, and legal/consent acknowledgements.
 4. **Epic 4: Feed Browsing Experience** – Home feed rendering, pagination, reactions, follow/wishlist hooks, and crash-safe resume.
-5. **Epic 5: Story Detail Playback & Consumption** – Story page layout, video playback controls, section navigation, accessibility affordances, and share entry points.
-6. **Epic 6: Media Pipeline & Content Protection** – Backend ingestion, transcoding to HLS, watermarking, DRM/signed URLs, storage lifecycle, and CDN delivery controls.
-7. **Epic 7: Maker Story Capture & Editing Tools** – Capture/import pipeline, clip trimming, ordering, captioning, and draft autosave.
+5. **Epic 5: Story Detail Playback & Consumption** – Story page layout with video carousel (3-7 clips), Process Timeline (development journal), video playback controls, section navigation, accessibility affordances, and share entry points.
+6. **Epic 6: Media Pipeline & Content Protection** – Backend ingestion, transcoding to HLS, watermarking, signed URLs (DRM deferred to post-MVP), storage lifecycle, and CDN delivery controls.
+7. **Epic 7: Maker Story Capture & Editing Tools** – Capture/import pipeline for multiple clips, carousel creation, clip trimming, ordering, captioning, Process Timeline journaling, and draft autosave.
 8. **Epic 8: Story Publishing & Moderation Pipeline** – Draft review, moderation queue, publishing approvals, scheduling, and rollback/versioning.
 9. **Epic 9: Offer Submission Flow** – Qualification checks, minimum offer validation, confirmation UI, and cancellation flows.
 10. **Epic 10: Auction Timer & State Management** – 72-hour timer lifecycle, soft-close extensions, state transitions, and audit logging.
-11. **Epic 11: Notifications & Activity Surfaces** – Real-time/batched notifications for offers, bids, wins, maker alerts, and activity inbox.
-12. **Epic 12: Checkout & Payment Processing** – Stripe Checkout integration, payment window enforcement, method retries, and receipt generation.
+11. **Epic 11: Notifications & Activity Surfaces** – Real-time mobile push notifications and in-app notifications for offers, bids, wins, maker alerts, and activity inbox with preference controls.
+12. **Epic 12: Checkout & Payment Processing** – Stripe Checkout integration, payment window enforcement, up to 3 retry attempts with exponential backoff, and receipt generation.
 13. **Epic 13: Shipping & Tracking Management** – Address collection, tracking updates, SLA timers, and status visibility for buyers/makers.
 14. **Epic 14: Issue Resolution & Refund Handling** – Issue reporting, dispute workflow, manual/automatic refund actions, and communication trails.
 15. **Epic 15: Admin Moderation Toolkit** – Admin dashboard, takedown actions, user suspension, audit trails, and configurable policies.
@@ -123,11 +151,11 @@ Full testing pyramid: Dart unit tests for domain/UI layers, integration tests fo
 17. **Epic 17: Analytics & KPI Reporting** – KPI dashboards, data export, event schema governance, and scheduled reporting for stakeholders.
 
 
-## Epic F1: Environment & CI/CD Enablement
+## Epic 01: Environment & CI/CD Enablement
 
 **Goal:** Establish a Flutter + Serverpod workspace with enforced guardrails so every contributor can ship confidently from day one.
 
-### Story F1.1 Bootstrap Repository and Flutter App
+### Story 01.1 Bootstrap Repository and Flutter App
 As a developer,
 I want the repo scaffolded with the Flutter client, Serverpod backend, and shared tooling,
 so that the team can run, test, and iterate against a consistent structure.
@@ -136,7 +164,7 @@ so that the team can run, test, and iterate against a consistent structure.
 2. Serverpod backend scaffold (or placeholder stub) checked in with health endpoint documented for smoke tests.
 3. Root README captures prerequisites, local setup, and links to guardrail docs (`AGENTS.md`, story flow).
 
-### Story F1.2 Enforce Story Branching and Scripts
+### Story 01.2 Enforce Story Branching and Scripts
 As a developer,
 I want branching policies and scripts codified,
 so that contributors follow story-based workflows without manual policing.
@@ -145,7 +173,7 @@ so that contributors follow story-based workflows without manual policing.
 2. CONTRIBUTING notes outline Conventional Commit rules and story status expectations.
 3. Sample story file updated to reflect workflow, and CI blocks non-conforming branches/commits.
 
-### Story F1.3 Configure CI Format/Analyze/Test Gates
+### Story 01.3 Configure CI Format/Analyze/Test Gates
 As a release manager,
 I want GitHub Actions (or equivalent) running format, analyze, and test on every push,
 so that regressions are caught before merging into `develop`.
@@ -154,7 +182,7 @@ so that regressions are caught before merging into `develop`.
 2. Workflow pins Flutter 3.19.6 / Dart 3.5.6 matching local tooling and caches dependencies for speed.
 3. Status checks required on PRs targeting `develop`, with documentation on resolving failures.
 
-### Story F1.4 Harden Secrets Management and Release Channels
+### Story 01.4 Harden Secrets Management and Release Channels
 As a dev lead,
 I want secrets, environment handling, and release channels defined,
 so that sensitive data stays protected and releases are predictable.
@@ -163,11 +191,11 @@ so that sensitive data stays protected and releases are predictable.
 2. Release channel strategy documented (story branches → `develop` → `main`), including tagging cadence.
 3. Validation ensures CI fails when secrets are accidentally committed (git-secrets or pre-commit hook).
 
-## Epic F2: Core Platform Services
+## Epic 02: Core Platform Services
 
 **Goal:** Provide shared app primitives—design system, navigation, configuration, and telemetry—that every feature can rely on.
 
-### Story F2.1 Establish Design Tokens and Theming
+### Story 02.1 Establish Design Tokens and Theming
 As a product designer,
 I want baseline typography, color, and spacing tokens available in Flutter,
 so that the app presents a cohesive visual language before feature work begins.
@@ -176,7 +204,7 @@ so that the app presents a cohesive visual language before feature work begins.
 2. Document token usage in `docs/architecture/coding-standards.md` with examples for widgets.
 3. Sample screens (splash, placeholder feed) consume tokens without hard-coded colors.
 
-### Story F2.2 Build Navigation Shell and Route Registry
+### Story 02.2 Build Navigation Shell and Route Registry
 As a user,
 I want consistent navigation scaffolding,
 so that I can move between feed, story, dashboard, and settings without dead ends.
@@ -185,7 +213,7 @@ so that I can move between feed, story, dashboard, and settings without dead end
 2. Provide deeplink handling and guarded routes for maker-only areas.
 3. Add instrumentation hook when route changes fire for analytics.
 
-### Story F2.3 Implement Configuration and Feature Flag Service
+### Story 02.3 Implement Configuration and Feature Flag Service
 As a release manager,
 I want runtime configuration and kill switches,
 so that experiments or risky features can be toggled without redeploying.
@@ -194,7 +222,7 @@ so that experiments or risky features can be toggled without redeploying.
 2. Feature flag helper exposes strongly typed toggles with unit tests covering defaults and overrides.
 3. Document process for adding new flags and auditing active toggles.
 
-### Story F2.4 Instrument Telemetry Scaffolding
+### Story 02.4 Instrument Telemetry Scaffolding
 As a data analyst,
 I want a unified telemetry pipeline,
 so that analytics events flow consistently across app and backend.
@@ -203,11 +231,11 @@ so that analytics events flow consistently across app and backend.
 2. Serverpod emits structured logs/events aligned with the same schema.
 3. Telemetry integration documented with sample event table referencing `docs/analytics/mvp-analytics-events.md`.
 
-## Epic F3: Observability & Compliance Baseline
+## Epic 03: Observability & Compliance Baseline
 
 **Goal:** Ensure the platform is monitorable, legally compliant, and resilient before inviting real users.
 
-### Story F3.1 Implement Structured Logging and Metrics
+### Story 03.1 Implement Structured Logging and Metrics
 As an SRE,
 I want structured logs and key metrics from day one,
 so that issues can be detected and triaged quickly.
@@ -216,7 +244,7 @@ so that issues can be detected and triaged quickly.
 2. Serverpod emits JSON logs with request IDs, latency, and error codes; metrics exported via Prometheus/OpenTelemetry.
 3. Dashboard stub (Grafana or similar) documents expected charts and alert thresholds.
 
-### Story F3.2 Stand Up Privacy and Legal Disclosures
+### Story 03.2 Stand Up Privacy and Legal Disclosures
 As a compliance officer,
 I want privacy/legal messaging surfaced clearly,
 so that we meet policy obligations before launch.
@@ -225,7 +253,7 @@ so that we meet policy obligations before launch.
 2. Capture explicit consent for data collection and communications, persisted in the user profile.
 3. Document handling for DMCA/takedown requests and link to issue escalation runbook.
 
-### Story F3.3 Define Data Retention and Backup Procedures
+### Story 03.3 Define Data Retention and Backup Procedures
 As an operations lead,
 I want retention, backup, and recovery processes in place,
 so that data loss risks are mitigated and compliance targets are met.
@@ -238,15 +266,18 @@ so that data loss risks are mitigated and compliance targets are met.
 
 **Goal:** Let viewers sign up, sign in, and maintain secure sessions across devices without friction.
 
-### Story 1.1 Implement Email/SMS Sign-In
-As a viewer,
-I want to sign in with email or SMS codes,
+### Story 1.1 Implement Email OTP Sign-In
+As a viewer or maker,
+I want to sign in with email one-time passwords,
 so that I can access the marketplace without needing a password.
 #### Acceptance Criteria
-1. OTP-based email/SMS flow with multi-layer rate limiting, account lockout, and comprehensive success/failure messaging.
+1. OTP-based email flow with multi-layer rate limiting, account lockout, and comprehensive success/failure messaging.
 2. Secure token storage using enhanced Flutter secure storage with AES-256-GCM encryption, RS256 JWT tokens, 15-minute expiry, and automatic refresh rotation via Serverpod.
 3. Integration tests cover happy path, invalid OTP attempts, brute force resistance, and token manipulation scenarios.
-4. Support for international phone numbers and email domains with proper localization.
+4. **SECURITY CRITICAL**: Implement cryptographically secure OTP generation with user-specific salts and 5-minute maximum validity.
+5. **SECURITY CRITICAL**: Implement progressive account lockout (5 failed attempts → 30 min → 1 hour → 24 hour locks).
+6. **SECURITY CRITICAL**: Implement comprehensive JWT token validation with device binding and token blacklisting.
+7. **UNIFIED AUTH**: Same authentication flow serves both viewers and makers, with role differentiation happening after successful sign-in.
 
 ### Story 1.2 Add Social Sign-In Options
 As a viewer,
@@ -256,6 +287,7 @@ so that I can use existing accounts seamlessly.
 1. Configure Apple Sign-In (iOS) and Google Sign-In (iOS/Android) per platform guidelines.
 2. Serverpod reconciles social identities, preventing duplicate viewer accounts.
 3. Fallback to email OTP if social auth fails, with analytics capturing drop-off.
+4. **UNIFIED AUTH**: Social accounts link to the same user model as email OTP sign-ins, with post-signin role differentiation.
 
 ### Story 1.3 Provide Session Persistence and Logout
 As a viewer,
@@ -264,29 +296,31 @@ so that I stay signed in securely across app launches.
 #### Acceptance Criteria
 1. Session refresh endpoint renews tokens before expiration and handles revocation.
 2. Logout clears tokens, wipes cached PII, and sends revoke event to backend.
-3. Account recovery flow triggers email/SMS with verification to reset sign-in method.
+3. Account recovery flow triggers email verification to reset sign-in method.
 
 ## Epic 2: Maker Authentication & Access Control
 
-**Goal:** Onboard makers through controlled invites, enforce role separation, and secure their sessions for business-critical tasks.
+**Goal:** Let authenticated users complete maker profile setup and gain publishing tools via a unified flow that uses a simple `is_maker` flag (complex RBAC postponed post-MVP).
 
-### Story 2.1 Launch Maker Invite and Application Flow
-As a marketplace operator,
-I want to invite vetted makers,
-so that only approved creators access publishing tools.
+### Story 2.1 Maker Profile Setup & Review
+As an authenticated user who wants to become a maker,
+I want to complete a guided profile setup after signing in,
+so that I can request maker access without a separate invitation system.
 #### Acceptance Criteria
-1. Maker invitation emails with expiration and status tracking in Serverpod.
-2. Application form captures portfolio links, tax info placeholders, and acceptance terms.
-3. Admin UI toggles maker approvals and sends acceptance notifications.
+1. Maker profile setup wizard accessible from user settings after unified authentication, guiding business information entry.
+2. Basic maker verification with email confirmation and lightweight profile review (full KYC deferred post-MVP).
+3. Simple role flag system distinguishing makers from viewers via an `is_maker` boolean with immediate effect after approval.
+4. **SECURITY CRITICAL**: Maker profile data stored with encryption for sensitive business information.
+5. **UNIFIED AUTH**: Uses the same authentication system as Story 1.1, with role differentiation happening post-signin through profile setup completion.
 
-### Story 2.2 Enforce Role-Based Access Control
+### Story 2.2 Enforce Maker Access via `is_maker`
 As a maker,
 I want access only to maker tooling while viewers stay limited,
 so that business operations remain secure.
 #### Acceptance Criteria
-1. Role claims embedded in auth tokens and validated on each privileged API call.
+1. Role claims embed the `is_maker` flag in auth tokens and validate it on each privileged API call.
 2. Maker-only routes and UI elements hidden/disabled for non-makers.
-3. Audit log records role escalations and approvals.
+3. Audit log records maker approvals/denials and subsequent flag changes.
 
 ### Story 2.3 Manage Maker Session Security
 As a maker,
@@ -324,7 +358,7 @@ As a user,
 I want to choose which notifications I receive and consent to communications,
 so that I stay informed without overload.
 #### Acceptance Criteria
-1. Notification matrix (push, email, SMS) configurable per event type.
+1. Notification matrix (push, email, in-app) configurable per event type.
 2. Consent toggles persist and sync with messaging provider suppression lists.
 3. Legal exports reflect latest consents for compliance audits.
 

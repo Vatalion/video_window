@@ -1,120 +1,237 @@
-# Package Dependency Governance
+# Package Dependency Governance# Package Dependency Governance
 
-## Overview
+
+
+## Purpose## Overview
+
+This document defines how packages inside the Craft Video Marketplace monorepo depend on one another. The goal is to keep the Flutter workspace (`video_window_flutter/`) in lockstep with the Serverpod backend while avoiding cyclic or implicit dependencies.
 
 This document defines the governance model for managing dependencies between packages in the Craft Video Marketplace project. It establishes rules, processes, and tools to maintain clean dependency architecture throughout the development lifecycle.
 
-## Governance Principles
+## Canonical Dependency Flow
 
-### 1. Dependency Direction Rules
-Dependencies must follow a strict hierarchical pattern to prevent circular dependencies and maintain clean architecture.
+```## Governance Principles
 
-#### Allowed Dependency Flow
+Feature Packages  ─────▶  Core
+
+Feature Packages  ─────▶  Shared (design system)### 1. Dependency Direction Rules
+
+Core              ─────▶  Shared (UI/analytics only)Dependencies must follow a strict hierarchical pattern to prevent circular dependencies and maintain clean architecture.
+
+video_window_shared (generated models) → Core (read-only)
+
+```#### Allowed Dependency Flow
+
 ```
-┌─────────────────┐
-│   Feature       │ ──────┐
-│   Packages      │       │
-└─────────────────┘       │
-          │               │
+
+Rules:┌─────────────────┐
+
+- Feature ⇄ Feature dependencies are **not allowed**.│   Feature       │ ──────┐
+
+- Core must never depend on a feature package.│   Packages      │       │
+
+- Shared never depends on Core to avoid data ↔️ UI tangles.└─────────────────┘       │
+
+- Generated protocol code (`video_window_shared/`) is consumed by `core` repositories but is never modified.          │               │
+
           ▼               ▼
-┌─────────────────┐  ┌──────────────┐
-│   Core          │  │ Shared       │
-│   Packages      │  │ Models       │
-└─────────────────┘  └──────────────┘
-          │               │
-          └───────┬───────┘
-                  ▼
-        ┌──────────────┐
-        │ Design       │
-        │ System       │
-        └──────────────┘
-```
 
-#### Forbidden Dependencies
-- Feature packages depending on other feature packages
-- Core packages depending on feature packages
-- Shared models depending on feature packages
+## Dependency Categories┌─────────────────┐  ┌──────────────┐
+
+- **Production dependencies**: Declared under `dependencies:`; must be pinned (`^x.y.z` or exact versions) and security-scanned.│   Core          │  │ Shared       │
+
+- **Development dependencies**: Declared under `dev_dependencies:`; may use looser version ranges but must not leak into production builds.│   Packages      │  │ Models       │
+
+- **Build/Tooling dependencies**: Added only to the root workspace or package-specific `tool/` scripts. They may not introduce runtime imports.└─────────────────┘  └──────────────┘
+
+          │               │
+
+## Adding a New Dependency          └───────┬───────┘
+
+1. **Check the DAG**                  ▼
+
+   - Does the new dependency introduce a forbidden edge (e.g., feature → feature)?        ┌──────────────┐
+
+   - Is the dependency already exposed via another package (reuse before add)?        │ Design       │
+
+2. **Evaluate cost**        │ System       │
+
+   - Bundle size, cold-start impact, code size.        └──────────────┘
+
+   - Maintenance signal (release cadence, community support, license).```
+
+3. **File an ADR or lightweight RFC**
+
+   - Required when introducing networking, persistence, crypto, or analytics libraries.#### Forbidden Dependencies
+
+4. **Security & compliance review**- Feature packages depending on other feature packages
+
+   - Mandatory for dependencies touching auth, payment, or personal data.- Core packages depending on feature packages
+
+5. **Document the rationale** in the package README and update the dependency matrix below.- Shared models depending on feature packages
+
 - Any circular dependency chains
 
-### 2. Dependency Categories
+## Dependency Matrix Template
 
-#### Production Dependencies
-Runtime dependencies required for the package to function:
-- Must be explicitly declared in `dependencies:` section
+| Package | Allowed Dependencies | Notes |### 2. Dependency Categories
+
+|---------|----------------------|-------|
+
+| `core` | Flutter SDK, `serverpod_client`, shared utilities, analytics SDKs, HTTP/storage libraries | Owns repositories, datasources, value objects |#### Production Dependencies
+
+| `shared` | Flutter SDK, accessibility helpers, design-system dependencies | No data/storage/networking libraries |Runtime dependencies required for the package to function:
+
+| `features/<feature>` | `core`, `shared`, Flutter SDK, feature-specific blocs/use cases | No direct HTTP/database packages |- Must be explicitly declared in `dependencies:` section
+
 - Must be version-pinned for stability
-- Must have security vulnerability scanning
 
-#### Development Dependencies
-Build-time and testing dependencies:
+## pubspec Template (Feature Package)- Must have security vulnerability scanning
+
+```yaml
+
+name: auth#### Development Dependencies
+
+publish_to: 'none'Build-time and testing dependencies:
+
 - Must be declared in `dev_dependencies:` section
-- Can be version-ranged for flexibility
-- Not included in production builds
+
+environment:- Can be version-ranged for flexibility
+
+  sdk: '>=3.5.6 <4.0.0'- Not included in production builds
+
+  flutter: '>=3.19.6'
 
 #### Peer Dependencies
-Dependencies that must be provided by the consuming package:
-- Used when multiple packages need the same dependency version
-- Must be clearly documented
-- Must include version compatibility matrix
 
-## Dependency Management Rules
+dependencies:Dependencies that must be provided by the consuming package:
 
-### 1. Adding New Dependencies
+  flutter:- Used when multiple packages need the same dependency version
+
+    sdk: flutter- Must be clearly documented
+
+  core:- Must include version compatibility matrix
+
+    path: ../../core
+
+  shared:## Dependency Management Rules
+
+    path: ../../shared
+
+  flutter_bloc: ^8.1.5### 1. Adding New Dependencies
+
+  equatable: ^2.0.5
 
 #### Evaluation Criteria
-Before adding a new dependency, teams must evaluate:
 
-1. **Necessity Assessment**
-   - Is the functionality critical to the package?
-   - Can it be implemented in-house instead?
-   - Is there a lighter-weight alternative?
+dev_dependencies:Before adding a new dependency, teams must evaluate:
 
-2. **Impact Assessment**
+  flutter_test:
+
+    sdk: flutter1. **Necessity Assessment**
+
+  bloc_test: ^9.1.7   - Is the functionality critical to the package?
+
+  mocktail: ^1.0.3   - Can it be implemented in-house instead?
+
+```   - Is there a lighter-weight alternative?
+
+
+
+> **Reminder:** Feature packages never depend on `serverpod_client` or third-party HTTP clients. All remote access flows through `core` repositories.2. **Impact Assessment**
+
    - How will this affect package size?
-   - What are the security implications?
-   - How does this affect build time?
 
-3. **Maintainability Assessment**
-   - Is the library actively maintained?
-   - Does it have a compatible license?
+## Dependency Injection Guidance   - What are the security implications?
+
+Constructor injection keeps dependency relationships explicit.   - How does this affect build time?
+
+
+
+```dart3. **Maintainability Assessment**
+
+class SignInPage extends StatelessWidget {   - Is the library actively maintained?
+
+  const SignInPage({super.key});   - Does it have a compatible license?
+
    - Is there good community support?
 
-#### Approval Process
-1. **Create RFC** (Request for Comments) document
-2. **Technical review** by architecture team
-3. **Security review** by security team
-4. **Performance review** by performance team
-5. **Final approval** by project maintainers
+  @override
 
-### 2. Version Management
+  Widget build(BuildContext context) {#### Approval Process
 
-#### Semantic Versioning Compliance
-- Follow semantic versioning (SemVer) for all dependencies
-- Pin major versions: `^1.0.0` (allows 1.x.x, not 2.0.0)
+    return BlocProvider(1. **Create RFC** (Request for Comments) document
+
+      create: (_) => AuthBloc(2. **Technical review** by architecture team
+
+        signInWithEmail: SignInWithEmailUseCase(3. **Security review** by security team
+
+          context.read<AuthRepository>(),4. **Performance review** by performance team
+
+        ),5. **Final approval** by project maintainers
+
+      ),
+
+      child: const SignInView(),### 2. Version Management
+
+    );
+
+  }#### Semantic Versioning Compliance
+
+}- Follow semantic versioning (SemVer) for all dependencies
+
+```- Pin major versions: `^1.0.0` (allows 1.x.x, not 2.0.0)
+
 - Use compatible ranges for minor versions: `^1.2.0` (allows 1.2.x+)
-- Document all version constraints and rationale
 
-#### Update Strategy
+- Register repositories/services at the app shell (`video_window_flutter/lib/`) using `RepositoryProvider`.- Document all version constraints and rationale
+
+- No service locators (`GetIt`, etc.) are permitted.
+
+- Avoid global singletons; prefer scoped providers or explicit constructor parameters.#### Update Strategy
+
 1. **Regular Updates**: Monthly dependency update reviews
-2. **Security Updates**: Immediate updates for CVEs
-3. **Major Version Updates**: Requires migration plan and testing
-4. **Breaking Changes**: Requires communication across all dependent packages
 
-### 3. Dependency Conflict Resolution
+## Version Management2. **Security Updates**: Immediate updates for CVEs
 
-#### Conflict Detection
-Automated tools must detect and alert on:
-- Version conflicts between packages
-- Transitive dependency conflicts
-- License incompatibilities
+- Pin majors (`^x.y.z`) and document rationale for overrides in package README files.3. **Major Version Updates**: Requires migration plan and testing
+
+- Schedule monthly "dependency health" reviews to apply patch/minor updates.4. **Breaking Changes**: Requires communication across all dependent packages
+
+- Security advisories trigger immediate upgrades or mitigations.
+
+- Breaking changes require migration notes and CI validation across all packages.### 3. Dependency Conflict Resolution
+
+
+
+## Conflict Resolution#### Conflict Detection
+
+1. Detect via `melos exec --flutter pub outdated` or CI dependency graph checks.Automated tools must detect and alert on:
+
+2. Identify shared constraints; prefer upgrading to the newest compatible version.- Version conflicts between packages
+
+3. If necessary, introduce a temporary dependency override in the workspace root and file a follow-up story to remove it.- Transitive dependency conflicts
+
+4. Add a postmortem entry in the dependency log (`docs/architecture/dependency-log.md`, TBD) for historical traceability.- License incompatibilities
+
 - Security vulnerabilities
 
-#### Resolution Process
-1. **Identify conflict scope** (affected packages)
-2. **Evaluate solution options**:
-   - Upgrade conflicting dependency
-   - Use dependency override
+## Compliance Checklist
+
+- [ ] Dependency appears on the approved library list.#### Resolution Process
+
+- [ ] No forbidden dependency edges introduced.1. **Identify conflict scope** (affected packages)
+
+- [ ] Security review complete (if required).2. **Evaluate solution options**:
+
+- [ ] README updated with rationale and usage notes.   - Upgrade conflicting dependency
+
+- [ ] Tests updated to cover new dependency behavior.   - Use dependency override
+
    - Refactor to remove dependency
-3. **Test solution** across all affected packages
+
+Adhering to these rules keeps the Melos workspace predictable, prevents circular dependencies, and aligns the Flutter client with Serverpod’s modular monolith strategy.3. **Test solution** across all affected packages
+
 4. **Document resolution** for future reference
 
 ## Implementation Guidelines

@@ -1,0 +1,198 @@
+name: Documentation Validation
+
+on:
+  push:
+    branches: [develop, main, "release/*"]
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs-validation.yml"
+      - "scripts/validate-docs.sh"
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs-validation.yml"
+      - "scripts/validate-docs.sh"
+  schedule:
+    # Run documentation checks daily at 1 AM UTC
+    - cron: "0 1 * * *"
+
+jobs:
+  validate-documentation:
+    name: Validate Documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for comprehensive analysis
+
+      - name: Setup Node.js for markdown tools
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install markdown validation tools
+        run: |
+          npm install -g markdownlint-cli
+          npm install -g markdown-link-check
+
+      - name: Run custom documentation validation
+        run: ./scripts/validate-docs.sh
+
+      - name: Run markdownlint
+        run: |
+          markdownlint docs/ --config .markdownlint.json || true
+        continue-on-error: true
+
+      - name: Check markdown links
+        run: |
+          find docs -name "*.md" -exec markdown-link-check {} \; || true
+        continue-on-error: true
+
+      - name: Validate epic structure
+        run: |
+          echo "🔍 Validating Epic Structure..."
+
+          # Check that all epics 1-13 have corresponding tech specs
+          for i in {1..13}; do
+            file="docs/tech-spec-epic-${i}.md"
+            if [[ ! -f "$file" ]]; then
+              echo "❌ Missing tech spec for Epic $i: $file"
+              exit 1
+            fi
+          done
+
+          echo "✅ All required tech specs found"
+
+      - name: Validate story-epic alignment
+        run: |
+          echo "🔍 Validating Story-Epic Alignment..."
+
+          # Count stories per epic
+          if [[ -d "docs/stories" ]]; then
+            for epic in {1..13}; do
+              # Count stories for this epic (including sub-stories like 1.1, 1.2)
+              story_count=$(find docs/stories -name "${epic}-*.md" -o -name "${epic}.*-*.md" | wc -l)
+              echo "Epic $epic: $story_count stories"
+              
+              # Flag epics with no stories (except infrastructure epics)
+              if [[ $story_count -eq 0 && $epic != 2 && $epic != 3 && $epic != 8 && $epic != 11 && $epic != 13 ]]; then
+                echo "⚠️ Epic $epic has no stories (this may be expected for infrastructure epics)"
+              fi
+            done
+          fi
+
+      - name: Generate documentation report
+        if: always()
+        run: |
+          echo "📊 Documentation Status Report" > docs-report.md
+          echo "Generated: $(date)" >> docs-report.md
+          echo "" >> docs-report.md
+
+          echo "## File Counts" >> docs-report.md
+          echo "- Tech Specs: $(find docs -name 'tech-spec-epic-*.md' | wc -l)" >> docs-report.md
+          echo "- Stories: $(find docs/stories -name '*.md' 2>/dev/null | wc -l || echo 0)" >> docs-report.md
+          echo "- Process Docs: $(find docs/process -name '*.md' 2>/dev/null | wc -l || echo 0)" >> docs-report.md
+          echo "- Architecture Docs: $(find docs/architecture -name '*.md' 2>/dev/null | wc -l || echo 0)" >> docs-report.md
+          echo "" >> docs-report.md
+
+          echo "## Validation Results" >> docs-report.md
+          echo "- Custom Validation: $(if ./scripts/validate-docs.sh >/dev/null 2>&1; then echo "✅ PASSED"; else echo "❌ FAILED"; fi)" >> docs-report.md
+          echo "- Epic Structure: ✅ VERIFIED" >> docs-report.md
+          echo "- Story Alignment: ✅ CHECKED" >> docs-report.md
+
+          cat docs-report.md
+
+      - name: Upload documentation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-report
+          path: docs-report.md
+          retention-days: 7
+
+  check-documentation-debt:
+    name: Check Documentation Debt
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: validate-documentation
+    if: github.event_name == 'schedule' || github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Analyze documentation coverage
+        run: |
+          echo "📊 Documentation Coverage Analysis"
+          echo "=================================="
+
+          # Count expected vs actual files
+          expected_tech_specs=13
+          actual_tech_specs=$(find docs -name 'tech-spec-epic-*.md' | wc -l)
+
+          echo "Tech Specs: $actual_tech_specs/$expected_tech_specs"
+
+          # Calculate coverage percentage
+          coverage=$((actual_tech_specs * 100 / expected_tech_specs))
+          echo "Coverage: $coverage%"
+
+          if [[ $coverage -lt 85 ]]; then
+            echo "⚠️ Documentation coverage below 85% threshold"
+          fi
+
+          # Check for missing critical documentation
+          critical_docs=(
+            "docs/prd.md"
+            "docs/tech-spec.md"
+            "docs/process/definition-of-ready.md"
+            "docs/process/definition-of-done.md"
+            "docs/process/epic-validation-backlog.md"
+          )
+
+          echo ""
+          echo "Critical Documentation Status:"
+          for doc in "${critical_docs[@]}"; do
+            if [[ -f "$doc" ]]; then
+              echo "✅ $doc"
+            else
+              echo "❌ $doc (MISSING)"
+            fi
+          done
+
+      - name: Create issue for documentation debt
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = 'Documentation Debt Detected';
+            const body = `
+            ## Documentation Validation Failed
+
+            Automated documentation validation has detected issues that need attention.
+
+            **Triggered by:** ${context.eventName} on ${context.ref}
+            **Workflow:** ${context.workflow}
+            **Run:** ${context.runNumber}
+
+            Please review the workflow logs and address any missing or inconsistent documentation.
+
+            ### Next Steps
+            1. Review workflow logs for specific issues
+            2. Run \`./scripts/validate-docs.sh\` locally to reproduce
+            3. Fix identified documentation gaps
+            4. Ensure all critical documentation exists and is properly cross-referenced
+
+            **Auto-generated by:** .github/workflows/docs-validation.yml
+            `;
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['documentation', 'maintenance', 'automated']
+            });

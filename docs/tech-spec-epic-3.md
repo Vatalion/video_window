@@ -18,10 +18,88 @@
 - **External:** AWS S3 (media storage), AWS KMS (encryption keys), SendGrid (email notifications), virus scanning service
 
 ### Technology Stack
-- **Flutter:** cached_network_image 3.3.0, image_picker 1.0.4, flutter_secure_storage 9.2.0, flutter_file_picker 6.2.1
-- **Serverpod:** Built-in file handling, encryption services, webhook handling
-- **Security:** AES-256-GCM field-level encryption, AWS KMS key management, virus scanning with AWS Macie
-- **Storage:** Encrypted S3 buckets with signed URLs, secure CDN distribution
+- **Flutter 3.19.6:** `cached_network_image` 3.3.1, `image_picker` 1.0.4, `flutter_secure_storage` 9.2.2, `file_picker` 6.1.1, `dio` 5.7.0 for authenticated uploads, `crop_your_image` 1.1.4 for avatar cropping
+- **Serverpod 2.9.2:** Profile, privacy, notification, media endpoints under `video_window_server/lib/src/endpoints/profile/`
+- **Media Processing:** AWS S3 (us-east-1) bucket `video-window-profile-media` with CloudFront distribution `d3vw-profile.cloudfront.net`
+- **Security & Compliance:** AWS KMS CMK `alias/video-window-profile` for encryption via `aws_kms` SDK 1.3.0, AWS Macie 2.0 + AWS Lambda virus scanning pipeline (Lambda runtime 20.2025.10)
+- **Email & Notifications:** SendGrid API v3 (`sendgrid-dart` 7.12.0), Firebase Cloud Messaging SDK 11.8.0 for push
+- **Analytics & Audit:** Segment 4.5.1 SDK, Snowflake ingestion via server-side connectors
+- **Secrets Management:** 1Password Connect 1.7.3 vault `video-window-profile` supplying runtime secrets
+
+### Source Tree & File Directives
+```text
+video_window_flutter/
+  packages/
+    features/
+      profile/
+        lib/
+          presentation/
+            pages/
+              profile_page.dart                   # Modify: extend profile form with avatar, DSAR, privacy links
+              privacy_settings_page.dart          # Create: privacy controls UI wired to BLoC (Story 3.3)
+              notification_preferences_page.dart  # Create: notification matrix UI with quiet hours (Story 3.4)
+            widgets/
+              avatar_upload_sheet.dart            # Create: crop + upload dialog that streams progress (Story 3.2)
+              privacy_toggle_tile.dart            # Create: reusable toggle w/ compliance copy (Story 3.3)
+              notification_channel_row.dart       # Create: multi-channel selector (Story 3.4)
+          use_cases/
+            update_profile_use_case.dart          # Modify: add encryption + DSAR triggers
+            upload_avatar_use_case.dart           # Create: orchestrates presigned URLs + virus scan polling
+            update_privacy_settings_use_case.dart # Create: writes privacy prefs via repository
+            update_notification_settings_use_case.dart # Create: manages quiet hours + delivery matrix
+        test/
+          presentation/
+            pages/
+              profile_page_test.dart              # Modify: cover new flows + optimistic updates
+              privacy_settings_page_test.dart     # Create: widget golden + bloc wiring tests
+              notification_preferences_page_test.dart # Create: quiet hours validation tests
+            widgets/
+              avatar_upload_sheet_test.dart       # Create: upload validation + error handling tests
+          use_cases/
+            upload_avatar_use_case_test.dart      # Create: presigned URL + virus scan assertions
+
+video_window_flutter/
+  packages/
+    core/
+      lib/
+        data/
+          repositories/
+            profile/
+              profile_repository.dart             # Modify: add media upload + privacy update methods
+              profile_media_repository.dart       # Create: encapsulate presigned URL + scan status polling
+          services/
+            encryption/profile_encryption_service.dart # Modify: add AES-256-GCM utilities per spec
+          datasources/
+            profile_remote_data_source.dart       # Modify: call new Serverpod endpoints
+      test/
+        data/
+          repositories/
+            profile/
+              profile_repository_test.dart        # Modify: cover new methods + error cases
+
+video_window_server/
+  lib/
+    src/
+      endpoints/
+        profile/
+          profile_endpoint.dart                   # Modify: include DSAR + notification routes
+          media_endpoint.dart                     # Create: presigned upload + virus scan webhook handlers
+      services/
+        profile_service.dart                      # Modify: orchestrate privacy + notification updates
+        media_processing_service.dart             # Create: queue virus scan + image resizing jobs
+      business/
+        profile/
+          privacy_manager.dart                    # Create: encapsulate privacy decision logic
+          notification_manager.dart               # Create: quiet hours + channel rules
+      tasks/
+        virus_scan_dispatcher.dart                # Create: Lambda invocation + status tracking
+
+infrastructure/
+  terraform/
+    profile_media.tf                               # Create: S3 bucket, CloudFront distribution, Macie integration
+  serverless/
+    virus_scan_lambda.ts                           # Create: Lambda runtime for ClamAV scan + SNS publish
+```
 
 ## Data Models
 
@@ -283,6 +361,26 @@ DELETE /users/me/blocked-users/{userId}
 ```
 
 ## Implementation Details
+
+### Implementation Guide
+1. **Repository & Service Preparation**
+  - Modify `video_window_flutter/packages/core/lib/data/repositories/profile/profile_repository.dart` to expose async methods for avatar upload, privacy updates, notification settings, and DSAR actions. Ensure value objects wrap inbound strings before Serverpod calls. (Stories 3.1–3.5)
+  - Create `profile_media_repository.dart` with presigned URL retrieval, multipart upload via `dio`, and virus scan status polling using retry with exponential backoff. (Story 3.2)
+2. **Serverpod Endpoint Expansion**
+  - Extend `video_window_server/lib/src/endpoints/profile/profile_endpoint.dart` with handlers for `/privacy-settings`, `/notification-preferences`, `/dsar/export`, `/dsar/delete`, and `/account`. Gate each mutation with RBAC checks from Epic 2 and encrypt sensitive payloads via `profile_encryption_service.dart`. (Stories 3.3–3.5)
+  - Create `media_endpoint.dart` to issue presigned uploads and receive AWS Lambda scan callbacks; enqueue resizing tasks through `media_processing_service.dart`. (Story 3.2)
+3. **Security & Compliance Hardening**
+  - Update `profile_encryption_service.dart` to use AES-256-GCM with per-user DEKs sealed by KMS CMK `alias/video-window-profile`. Store DEK metadata in `user_profiles.encryption_context` and rotate keys quarterly. (Story 3.5)
+  - Implement `virus_scan_dispatcher.dart` to invoke Lambda `virus_scan_lambda.ts`, persist scan status in Redis, and surface failure states to the client. (Story 3.2)
+4. **Flutter Presentation Layer**
+  - Modify `profile_page.dart` to split tabs for Profile, Privacy, Notifications, and Account, dispatching new BLoC events (`PrivacySettingsSubmitted`, `NotificationSettingsSubmitted`, `AccountDeletionRequested`). Add DSAR export/download UI with progress indicators. (Stories 3.1 & 3.5)
+  - Create dedicated pages and widgets listed in the source tree to drive privacy toggles, notification matrix, and avatar cropping experiences. (Stories 3.2–3.4)
+5. **State Management & Analytics**
+  - Extend `ProfileBloc` with sub-states for avatar upload progress, privacy save confirmation, notification quiet hours validation, and DSAR export status. Emit analytics events defined in this spec via `analytics_service.track()`. (Stories 3.1–3.5)
+  - Ensure optimistic updates rollback on repository failures by replaying cached data from `ProfileSecureStorage`. (Story 3.1)
+6. **Testing & Verification**
+  - Add unit tests for repositories/services verifying encryption, presigned URL handling, and DSAR flows with recorded fixtures using `mocktail`.
+  - Implement widget tests covering privacy toggles, notification matrices, and avatar upload modals; integration tests should simulate upload → scan callback → profile update pipeline.
 
 ### Flutter Profile Module Structure
 
@@ -769,6 +867,18 @@ class PrivacyEnforcementService {
 }
 ```
 
+### Test Traceability
+| Acceptance Criterion | Verification Artifact | Test Type |
+| -------------------- | --------------------- | --------- |
+| AC1 – Profile management interface | `profile_page_test.dart`, `profile_bloc_test.dart` | Widget + Bloc |
+| AC2 – Secure media upload pipeline | `upload_avatar_use_case_test.dart`, `media_upload_integration_test.dart` | Unit + Integration |
+| AC3 – Granular privacy controls | `privacy_settings_page_test.dart`, `privacy_manager_service_test.dart` | Widget + Unit |
+| AC4 – PII encryption | `profile_encryption_service_test.dart`, `encryption_roundtrip_test.dart` | Unit + Integration |
+| AC5 – DSAR functionality | `dsar_workflow_integration_test.dart` | Integration |
+| AC6 – RBAC enforcement | `profile_endpoint_authorization_test.dart` | Integration |
+| AC7 – Notification preferences matrix | `notification_preferences_page_test.dart`, `notification_manager_service_test.dart` | Widget + Unit |
+| AC8 – Security regression coverage | `security_profile_regression_test.dart` | Security |
+
 ## Testing Strategy
 
 ### Unit Tests
@@ -872,13 +982,15 @@ class EncryptionException extends ProfileException { }
 ### Environment Variables
 ```dart
 // Required Environment Variables
-PROFILE_ENCRYPTION_KEY=your-profile-encryption-key
-AWS_S3_PROFILE_BUCKET=your-secure-profile-bucket
-AWS_KMS_KEY_ID=your-kms-key-id
-VIRUS_SCANNING_API_KEY=your-virus-scanner-key
-CDN_BASE_URL=https://cdn.example.com
-DSAR_EXPORT_RETENTION_DAYS=7
+PROFILE_ENCRYPTION_KEY=op://video-window-profile/Profile Service/PROFILE_ENCRYPTION_KEY
+AWS_S3_PROFILE_BUCKET=video-window-profile-media
+AWS_KMS_KEY_ARN=arn:aws:kms:us-east-1:4815162342:key/6f8c3f2d-5ab8-4dce-9c1b-9e4c7a2d9b10
+VIRUS_SCANNING_API_KEY=op://security/ThreatScanner/VIRUS_SCANNING_API_KEY
+CDN_BASE_URL=https://d3vw-profile.cloudfront.net
+DSAR_EXPORT_RETENTION_DAYS=30
 AVATAR_MAX_SIZE_BYTES=5242880
+SEGMENT_PROFILE_WRITE_KEY=op://growth/Segment/PROFILE_WRITE_KEY
+SENDGRID_API_KEY=op://messaging/SendGrid/SENDGRID_API_KEY
 ```
 
 ### Database Migrations
@@ -1026,3 +1138,9 @@ CREATE INDEX idx_dsar_requests_status ON dsar_requests(status);
 - [Compliance Guide](../compliance/compliance-guide.md) - GDPR/CCPA requirements and data protection
 - [Front-End Architecture](../architecture/front-end-architecture.md) - BLoC patterns and state management
 - [Database Architecture](../architecture/adr/ADR-0003-database-architecture.md) - Database schema and indexing
+
+## Change Log
+| Date       | Version | Description                            | Author            |
+| ---------- | ------- | -------------------------------------- | ----------------- |
+| 2025-10-09 | v0.1    | Initial draft created                  | Development Team  |
+| 2025-10-29 | v1.0    | Definitive stack, source tree, stories | GitHub Copilot AI |

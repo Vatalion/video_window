@@ -46,7 +46,7 @@ Status: Draft v0.2 — Prepared after architecture baseline (2025-09-30); update
   - Coding standards for package dependencies, BLoC patterns, testing.
   - Data flow patterns (`docs/architecture/data-flow-mapping.md`) for Serverpod integration.
 - **Risks/Watchouts:**
-  - Flutter/Serverpod version alignment (3.35+/2.9.x) — run `flutter --version` + `serverpod --version` in setup.
+  - Flutter/Serverpod version alignment (3.19.6 / 2.9.x) — run `flutter --version` + `serverpod --version` in setup.
   - Melos workspace setup complexity; ensure path dependencies work correctly.
   - Serverpod code generation workflow; must run `melos run generate` after model changes.
   - Media pipeline dependencies (FFmpeg/MediaConvert) stubbed during F1; ensure placeholder modules throw clear TODOs.

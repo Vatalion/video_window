@@ -628,7 +628,7 @@ echo "Index verification complete"
 **Related Documents:**
 - [Database Performance Audit Plan](database-performance-audit-plan.md)
 - [Event-Driven Architecture](../adr/ADR-002-event-driven-architecture.md)
-- [API Gateway Implementation](../adr/ADR-001-api-gateway.md)
+- [API Gateway Implementation](../adr/ADR-0011-api-gateway.md)
 
 **Next Steps:**
 1. Implement automated index monitoring

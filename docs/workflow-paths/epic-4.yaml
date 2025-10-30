@@ -1,0 +1,10 @@
+workflows:
+  - name: Epic 4 Tech Spec Remediation
+    command: "*tech-spec-epic-4"
+    agent: Bob (Scrum Master)
+  - name: Story Readiness – Feed Vertical Slice
+    command: "*story-ready epic-4"
+    agent: Bob (Scrum Master)
+  - name: Validation Cleanup – Epic 4
+    command: "*validation-check epic-4"
+    agent: Murat (Master Test Architect)

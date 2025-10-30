@@ -17,11 +17,13 @@
 - **External:** KYC verification services, document storage with encryption, email/SMS providers
 
 ### Technology Stack
-- **Flutter:** Secure Storage 9.2.0, file_picker 6.1.1, image_picker 1.0.4
-- **Serverpod:** Built-in authentication, custom invitation system, role-based middleware
-- **Security:** HMAC-SHA256 invitation codes, end-to-end document encryption, RBAC with JWT claims
-- **Storage:** Encrypted document storage, secure invitation code management
-- **Verification:** Third-party KYC service integration with secure API handling
+- **Flutter 3.19.6:** `flutter_secure_storage` 9.2.2, `file_picker` 6.1.1, `image_picker` 1.0.4, `camera` 0.11.0 to capture identity documents, `dio` 5.7.0 for REST integrations
+- **Serverpod 2.9.2:** Invitation, RBAC, and verification endpoints under `video_window_server/lib/src/endpoints/identity/`
+- **Email & SMS:** SendGrid API v3 (transactional email) and Twilio Verify v2 (SMS code delivery) packaged via `sendgrid-dart` 7.12.0 and `twilio_dart` 0.5.2
+- **KYC Provider:** Persona Connect API v2025.3 with webhook callbacks hosted on Serverpod
+- **Cryptography:** `package:crypto` 3.0.3 for HMAC-SHA256, `bcrypt` 4.0.1 for secret hashing, `package:pointycastle` 3.8.0 for at-rest document encryption
+- **Storage:** PostgreSQL 15 primary DB, Redis 7.2.4 for invitation and permission caching, AWS S3 (eu-central-1) with SSE-KMS CMK `alias/video-window-maker-docs`
+- **Secrets Management:** 1Password Connect 1.7.3 vault `video-window-maker-auth` distributing runtime secrets during deploy
 
 ## Data Models
 
@@ -720,6 +722,69 @@ class DocumentEncryptionService {
 - **Document Upload Performance:** Test large file upload and encryption performance
 - **Concurrent User Testing:** Test system behavior with multiple makers authenticating simultaneously
 
+## Source Tree & File Directives
+
+| Path | Action | Story | Notes |
+| --- | --- | --- | --- |
+| `video_window_flutter/packages/features/auth/lib/presentation/pages/maker_invitation_claim_page.dart` | create | 2.1 | Invitation claim & onboarding wizard |
+| `video_window_flutter/packages/features/auth/lib/presentation/bloc/maker_invitation_bloc.dart` | create | 2.1 | Orchestrates invitation validation + profile bootstrap |
+| `video_window_flutter/packages/features/auth/lib/use_cases/create_invitation_use_case.dart` | create | 2.1 | Admin invitation issuance flow |
+| `video_window_flutter/packages/core/lib/data/repositories/maker_invitation_repository.dart` | create | 2.1 | Wraps Serverpod invitation endpoints |
+| `video_window_server/lib/src/endpoints/identity/invitation_endpoint.dart` | create | 2.1 | Serverpod entrypoints for create/claim/resend |
+| `video_window_server/lib/src/services/invitation_service.dart` | create | 2.1 | HMAC code generation, rate limiting, audit logging |
+| `video_window_flutter/packages/features/auth/lib/presentation/widgets/role_badge.dart` | create | 2.2 | Displays maker/admin permissions in UI |
+| `video_window_flutter/packages/features/auth/lib/use_cases/update_role_assignments_use_case.dart` | create | 2.2 | Admin role management UI integrates with RBAC service |
+| `video_window_server/lib/src/services/rbac_service.dart` | create | 2.2 | Centralizes permission hierarchy + enforcement |
+| `video_window_server/lib/src/repositories/permission_repository.dart` | create | 2.2 | DB access for roles/permissions |
+| `video_window_flutter/packages/features/auth/lib/presentation/pages/maker_kyc_page.dart` | create | 2.3 | KYC submission wizard for Persona flows |
+| `video_window_flutter/packages/core/lib/data/services/kyc/persona_client.dart` | create | 2.3 | REST client for Persona Connect API |
+| `video_window_server/lib/src/endpoints/identity/kyc_endpoint.dart` | create | 2.3 | Orchestrates Persona session creation + webhook callbacks |
+| `video_window_server/lib/src/services/kyc_service.dart` | create | 2.3 | Validates documents, stores encrypted artifacts |
+| `video_window_flutter/packages/features/auth/lib/presentation/pages/maker_device_security_page.dart` | create | 2.4 | Device registration & security settings |
+| `video_window_flutter/packages/core/lib/data/services/device_security_service.dart` | create | 2.4 | Secure device binding + attestation checks |
+| `video_window_server/lib/src/services/device_security_service.dart` | create | 2.4 | Maintains maker-device registry & risk scoring |
+| `video_window_server/migrations/2025-10-29T01-maker-access.sql` | create | 2.1-2.4 | Consolidated DB migration for invitations, RBAC, KYC, devices |
+| `video_window_flutter/packages/features/auth/test/presentation/bloc/maker_invitation_bloc_test.dart` | create | 2.1 | BLoC unit tests >=80% coverage |
+| `video_window_flutter/packages/features/auth/test/use_cases/update_role_assignments_use_case_test.dart` | create | 2.2 | Validates RBAC orchestration |
+| `video_window_flutter/packages/features/auth/test/presentation/pages/maker_kyc_page_test.dart` | create | 2.3 | Widget coverage for KYC UI |
+| `video_window_server/test/services/device_security_service_test.dart` | create | 2.4 | Ensures device risk scoring + revocation |
+
+## Implementation Guide
+
+### Step-by-Step Delivery Plan
+1. **Invitation Platform (Story 2.1)**
+  - Build admin invitation issuance UI and API integrations (`create_invitation_use_case.dart`, `invitation_endpoint.dart`).
+  - Implement claim flow with secure HMAC verification and onboarding wizard (`maker_invitation_bloc.dart`).
+  - Record audit events and enforce rate limits via Redis in `invitation_service.dart`.
+2. **RBAC Foundations (Story 2.2)**
+  - Model roles/permissions in Postgres + Redis cache using `rbac_service.dart`.
+  - Surface role management UI with assign/remove flows and permission badges.
+  - Ensure JWT claims include role IDs and enforce middleware checks on Serverpod endpoints.
+3. **Identity Verification & KYC (Story 2.3)**
+  - Integrate Persona Connect API via `persona_client.dart` and `kyc_service.dart`.
+  - Handle document uploads with AES-256 encryption and S3 storage.
+  - Process webhook callbacks to transition verification status + notify makers.
+4. **Maker Profile & Device Security (Story 2.4)**
+  - Create device binding flows capturing attestation metadata and storing in `maker_devices` table.
+  - Implement profile management page with role-aware UI controls.
+  - Enforce device trust checks during maker session creation (integrated with Story 1.3 session refresh logic).
+5. **Testing & Compliance**
+  - Execute `melos run test:unit`, `melos run test:integration`, and Serverpod service tests.
+  - Run `melos run analyze` and `melos run format` before merge.
+  - Perform dry-run Persona sandbox flows to validate KYC end-to-end.
+
+### Acceptance Criteria → Artifact Mapping
+
+| Acceptance Criterion | Implementation Artifact | Test Coverage |
+| --- | --- | --- |
+| Secure invitation issuance with audit trail (Story 2.1 AC1) | `invitation_endpoint.dart`, `invitation_service.dart`, Redis rate limits | `maker_invitation_bloc_test.dart`, `invitation_flow_integration_test.dart` |
+| Invitation claim creates maker session & profile (Story 2.1 AC2) | `maker_invitation_claim_page.dart`, `maker_invitation_bloc.dart` | `maker_onboarding_integration_test.dart` |
+| Role hierarchies with inheritance & enforcement (Story 2.2 AC1/AC2) | `rbac_service.dart`, `permission_repository.dart` | `rbac_service_test.dart`, `permission_lookup_benchmark.dart` |
+| Admin role assignment UI with audit logging (Story 2.2 AC3) | `update_role_assignments_use_case.dart`, `role_badge.dart` | `update_role_assignments_use_case_test.dart`, `role_assignment_integration_test.dart` |
+| Persona KYC submission + webhook handling (Story 2.3 AC1/AC2) | `kyc_endpoint.dart`, `kyc_service.dart`, S3 storage | `maker_kyc_page_test.dart`, `kyc_flow_integration_test.dart` |
+| Device binding + trust score enforcement (Story 2.4 AC1/AC2) | `device_security_service.dart`, `maker_device_security_page.dart` | `device_security_service_test.dart`, `maker_device_security_integration_test.dart` |
+| Session hardening with device revocation (Story 2.4 AC3) | `device_security_service.dart`, integration with SessionService | `session_device_revocation_test.dart` |
+
 ## Error Handling
 
 ### Error Types
@@ -789,11 +854,12 @@ class InsufficientPermissionsException extends MakerAuthException { }
 ## Deployment Considerations
 
 ### Environment Variables
-```dart
-// Required Environment Variables
-INVITATION_HMAC_SECRET=your-invitation-hmac-secret
-DOCUMENT_ENCRYPTION_KEY=your-document-encryption-key
-KYC_SERVICE_API_KEY=your-kyc-service-api-key
+```text
+# Required Environment Variables (managed in 1Password vault `video-window-maker-auth`)
+INVITATION_HMAC_SECRET=vw-maker-invite-hmac-2025
+DOCUMENT_ENCRYPTION_KEY=arn:aws:kms:eu-central-1:447812345678:key/alias/video-window-maker-docs
+KYC_SERVICE_API_KEY=persona-livekey-2025-10-rotate
+TWILIO_VERIFY_SERVICE_SID=VA9d2c1b3a4makersecure
 RBAC_CACHE_TTL=3600
 INVITATION_DEFAULT_EXPIRY_DAYS=7
 MAX_INVITATION_ATTEMPTS_PER_HOUR=5
@@ -876,6 +942,52 @@ CREATE TABLE verification_documents (
   reviewed_at TIMESTAMPTZ,
   metadata JSONB
 );
+
+-- Maker device registry
+CREATE TABLE maker_devices (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  device_id VARCHAR(255) NOT NULL,
+  device_type VARCHAR(100) NOT NULL,
+  platform VARCHAR(50) NOT NULL,
+  attestation_metadata JSONB,
+  trust_score NUMERIC(5,2) DEFAULT 0,
+  last_seen_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  revoked_at TIMESTAMPTZ,
+  UNIQUE(user_id, device_id)
+);
+
+-- Audit log for role changes
+CREATE TABLE role_assignment_audit (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id),
+  role_id UUID NOT NULL REFERENCES roles(id),
+  action VARCHAR(20) NOT NULL,
+  performed_by UUID REFERENCES users(id),
+  performed_at TIMESTAMPTZ DEFAULT NOW(),
+  context JSONB
+);
+
+-- Maker onboarding status tracking
+CREATE TABLE maker_onboarding_status (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  checklist JSONB NOT NULL,
+  current_step VARCHAR(100) NOT NULL,
+  completed_steps JSONB DEFAULT '[]'::jsonb,
+  metadata JSONB,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX idx_invitations_code ON invitations(code);
+CREATE INDEX idx_invitations_status ON invitations(status);
+CREATE INDEX idx_roles_level ON roles(level);
+CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
+CREATE INDEX idx_maker_profiles_status ON maker_profiles(verification_status);
+CREATE INDEX idx_verification_documents_status ON verification_documents(status);
+CREATE INDEX idx_maker_devices_user_id ON maker_devices(user_id);
 
 -- Performance indexes
 CREATE INDEX idx_invitations_code ON invitations(code);

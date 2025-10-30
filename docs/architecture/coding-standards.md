@@ -11,16 +11,16 @@ Status: v0.2 — Comprehensive development standards enforced alongside architec
 - **Accessibility Required**: All UI components must meet WCAG 2.1 AA standards from day one.
 
 ## Flutter Client
-- **Project Structure:** Unified package architecture using Melos workspace:
-  - `packages/mobile_client/` - Main Flutter app with global BLoCs
-  - `packages/features/<name>/` - Feature packages with clean architecture
-  - `packages/core/` - Shared utilities and extensions
-  - `packages/shared_models/` - Serverpod-generated models
-  - `packages/design_system/` - UI components and theming
+- **Project Structure:** Unified Melos workspace under `video_window_flutter/`:
+  - `lib/` – App shell, routing, global blocs
+  - `packages/core/` – Repositories, datasources, services, value objects
+  - `packages/shared/` – Design system, shared widgets, accessibility primitives
+  - `packages/features/<name>/` – Feature packages exposing only `use_cases/` + `presentation/`
+  - `../video_window_shared/` – Serverpod-generated protocol models (read-only)
 - **State Management:** Centralized BLoC architecture. Global BLoCs in mobile_client, feature-specific BLoCs in feature packages. Widgets receive dependencies via constructors, not `GetIt` globals.
 - **UI Composition:** Small, testable widgets (<200 lines). Use design system tokens. Respect accessibility: 44x44 tap targets, contrast ≥4.5:1, reduced motion support.
 - **Navigation:** Centralized GoRouter in `packages/mobile_client/lib/presentation/routes/`. No ad-hoc navigation strings.
-- **API Calls:** Use generated Serverpod client from `shared_models` package. No direct REST calls.
+- **API Calls:** Use repositories in `packages/core/` which wrap the generated Serverpod client (`video_window_shared/`). No direct REST calls.
 - **Error Surfaces:** Friendly errors with retry actions. Log via analytics with correlation IDs.
 
 ### Data Transformation Standards
@@ -79,7 +79,7 @@ context.read<AuthBloc>().add(SignInEmailChanged(email: value));
 - **Dart Files:** `snake_case.dart` (e.g., `user_repository.dart`, `auth_bloc.dart`)
 - **Test Files:** `snake_case_test.dart` (e.g., `user_repository_test.dart`)
 - **Golden Test Files:** `snake_case_golden_test.dart`
-- **Story Files:** `kebab-case.md` (e.g., `user-sign-in-flow.md`)
+- **Story Files:** `<epic-id>.<story-id>.<slug>.md` (e.g., `01.1.bootstrap-repository-and-flutter-app.md`, `1.1.email-otp-sign-in.md`). Foundational epics use zero-padded epic IDs (`01-03`).
 
 ### Class/Type Naming
 - **Classes:** `PascalCase` (e.g., `UserRepository`, `AuthenticationBloc`)
@@ -150,7 +150,7 @@ export 'presentation/widgets/sign_in_form.dart';
 ### Dependency Injection Patterns
 - **Constructor Injection**: Preferred for all services and repositories from core package
 - **BLoC Provider**: Use `RepositoryProvider` and `BlocProvider` in widget tree
-- **Package Dependencies**: Feature packages depend on core, shared_models, design_system
+- **Package Dependencies**: Feature packages depend only on `core` and `shared`
 - **Service Locator**: Avoid GetIt - use BLoC and constructor injection instead
 
 **Example: Feature package dependencies**
@@ -159,12 +159,10 @@ export 'presentation/widgets/sign_in_form.dart';
 dependencies:
   flutter:
     sdk: flutter
-  video_window_core:
+  core:
     path: ../../core
-  video_window_shared_models:
-    path: ../../shared_models
-  video_window_design_system:
-    path: ../../design_system
+  shared:
+    path: ../../shared
   flutter_bloc: ^8.1.5
 ```
 

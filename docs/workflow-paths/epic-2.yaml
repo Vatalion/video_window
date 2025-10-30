@@ -1,0 +1,10 @@
+workflows:
+  - name: Epic 2 Tech Spec Stabilization
+    command: "*tech-spec-epic-2"
+    agent: Bob (Scrum Master)
+  - name: Story Readiness – Maker Access Vertical Slice
+    command: "*story-ready epic-2"
+    agent: Bob (Scrum Master)
+  - name: Validation Cleanup – Epic 2
+    command: "*validation-check epic-2"
+    agent: Murat (Master Test Architect)

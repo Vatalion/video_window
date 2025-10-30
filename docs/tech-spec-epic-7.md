@@ -17,12 +17,134 @@
 - **Infrastructure:** Object storage for encrypted raw footage, CDN for processed content
 
 ### Technology Stack
-- **Flutter:** camera 0.10.5, video_player 2.8.1, flutter_secure_storage 9.2.0, path_provider 2.1.1
-- **Video Processing:** FFmpeg integrated via Isolate for background processing
-- **Encryption:** AES-256-GCM with platform keychain/keystore integration
-- **Storage:** Local SQLite for draft metadata, encrypted file storage for raw footage
-- **Performance:** Custom painters for timeline rendering, Isolate for heavy computation
-- **State Management:** BLoC pattern with separate BLoCs for capture, timeline, captions, drafts
+- **Flutter SDK & Tooling:** Flutter 3.19.6, Dart 3.5.6 (repo baseline), Melos-managed workspace.
+- **Capture & Device APIs:** `camera` 0.10.5, `sensors_plus` 5.0.2 for gyroscope feedback, `device_info_plus` 10.1.0 for capability detection, `permission_handler` 11.3.0 for runtime permissions.
+- **Video Playback & Preview:** `video_player` 2.8.3, `chewie` 1.7.4 (preview overlays), `wakelock_plus` 1.1.3 to prevent sleep during capture.
+- **Video Processing Pipeline:** `ffmpeg-kit_flutter_full_gpl` 4.5.1-LTS wrapped through isolate workers, GPU acceleration toggled via `flutter_gpu_video_processing` 1.2.0.
+- **Encryption & Security:** AES-256-GCM via `cryptography` 2.7.0, secure key storage with `flutter_secure_storage` 9.2.1, device biometrics handshake using `local_auth` 2.1.7.
+- **Local Persistence:** `sqflite` 2.3.3 for draft metadata, `drift` 2.17.0 for typed DAOs, `path_provider` 2.1.2 for sandbox directories, raw footage stored under encrypted application storage (`NSFileProtectionComplete`, `Scoped Storage`).
+- **State Management & Utilities:** `flutter_bloc` 9.1.0, `equatable` 2.0.5, `rxdart` 0.27.7 for timeline scrubbing throttling.
+- **Performance Instrumentation:** Internal `performance_monitor` utility, `package:metrics_center` 1.1.0 for frame timing, `firebase_crashlytics` 3.4.9 (crash traces forwarded via Segment bridge).
+- **Design System & Accessibility:** Shared tokens from `packages/shared` (v1.4.0), `flutter_animate` 4.5.0 for micro-interactions, `flutter_accessibility_service` 0.3.2 for caption compliance.
+
+### Source Tree & File Directives
+```text
+video_window_flutter/
+  packages/
+    features/
+      timeline/
+        lib/
+          presentation/
+            pages/
+              maker_studio_page.dart              # Modify: unify capture + timeline shell (Story 7.1)
+              timeline_editor_page.dart           # Create: timeline editing workspace (Story 7.2)
+            widgets/
+              capture_controls_panel.dart         # Create: exposure/focus/record UI (Story 7.1)
+              timeline_scrubber.dart              # Create: 60fps scrubbing component (Story 7.2)
+              caption_editor_sheet.dart           # Create: caption styling & positioning (Story 7.2)
+            bloc/
+              capture_bloc.dart                   # Modify: device adaptive capture pipeline (Story 7.1)
+              timeline_editor_bloc.dart           # Modify: trim/split + performance instrumentation (Story 7.2)
+              caption_editor_bloc.dart            # Modify: rich captions & analytics (Story 7.2)
+              draft_sync_bloc.dart                # Create: autosave + conflict handling (Story 7.3)
+        lib/
+          use_cases/
+            start_capture_session_use_case.dart   # Create: orchestrate capture setup + storage (Story 7.1)
+            apply_timeline_edit_use_case.dart     # Create: edit operations routed through services (Story 7.2)
+            resolve_draft_conflict_use_case.dart  # Create: merges & sync resolution (Story 7.3)
+    core/
+      lib/
+        data/
+          services/
+            media/
+              video_capture_service.dart          # Modify: hardware config + ffmpeg handoff (Story 7.1)
+              timeline_processing_service.dart    # Create: isolate orchestrator & perf metrics (Story 7.2)
+            storage/
+              draft_repository.dart               # Modify: drift-backed versioning (Story 7.3)
+          datasources/
+            local/
+              draft_database.dart                 # Create: drift schema for drafts/versions (Story 7.3)
+        security/
+          local_encryption_service.dart           # Modify: AES-256-GCM with key rotation (Story 7.1)
+    shared/
+      lib/
+        analytics/
+          analytics_events.dart                   # Modify: add maker studio events (Story 7.1-7.3)
+
+video_window_server/
+  lib/
+    src/
+      endpoints/
+        story/
+          draft_endpoint.dart                     # Modify: extend autosave + conflict APIs (Story 7.3)
+      services/
+        story/
+          draft_sync_service.dart                 # Modify: diff sync + conflict audit (Story 7.3)
+        media_pipeline/
+          ingest_service.dart                     # Modify: import validation hooks (Story 7.1)
+    test/
+      endpoints/story/
+        draft_endpoint_test.dart                  # Extend: autosave + conflict scenarios
+      services/story/
+        draft_sync_service_test.dart              # Add coverage for version merges
+
+infrastructure/
+  terraform/
+    maker_studio.tf                               # Create: S3 raw footage prefix, CloudWatch metrics, ffmpeg lambda cache (Story 7.1-7.3)
+  ci/
+    maker_studio_checks.yaml                      # Create: capture linting, performance regression harness
+```
+
+### Implementation Guide
+1. **Capture & Import Foundations (Story 7.1)**
+   - Extend `video_capture_service.dart` to read device profile via `device_info_plus` 10.1.0, choosing resolution/bitrate presets defined in `maker_studio_profiles.yaml`.
+   - Wire `capture_bloc.dart` to drive `maker_studio_page.dart` with exposure/focus controls, using `capture_controls_panel.dart` for UI.
+   - Implement encryption pipeline in `local_encryption_service.dart` using AES-256-GCM keys sourced from `vault://maker-studio/crypto/raw-footage`. Ensure secure cleanup after upload via `start_capture_session_use_case.dart` `complete()` method.
+   - Update `media_pipeline/ingest_service.dart` to reject DRM-protected imports by inspecting `ffprobe` metadata (FFmpeg kit 4.5.1) and log via `maker.capture.import_rejected`.
+2. **Timeline Editing & Captioning (Story 7.2)**
+   - Introduce `timeline_processing_service.dart` to offload trim/split/extract frame jobs onto isolates with per-job performance metrics.
+   - Create `timeline_editor_page.dart` and `timeline_scrubber.dart` for 60fps scrubbing; integrate with `PerformanceMonitor.recordMetric('timeline.frame_time_ms')`.
+   - Enhance `caption_editor_bloc.dart` + `caption_editor_sheet.dart` to support style presets from `packages/shared` design tokens and emit analytics via `AnalyticsEvents.makerCaptionEdited`.
+   - Persist edits through `apply_timeline_edit_use_case.dart`, ensuring BLoC emits `TimelineEditorPerformanceState` with latest frame-time stats.
+3. **Draft Autosave & Sync (Story 7.3)**
+   - Replace existing SQLite helpers with Drift schema `draft_database.dart` to track versions, conflicts, and auto-save cadence.
+   - Build `draft_sync_bloc.dart` coordinating local autosave (`AUTO_SAVE_INTERVAL_SECONDS`) and server sync using `draft_endpoint.dart`.
+   - Implement `resolve_draft_conflict_use_case.dart` leveraging `DraftSyncService.threeWayMerge()`; log conflict outcomes to Segment.
+   - Update server-side `draft_endpoint.dart` and `draft_sync_service.dart` to accept version vectors, returning conflict metadata for UI overlays.
+4. **Infrastructure & Tooling**
+   - Provision `maker_studio.tf` resources: S3 `vw-maker-raw-footage-${env}` bucket with Object Lock, CloudWatch dashboard `MakerStudioPerformance`, and IAM roles for ffmpeg lambda caches.
+   - Add CI workflow `maker_studio_checks.yaml` running `melos run analyze:timeline`, ffmpeg smoke tests, and integration benchmarks.
+5. **Observability & QA**
+   - Integrate `performance_monitor` to push metrics to Datadog (`maker.timeline.frame_time_ms`, `maker.capture.success_rate`).
+   - Configure analytics events enumerated in `AnalyticsEvents` and ensure dashboards are updated per `docs/analytics/maker-studio-dashboard.md`.
+   - Map acceptance criteria to specific tests in the Test Traceability section and ensure runbook `docs/runbooks/maker-studio.md` references new instrumentation.
+
+### Monitoring & Analytics
+- **Metrics (Datadog):** `maker.capture.success_rate` (target ≥ 95%), `maker.timeline.frame_time_ms` (p95 ≤ 16.7ms), `maker.timeline.trim_duration_ms` (p95 ≤ 100ms), `maker.draft.autosave_latency_ms` (p95 ≤ 250ms).
+- **Segment Events:** `maker_capture_started`, `maker_capture_completed`, `maker_clip_import_failed`, `maker_timeline_trimmed`, `maker_caption_added`, `maker_draft_conflict_detected`, `maker_draft_resolved`.
+- **Dashboards:** Grafana `maker-studio-runtime` (timeline performance), Datadog dashboard `Maker Studio Experience`, Kibana index `maker-studio-logs-*` for ffmpeg isolate errors.
+- **Alerting:** EventBridge rule `maker-studio-performance-alerts` routes to Slack `#eng-maker-studio` when frame time p95 > 20ms (5m); PagerDuty `Maker Studio Capture` on autosave latency > 500ms for 2 consecutive samples.
+
+### Environment Configuration
+```yaml
+maker_studio:
+  AUTO_SAVE_INTERVAL_SECONDS: 20
+  MAX_CLIP_DURATION_SECONDS: 420
+  MAX_PROJECT_DURATION_SECONDS: 900
+  TIMELINE_CACHE_SIZE_MB: 128
+  CONFLICT_RESOLUTION_TIMEOUT_SECONDS: 300
+  ENCRYPTION_KEY_DERIVATION_SALT: "vault://maker-studio/crypto/derivation_salt"
+  ENCRYPTION_MASTER_KEY_ALIAS: "alias/maker-studio-footage"
+  RAW_FOOTAGE_BUCKET: "vw-maker-raw-footage-${ENV}"
+  FFPROBE_BINARY_PATH: "/opt/ffmpeg-kit/4.5.1/bin/ffprobe"
+  DEVICE_PROFILE_CONFIG: "config/maker_studio_profiles.yaml"
+
+observability:
+  DATADOG_NAMESPACE: "maker-studio"
+  SEGMENT_WRITE_KEY: "op://video-window-feed/Analytics/SEGMENT_MAKER_WRITE_KEY"
+  GRAFANA_DASHBOARD_UID: "maker-studio-runtime"
+  SLACK_ALERT_CHANNEL: "#eng-maker-studio"
+```
 
 ## Data Models
 
@@ -708,6 +830,16 @@ class ConflictResolver {
 }
 ```
 
+  ### Test Traceability
+  | Acceptance Criteria | Coverage Strategy | Execution Command |
+  | ------------------- | ----------------- | ----------------- |
+  | AC1 (Secure capture & import) | `video_capture_service_test.dart`, integration flow `maker_capture_flow_test.dart` | `melos run test -- --tags maker-capture` |
+  | AC2 (Timeline editing) | `timeline_editor_bloc_test.dart`, widget test `timeline_editor_page_test.dart` | `melos run test -- --tags maker-timeline` |
+  | AC3 (Caption editor) | `caption_editor_bloc_test.dart`, golden tests for caption styling | `melos run test -- --tags maker-caption` |
+  | AC4 (Draft autosave & sync) | Drift-backed `draft_repository_test.dart`, server `draft_endpoint_test.dart` | `melos run test -- --tags maker-draft` |
+  | AC5 (Performance metrics) | Integration benchmark `timeline_performance_test.dart` (records frame time) | `melos run benchmark -- --suite maker-studio` |
+  | AC6 (Analytics & monitoring) | Telemetry assertions in `maker_studio_observability_test.dart` verifying Segment/Datadog payloads | `melos run test -- --tags maker-observability` |
+
 ## Testing Strategy
 
 ### Unit Tests
@@ -867,13 +999,17 @@ class EncryptionFailedException extends MakerStudioException { }
 
 ### Environment Variables
 ```dart
-// Required Environment Variables
-ENCRYPTION_KEY_DERIVATION_SALT=your-salt-value
-MAX_CLIP_DURATION_SECONDS=300
-MAX_PROJECT_DURATION_SECONDS=600
-TIMELINE_CACHE_SIZE_MB=100
-AUTO_SAVE_INTERVAL_SECONDS=30
+// Required Environment Variables (refer to config/maker_studio.env)
+ENCRYPTION_KEY_DERIVATION_SALT=vault://maker-studio/crypto/derivation_salt
+ENCRYPTION_MASTER_KEY_ALIAS=alias/maker-studio-footage
+MAX_CLIP_DURATION_SECONDS=420
+MAX_PROJECT_DURATION_SECONDS=900
+TIMELINE_CACHE_SIZE_MB=128
+AUTO_SAVE_INTERVAL_SECONDS=20
 CONFLICT_RESOLUTION_TIMEOUT_SECONDS=300
+RAW_FOOTAGE_BUCKET=vw-maker-raw-footage-${ENV}
+FFPROBE_BINARY_PATH=/opt/ffmpeg-kit/4.5.1/bin/ffprobe
+DEVICE_PROFILE_CONFIG=config/maker_studio_profiles.yaml
 ```
 
 ### Database Schema
@@ -994,3 +1130,12 @@ CREATE INDEX idx_captions_time_range ON captions(start_time_ms, end_time_ms);
 
 **Dependencies:** Epic 6 (Media Pipeline) for upload/processing integration, Epic 2 (Maker Auth) for access control
 **Blocks:** Epic 8 (Story Publishing) depends on completed drafts and timeline data
+
+## Change Log
+| Date       | Version | Description                                                                 | Author            |
+| ---------- | ------- | --------------------------------------------------------------------------- | ----------------- |
+| 2025-10-09 | v0.1    | Initial draft created following Story 1.1 gold standard                      | Claude Code Assistant |
+| 2025-10-29 | v1.0    | Promoted to definitive: pinned stack, source directives, implementation guide, monitoring, environment config, test traceability | GitHub Copilot AI |
+
+---
+*This technical specification outlines the definitive plan for Maker Studio capture, editing, and draft workflows and should be updated alongside related stories and runbooks.*

@@ -1,131 +1,115 @@
 # Source Tree Structure
 
-```text
-video_window/                                    # Project root
-├── packages/
-│   ├── mobile_client/                         # Main Flutter application
-│   │   ├── lib/
-│   │   │   ├── main.dart                      # App entry point
-│   │   │   ├── app.dart                       # App configuration
-│   │   │   └── presentation/                 # Global presentation layer
-│   │   │       ├── bloc/                     # Global BLoCs (app, auth)
-│   │   │       └── routes/                   # App routing
-│   │   └── pubspec.yaml                       # Flutter app dependencies
-│   ├── core/                                 # Core utilities and base classes
-│   │   ├── lib/
-│   │   │   ├── utils/                        # Utility functions
-│   │   │   ├── exceptions/                   # Custom exceptions
-│   │   │   ├── extensions/                   # Dart extensions
-│   │   │   └── core.dart                     # Public API export
-│   │   └── pubspec.yaml                       # Core package dependencies
-│   ├── shared_models/                        # Shared domain models
-│   │   ├── lib/
-│   │   │   ├── models/                       # Domain entities
-│   │   │   ├── enums/                        # Shared enumerations
-│   │   │   ├── constants/                    # Domain constants
-│   │   │   └── shared_models.dart            # Public API export
-│   │   └── pubspec.yaml                       # Shared models dependencies
-│   ├── design_system/                        # UI components and theming
-│   │   ├── lib/
-│   │   │   ├── theme/                        # Design tokens and themes
-│   │   │   ├── widgets/                      # Reusable UI components
-│   │   │   ├── tokens/                       # Design tokens (colors, typography)
-│   │   │   └── design_system.dart            # Public API export
-│   │   └── pubspec.yaml                       # Design system dependencies
-│   └── features/                             # Feature packages
-│       ├── auth/                             # Authentication feature
-│       │   ├── lib/
-│       │   │   ├── domain/                   # Business logic and entities
-│       │   │   │   ├── entities/             # Domain entities
-│       │   │   │   ├── repositories/         # Repository interfaces
-│       │   │   │   └── usecases/             # Business use cases
-│       │   │   ├── data/                     # Data layer implementation
-│       │   │   │   ├── datasources/          # Data sources
-│       │   │   │   ├── models/               # Data transfer objects
-│       │   │   │   └── repositories/         # Repository implementations
-│       │   │   └── presentation/             # UI layer
-│       │   │       ├── pages/                # Screen components
-│       │   │       ├── widgets/              # Feature-specific widgets
-│       │   │       ├── bloc/                 # Feature-specific BLoCs
-│       │   │       └── routes/               # Feature routes
-│       │   └── pubspec.yaml                   # Auth feature dependencies
-│       ├── timeline/                         # Timeline editing feature
-│       ├── publishing/                       # Content publishing feature
-│       ├── commerce/                         # Commerce and marketplace features
-│       ├── shipping/                         # Shipping and fulfillment features
-│       └── notifications/                    # Notification management features
-├── serverpod/                                 # Serverpod backend
-│   ├── config/
-│   │   ├── development.yaml                 # Development configuration
-│   │   └── production.yaml                  # Production configuration
+Clean layout of the repository so new contributors can find the right place to work.
+
+```
+video_window/
+├── video_window_server/                # Serverpod backend (modular monolith)
+│   ├── config/                         # Environment configs
 │   ├── lib/
 │   │   └── src/
-│   │       ├── generated/                    # Generated code
-│   │       ├── endpoints/                    # API endpoints
-│   │       ├── models/                       # Database models
-│   │       └── web/                          # Web endpoints (if any)
+│   │       ├── endpoints/              # API endpoints per module
+│   │       ├── generated/              # Serverpod-generated code
+│   │       ├── protocol/               # YAML schemas + migrations
+│   │       └── utilities/              # Shared backend helpers
+│   ├── migrations/                     # PostgreSQL migration scripts
+│   └── pubspec.yaml
+├── video_window_client/                # Generated client SDK (read-only)
+├── video_window_shared/                # Generated protocol models (read-only)
+├── video_window_flutter/               # Flutter Melos workspace
+│   ├── lib/
+│   │   ├── main.dart                   # Application entry point
+│   │   ├── app.dart                    # App configuration & DI wiring
+│   │   └── presentation/
+│   │       ├── bloc/                   # Global BLoCs (auth, app shell)
+│   │       └── routing/                # Top-level navigation
 │   └── packages/
-│       └── modules/                         # Serverpod modules
-│           ├── identity/                     # Identity and access management
+│       ├── core/                       # Data access layer (no feature domain)
+│       │   ├── lib/
+│       │   │   ├── data/               # All infrastructure-facing code
+│       │   │   │   ├── datasources/    # Serverpod + local data sources
+│       │   │   │   ├── repositories/   # Repository implementations
+│       │   │   │   ├── services/       # Cross-cutting services (auth, storage)
+│       │   │   │   └── models/         # DTOs / data transfer classes
+│       │   └── pubspec.yaml
+│       ├── shared/                     # Cross-feature UI + business helpers
+│       │   ├── lib/
+│       │   │   ├── design_system/      # Tokens, themes, reusable widgets
+│       │   │   ├── domain/             # Shared business logic
+│       │   │   │   ├── entities/
+│       │   │   │   ├── value_objects/
+│       │   │   │   └── use_cases/
+│       │   │   └── services/           # Cross-cutting flows (analytics, tracking)
+│       │   └── pubspec.yaml
+│       └── features/                   # Feature packages (presentation + feature domain)
+│           ├── auth/
 │           │   ├── lib/
-│           │   │   ├── endpoints/             # Auth endpoints
-│           │   │   ├── models/                # User models
-│           │   │   └── tables/                # Database tables
-│           ├── story/                        # Story management
-│           ├── media_pipeline/               # Media processing
-│           ├── offers/                       # Offers and auctions
-│           ├── payments/                     # Payment processing
-│           ├── orders/                       # Order management
-│           └── notifications/                # Notification services
-├── docs/                                      # Documentation
-│   ├── architecture/                        # Architecture documentation
-│   │   ├── offers-auction-orders-model.md
-│   │   ├── story-component-mapping.md
-│   │   ├── front-end-architecture.md
-│   │   ├── coding-standards.md
-│   │   ├── source-tree.md
-│   │   ├── project-structure-implementation.md
-│   │   ├── package-architecture-requirements.md
-│   │   ├── package-dependency-governance.md
-│   │   ├── melos-configuration.md
-│   │   ├── serverpod-integration-guide.md
-│   │   ├── decision-framework.md
-│   │   └── CRITICAL-ISSUES-ANALYSIS.md
-│   ├── prd.md                                # Product requirements
-│   └── qa/                                   # Quality assurance
-├── tools/                                     # Development tools and scripts
-├── melos.yaml                                 # Melos workspace configuration
-├── README.md                                  # Project README
-└── .gitignore                                # Git ignore file
+│           │   │   ├── domain/
+│           │   │   │   ├── entities/   # Feature entities & aggregates
+│           │   │   │   ├── value_objects/ # Validated value types
+│           │   │   │   └── use_cases/  # Feature use cases
+│           │   │   └── presentation/   # bloc/, pages/, widgets/
+│           │   └── pubspec.yaml
+│           ├── timeline/               # Same structure as auth
+│           │   ├── lib/
+│           │   │   ├── domain/
+│           │   │   │   ├── entities/
+│           │   │   │   ├── value_objects/
+│           │   │   │   └── use_cases/
+│           │   │   └── presentation/
+│           │   └── pubspec.yaml
+│           ├── commerce/
+│           │   ├── lib/
+│           │   │   ├── domain/
+│           │   │   │   ├── entities/
+│           │   │   │   ├── value_objects/
+│           │   │   │   └── use_cases/
+│           │   │   └── presentation/
+│           │   └── pubspec.yaml
+│           ├── publishing/
+│           │   ├── lib/
+│           │   │   ├── domain/
+│           │   │   │   ├── entities/
+│           │   │   │   ├── value_objects/
+│           │   │   │   └── use_cases/
+│           │   │   └── presentation/
+│           │   └── pubspec.yaml
+│           └── notifications/
+│               ├── lib/
+│               │   ├── domain/
+│               │   │   ├── entities/
+│               │   │   ├── value_objects/
+│               │   │   └── use_cases/
+│               │   └── presentation/
+│               └── pubspec.yaml
+├── docs/                               # Product & architecture documentation
+│   ├── architecture/
+│   ├── prd.md
+│   └── testing/
+├── tools/                              # Scripts and supporting tooling
+├── melos.yaml                          # Workspace configuration
+├── pubspec.yaml                        # Root Dart configuration
+└── README.md
 ```
 
-## Package Architecture Overview
+### Service Folder Roles
 
-This repository follows a **unified package structure** with clear separation of concerns:
+- `core/lib/data/services/` handles infrastructure concerns (auth tokens, network guards, storage bridges) that sit next to repositories.
+- `shared/lib/services/` hosts cross-feature business helpers used by multiple features (analytics, feature flags, notification routing).
 
-### Core Principles
+## Key Boundaries
 
-1. **Monorepo with Melos**: All packages managed through Melos workspace
-2. **Feature-based organization**: Each major feature is its own package
-3. **Shared packages**: Core utilities, models, and design system are shared
-4. **Serverpod integration**: Backend modules mirror Flutter feature packages
-5. **Clean architecture**: Each feature follows domain/data/presentation layers
+- `video_window_client/` and `video_window_shared/` are regenerated by `serverpod generate`; do not edit by hand.
+- Feature packages contain only `use_cases/` and `presentation/` folders. All data access stays inside `packages/core/`.
+- Shared design assets live in `packages/shared/` to keep UI consistent across features.
+- Run all Melos commands from the `video_window_flutter/` directory.
 
-### Package Responsibilities
+## Quick Workflow Snapshot
 
-- **mobile_client**: Main Flutter app, global state, navigation
-- **core**: Shared utilities, exceptions, extensions
-- **shared_models**: Domain entities shared across client/server
-- **design_system**: UI components, theming, design tokens
-- **features/**: Feature-specific business logic and UI
-- **serverpod/modules/**: Backend business logic and data persistence
+1. `cd video_window/video_window_flutter`
+2. `melos run setup` (first time) or `melos run generate` (after model changes)
+3. Implement or update code in the appropriate `core`, `shared`, or feature package
+4. `melos run test` and `melos run analyze` before raising a PR
+5. If backend protocol changes, run `serverpod generate` inside `video_window_server/`
 
-### Development Workflow
-
-1. **Setup**: `melos bootstrap` to initialize workspace
-2. **Development**: Work within specific packages
-3. **Testing**: `melos run test` for all packages
-4. **Building**: `melos run build` for release builds
-5. **Code Generation**: `melos run generate` for generated code
-
-This structure enables parallel development, clear boundaries, and scalable architecture as the project grows.
+These guardrails keep the Flutter workspace in sync with the Serverpod backend while enforcing clean, testable boundaries.

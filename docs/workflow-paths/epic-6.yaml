@@ -1,0 +1,10 @@
+workflows:
+  - name: Epic 6 Tech Spec Remediation
+    command: "*tech-spec-epic-6"
+    agent: Bob (Scrum Master)
+  - name: Story Readiness – Media Pipeline Vertical Slice
+    command: "*story-ready epic-6"
+    agent: Bob (Scrum Master)
+  - name: Validation Cleanup – Epic 6
+    command: "*validation-check epic-6"
+    agent: Murat (Master Test Architect)

@@ -1,0 +1,10 @@
+workflows:
+  - name: Epic 1 Tech Spec Consolidation
+    command: "*tech-spec-epic-1"
+    agent: Bob (Scrum Master)
+  - name: Story Readiness – Authentication Vertical Slice
+    command: "*story-ready epic-1"
+    agent: Bob (Scrum Master)
+  - name: Validation Cleanup – Epic 1
+    command: "*validation-check epic-1"
+    agent: Murat (Master Test Architect)

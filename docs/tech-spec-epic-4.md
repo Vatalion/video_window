@@ -19,10 +19,85 @@
 - **External:** CDN (video streaming), Image optimization service, Analytics
 
 ### Technology Stack
-- **Flutter:** video_player 2.8.1, cached_network_image 3.3.1, infinite_scroll_pagination 4.0.0
-- **Performance:** flutter_displaymode 0.6.0, wakelock_plus 1.2.5, visibility_detector 0.4.2
-- **State Management:** BLoC with optimized state selectors and debouncing
-- **Video Streaming:** HLS with adaptive bitrate, preloading strategy, memory management
+- **Flutter 3.19.6:** `video_player` 2.8.1, `cached_network_image` 3.3.1, `infinite_scroll_pagination` 4.0.0, `wakelock_plus` 1.2.5, `flutter_displaymode` 0.6.0, `visibility_detector` 0.4.2
+- **Serverpod 2.9.2:** Feed and interaction endpoints in `video_window_server/lib/src/endpoints/feed/`
+- **Streaming & CDN:** AWS S3 (us-east-1) bucket `video-window-feed-hls` fronted by CloudFront distribution `d3vw-feed.cloudfront.net` with signed cookies, media segments transcoded via AWS MediaConvert job template `vw-feed-hls-v1`
+- **Caching & Storage:** Redis 7.2.4 cluster for feed cursors/prefetch state, PostgreSQL 15 for `videos`, `user_interactions`, `feed_cache` tables, CloudFront edge cache TTL 120s default
+- **Analytics & Observability:** Segment SDK 4.5.1, Datadog RUM 1.13.0, Firebase Analytics 11.8.0, Sentry Flutter 8.7.0 for crash/perf monitoring
+- **Recommendation Engine:** Serverpod module `recommendation` using LightFM 1.17 on Python microservice (versioned API v2025.9) accessed via gRPC proxy
+- **Secrets Management:** 1Password Connect 1.7.3 vault `video-window-feed` for runtime credentials and API keys
+
+### Source Tree & File Directives
+```text
+video_window_flutter/
+  packages/
+    features/
+      timeline/
+        lib/
+          presentation/
+            pages/
+              feed_page.dart                         # Modify: integrate vertical pager + performance overlays (Story 4.1)
+              feed_settings_sheet.dart               # Create: personalization controls (Story 4.6)
+            widgets/
+              video_feed_item.dart                   # Modify: hook preloader + analytics taps (Story 4.1)
+              infinite_scroll_footer.dart            # Create: displays loading states (Story 4.2)
+              preload_debug_overlay.dart             # Create: toggleable perf metrics HUD (Story 4.4)
+          use_cases/
+            fetch_feed_page_use_case.dart            # Modify: add cursor + personalization params (Story 4.2)
+            preload_videos_use_case.dart             # Create: orchestrate video cache queue (Story 4.3)
+            record_interaction_use_case.dart         # Modify: append recommendation signals (Story 4.5)
+            update_feed_preferences_use_case.dart    # Create: persist personalization toggles (Story 4.6)
+        test/
+          presentation/
+            pages/
+              feed_page_test.dart                    # Modify: cover pagination + jank mitigation
+              feed_settings_sheet_test.dart          # Create: ensures preference persistence
+          widgets/
+            video_feed_item_test.dart                # Modify: verifies preload + pause logic
+            infinite_scroll_footer_test.dart         # Create: footer states
+          use_cases/
+            preload_videos_use_case_test.dart        # Create: cache limit + eviction behaviour
+
+video_window_flutter/
+  packages/
+    core/
+      lib/
+        data/
+          repositories/
+            feed/
+              feed_repository.dart                   # Modify: add gRPC recommendation + Redis hydration (Stories 4.2, 4.5)
+              feed_cache_repository.dart             # Create: manage local cache + persistence (Story 4.3)
+          services/
+            analytics/feed_analytics_service.dart    # Modify: emit Segment + Datadog events (Story 4.1)
+            performance/feed_performance_service.dart# Create: capture FPS/jank metrics via MethodChannel (Story 4.4)
+      test/
+        data/
+          repositories/
+            feed/
+              feed_repository_test.dart              # Modify: ensure cursor + personalization coverage
+
+video_window_server/
+  lib/
+    src/
+      endpoints/
+        feed/
+          feed_endpoint.dart                         # Modify: paginate w/ cursor + personalization filters (Story 4.2)
+          interaction_endpoint.dart                  # Modify: stream interactions to recommendation service (Story 4.5)
+      services/
+        feed_service.dart                            # Modify: add caching + prefetch heuristics
+        recommendation_bridge_service.dart           # Create: gRPC proxy to LightFM microservice
+      cache/
+        feed_cache_manager.dart                      # Create: Redis-backed suggestion cache (Story 4.3)
+      metrics/
+        feed_performance_sampler.dart                # Create: aggregates server latency for dashboards
+
+infrastructure/
+  terraform/
+    feed_cdn.tf                                      # Create: CloudFront + S3 origin + signed cookie policy
+    feed_redis.tf                                    # Create: Elasticache Redis cluster for feed cursors
+  serverless/
+    feed_prefetch_worker.ts                          # Create: schedules warm cache jobs via EventBridge
+```
 
 ## Data Models
 
@@ -168,6 +243,26 @@ GET /feed/trending
 
 ## Implementation Details
 
+### Implementation Guide
+1. **Repository & Data Layer Prep**
+  - Update `feed_repository.dart` to request pages via Serverpod with `cursor`, `feedSessionId`, and personalization parameters (preferred tags, blocked makers). Persist responses into `feed_cache_repository.dart` leveraging Hive box `feed_cache` capped at 100 MB. (Stories 4.1, 4.2)
+  - Implement `feed_cache_repository.dart` eviction policy (LRU) and hydrate from Redis snapshot when cold-starting the app. (Story 4.3)
+2. **Serverpod Endpoint Enhancements**
+  - Extend `feed_endpoint.dart` to support cursor-based pagination, max page size 50, and fetch recommendations via `recommendation_bridge_service.dart`. Cache page payloads in Redis `feed:page:{userId}:{cursor}` with TTL 120 seconds. (Stories 4.2, 4.5)
+  - Update `interaction_endpoint.dart` to stream watch metrics to Kafka topic `feed.interactions.v1` and trigger LightFM retraining job nightly. (Stories 4.1, 4.5)
+3. **Preloading & Performance Services**
+  - Create `preload_videos_use_case.dart` orchestrating warm-up of next/previous two videos using `VideoPreloader`. Integrate with `feed_performance_service.dart` capturing FPS/jank via `MethodChannel('com.videowindow/perf')`. (Stories 4.3, 4.4)
+  - Implement `feed_prefetch_worker.ts` EventBridge job to pre-warm CloudFront cache for trending videos hourly. (Story 4.3)
+4. **Flutter Presentation Layer**
+  - Modify `feed_page.dart` to host `PageView` with BLoC-driven state, infinite scroll footer, and debug overlay toggled via long-press. (Stories 4.1, 4.4)
+  - Add `feed_settings_sheet.dart` to surface personalization toggles, linking to `update_feed_preferences_use_case.dart` and persisting to Serverpod preferences. (Story 4.6)
+5. **Recommendation & Personalization**
+  - Implement `recommendation_bridge_service.dart` to call LightFM microservice over gRPC using service account `feed-rec-svc@video-window`. Handle fallback to trending feed when service unavailable. (Story 4.5)
+  - Update analytics pipeline to capture `feed_video_viewed`, `feed_swipe`, `feed_like`, and feed session metrics via Segment + Datadog correlation IDs. (Stories 4.1, 4.5)
+6. **Testing & Performance Validation**
+  - Add unit tests for repositories, caching, and recommendation bridging with golden snapshots for personalization responses.
+  - Create integration tests measuring pagination correctness, video preload queue length, and server latency budgets. Use automated performance test harness to assert 60fps/<2% jank thresholds as part of CI.
+
 ### Flutter Feed Module Structure
 
 #### Video Feed Architecture
@@ -271,6 +366,31 @@ class _VideoFeedState extends State<VideoFeed> {
   }
 }
 ```
+
+## Analytics & Observability
+
+### Metrics
+- `feed.performance.fps` (Datadog gauge) — collected every 15 seconds from `feed_performance_service.dart`; alert when <55 for 5 minutes.
+- `feed.performance.jank` (Datadog gauge) — target <2%; critical alert at >3%.
+- `feed.preload.queue_depth` (Datadog gauge) — expected 0–4; investigate >6 sustained.
+- `feed.cache.hit_rate` (Datadog gauge) — computed hourly from `feed_cache_manager.dart`, target >80%.
+- `feed.recommendation.fallback` (Datadog count) — monitor for spikes indicating LightFM outages.
+- Firebase traces `feed_scroll_start`/`feed_scroll_end` capturing scroll latency buckets for Release builds.
+
+### Analytics Events (Segment)
+- `feed_video_viewed` — params: `videoId`, `position`, `algorithm`, `sessionId`, `preloaded`.
+- `feed_swipe` — params: `direction`, `duration`, `completed`.
+- `feed_page_loaded` — params: `cursor`, `loadTimeMs`, `cacheHit` (Story 4.2).
+- `feed_preload_complete` — params: `queueDepth`, `latencyMs`, `networkType` (Story 4.3).
+- `feed_recommendation_served` — params: `algorithm`, `score`, `experimentVariant` (Story 4.5).
+- `feed_preferences_updated` — params: `changedFields`, `autoPlayEnabled`, `reducedMotion` (Story 4.6).
+- `feed_pagination_retry` — params: `cursor`, `attempt` (Story 4.2).
+
+### Dashboards & Alerts
+- Datadog dashboard `Feed Experience` aggregates FPS, jank, cache hit-rate, fallback counts.
+- Sentry release health dashboard monitors crash-free sessions for feed feature.
+- Segment → Snowflake pipeline exports feed events hourly for analytics modeling.
+- Slack channel `#alerts-feed` receives Datadog alerts for FPS, jank, and recommendation fallback thresholds.
 
 #### Optimized Video Player Component
 ```dart
@@ -1584,6 +1704,20 @@ class FeedConfig {
 }
 ```
 
+### Environment Variables
+```bash
+FEED_CDN_BASE_URL=https://d3vw-feed.cloudfront.net
+FEED_S3_BUCKET=video-window-feed-hls
+FEED_REDIS_ENDPOINT=redis-feed-cluster.x1yzab.0001.use1.cache.amazonaws.com:6379
+RECOMMENDATION_GRPC_ENDPOINT=grpcs://feed-rec.video-window.internal:7443
+LIGHTFM_MODEL_VERSION=2025.09.1
+SEGMENT_FEED_WRITE_KEY=op://video-window-feed/Analytics/SEGMENT_FEED_WRITE_KEY
+DATADOG_RUM_CLIENT_TOKEN=op://observability/Datadog/RUM_CLIENT_TOKEN
+SENTRY_DSN=op://video-window-feed/Sentry/DSN
+SERVERPOD_FEED_SERVICE_SECRET=op://serverpod/Feed/SHARED_SECRET
+FEED_PREFETCH_CRON_EXPRESSION=rate(1 hour)
+```
+
 ### Feature Flags
 ```dart
 class FeedFeatureFlags {
@@ -1638,3 +1772,9 @@ class FeedFeatureFlags {
 **Dependencies:** Epic 1 (Authentication) for user identification, Epic 2 (Content Creation) for video availability, Epic F2 (Core Platform Services) for design tokens and navigation framework
 
 **Blocks:** Epic 5 (Shopping Discovery) can begin in parallel after feed foundation is established
+
+## Change Log
+| Date       | Version | Description                               | Author            |
+| ---------- | ------- | ----------------------------------------- | ----------------- |
+| 2025-10-10 | v0.1    | Initial draft created                     | Development Team  |
+| 2025-10-29 | v1.0    | Definitive stack, source tree, stories    | GitHub Copilot AI |

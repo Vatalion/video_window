@@ -5,9 +5,9 @@ Status: Draft v0.1 — Derived from PRD v0.1 (2025-09-27) and Analyst Checkpoint
 This document maps each PRD story to the concrete technical components that will implement it. Use it as the execution blueprint when spinning up development workstreams, aligning Serverpod backend services, Flutter client modules, and shared infrastructure.
 
 ## Architectural Baseline
-- Flutter 3.35+ (Dart 3.8+) unified package structure with Melos workspace
+- Flutter 3.19.6 (Dart 3.5.6) workspace rooted at `video_window_flutter/` and managed by Melos
 - Serverpod 2.9.x monolithic backend with modular packages for bounded contexts
-- Unified package architecture with mobile_client, core, shared_models, design_system, features
+- Unified package architecture with `video_window_flutter/lib/` app shell plus `packages/core`, `packages/shared`, and `packages/features/*`
 - Stripe Connect Express, hosted Checkout, webhooks for payments
 - Signed HLS media delivery with watermarking and capture deterrence
 - Observability via structured logging, metrics, tracing, and alerting defined in PRD NFRs
@@ -15,11 +15,11 @@ This document maps each PRD story to the concrete technical components that will
 ## Core Components
 
 ### Flutter Package Architecture
-- **packages/mobile_client/**: Main Flutter app with global BLoCs, navigation, app shell
-- **packages/core/**: Data layer (repositories, datasources, services), shared utilities
-- **packages/shared_models/**: Serverpod-generated models, type definitions
-- **packages/design_system/**: UI components, theming, design tokens, shared widgets
-- **packages/features/**: Feature-specific packages with use cases and UI
+- **video_window_flutter/lib/**: Main Flutter app shell, global BLoCs, navigation, and configuration
+- **video_window_flutter/packages/core/**: Centralized data layer (repositories, datasources, services), shared utilities, value objects
+- **video_window_flutter/packages/shared/**: Design system, theming, shared widgets, accessibility primitives
+- **video_window_flutter/packages/features/**: Feature-specific packages exposing only `use_cases/` and `presentation/`
+- **video_window_shared/**: Serverpod-generated shared protocol models (auto-generated, not edited manually)
 
 ### Feature Packages
 - **features/auth/**: Email/SMS OTP, social sign-in, session management UI
@@ -63,28 +63,28 @@ This document maps each PRD story to the concrete technical components that will
 
 Each table lists the implementing components per story. Components marked with `*` are primary owners; others support the workflow.
 
-### Epic F1 — Environment & CI/CD Enablement
+### Epic 01 — Environment & CI/CD Enablement
 | Story | Components | Notes |
 | --- | --- | --- |
-| F1.1 Bootstrap Repository and Flutter App | `app_shell*`, `design_system`, `observability_core`, GitHub Actions | Scaffold client/backend, add smoke tests, document setup.
-| F1.2 Enforce Story Branching and Scripts | Story flow scripts*, Git hooks, `.bmad-core`, documentation | CI checks for branch naming, Conventional Commits, status workflows.
-| F1.3 Configure CI Format/Analyze/Test Gates | GitHub Actions*, cache config, Flutter/Serverpod toolchains | Mirrors local gates; pins versions; exposes troubleshooting docs.
-| F1.4 Harden Secrets Management and Release Channels | Secrets manager*, `security_service`, release docs | git-secrets/pre-commit hooks, branch protection, release cadence doc.
+| 01.1 Bootstrap Repository and Flutter App | `app_shell*`, `design_system`, `observability_core`, GitHub Actions | Scaffold client/backend, add smoke tests, document setup.
+| 01.2 Enforce Story Branching and Scripts | Story flow scripts*, Git hooks, `.bmad-core`, documentation | CI checks for branch naming, Conventional Commits, status workflows.
+| 01.3 Configure CI Format/Analyze/Test Gates | GitHub Actions*, cache config, Flutter/Serverpod toolchains | Mirrors local gates; pins versions; exposes troubleshooting docs.
+| 01.4 Harden Secrets Management and Release Channels | Secrets manager*, `security_service`, release docs | git-secrets/pre-commit hooks, branch protection, release cadence doc.
 
-### Epic F2 — Core Platform Services
+### Epic 02 — Core Platform Services
 | Story | Components | Notes |
 | --- | --- | --- |
-| F2.1 Design Tokens and Theming | `design_system*`, `app_shell`, docs | Central theme extension, sample widgets, lint rules.
-| F2.2 Navigation Shell and Route Registry | `app_shell*`, `config`, `analytics` | Navigator 2.0 routing, guarded maker routes, route analytics hooks.
-| F2.3 Configuration & Feature Flags | `config*`, `config_service`, `app_shell` | Remote JSON pull with local fallback, typed toggles, docs for adding flags.
-| F2.4 Telemetry Scaffolding | `analytics*`, `observability_core`, `analytics_service` | Event dispatcher, server ingestion, schema alignment with analytics doc.
+| 02.1 Design Tokens and Theming | `design_system*`, `app_shell`, docs | Central theme extension, sample widgets, lint rules.
+| 02.2 Navigation Shell and Route Registry | `app_shell*`, `config`, `analytics` | Navigator 2.0 routing, guarded maker routes, route analytics hooks.
+| 02.3 Configuration & Feature Flags | `config*`, `config_service`, `app_shell` | Remote JSON pull with local fallback, typed toggles, docs for adding flags.
+| 02.4 Telemetry Scaffolding | `analytics*`, `observability_core`, `analytics_service` | Event dispatcher, server ingestion, schema alignment with analytics doc.
 
-### Epic F3 — Observability & Compliance Baseline
+### Epic 03 — Observability & Compliance Baseline
 | Story | Components | Notes |
 | --- | --- | --- |
-| F3.1 Structured Logging & Metrics | `observability_core*`, `analytics_service`, infra stack | Logging formatters, tracing IDs, Prometheus exporters, dashboards.
-| F3.2 Privacy & Legal Disclosures | `profile`, `app_shell`, legal content store*, `security_service` | Reachable policies, consent capture, escalation runbook docs.
-| F3.3 Data Retention & Backup Procedures | `security_service*`, `order_service`, infra automation | Backup schedules, lifecycle rules, DR playbooks, drill cadence.
+| 03.1 Structured Logging & Metrics | `observability_core*`, `analytics_service`, infra stack | Logging formatters, tracing IDs, Prometheus exporters, dashboards.
+| 03.2 Privacy & Legal Disclosures | `profile`, `app_shell`, legal content store*, `security_service` | Reachable policies, consent capture, escalation runbook docs.
+| 03.3 Data Retention & Backup Procedures | `security_service*`, `order_service`, infra automation | Backup schedules, lifecycle rules, DR playbooks, drill cadence.
 
 ### Epic 1 — Viewer Authentication & Session Handling
 | Story | Components | Notes |

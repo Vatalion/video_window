@@ -1,88 +1,174 @@
-# Craft Video Marketplace - Project Structure Implementation Guide
+# Project Structure Implementation Guide# Craft Video Marketplace - Project Structure Implementation Guide
 
-## Current State Analysis
 
-### Existing Project Structure
-```
-video_window/
-├── lib/
-│   └── main.dart                # Basic app entry point
-├── pubspec.yaml                 # Dependencies configured for Serverpod-first approach
-└── docs/                        # Comprehensive architecture documentation
-```
 
-**Current Implementation**: Clean Flutter project with Serverpod-first dependency configuration and comprehensive architecture documentation.
+This guide explains how to stand up the canonical workspace layout for Craft Video Marketplace and migrate existing code into it.## Current State Analysis
 
-**Target Implementation**: Comprehensive marketplace platform with unified package architecture, Serverpod backend, and full e-commerce capabilities.
 
----
 
-## Target Project Structure
+## Target Layout### Existing Project Structure
 
-### Unified Package Architecture
+``````
 
-**Package structure follows the specifications defined in `package-architecture-requirements.md`.**
+video_window/video_window/
 
-```
+├── video_window_server/                # Serverpod backend├── lib/
+
+├── video_window_client/                # Generated Serverpod client (read-only)│   └── main.dart                # Basic app entry point
+
+├── video_window_shared/                # Generated protocol models (read-only)├── pubspec.yaml                 # Dependencies configured for Serverpod-first approach
+
+├── video_window_flutter/               # Flutter Melos workspace└── docs/                        # Comprehensive architecture documentation
+
+│   ├── lib/                            # App shell, routing, global blocs```
+
+│   └── packages/
+
+│       ├── core/                       # Datasources, repositories, services, value objects**Current Implementation**: Clean Flutter project with Serverpod-first dependency configuration and comprehensive architecture documentation.
+
+│       ├── shared/                     # Design system + shared widgets
+
+│       └── features/**Target Implementation**: Comprehensive marketplace platform with unified package architecture, Serverpod backend, and full e-commerce capabilities.
+
+│           ├── auth/
+
+│           │   ├── lib/use_cases/---
+
+│           │   └── lib/presentation/   # bloc/, pages/, widgets/
+
+│           ├── timeline/## Target Project Structure
+
+│           ├── commerce/
+
+│           ├── publishing/### Unified Package Architecture
+
+│           ├── notifications/
+
+│           └── future features…**Package structure follows the specifications defined in `package-architecture-requirements.md`.**
+
+└── docs/                               # Architecture + product documentation
+
+``````
+
 video_window/                          # Root project directory
-├── packages/                          # Flutter packages managed by Melos
-│   ├── core/                          # Core utilities, data layer, base classes
-│   ├── shared/                        # Shared models, design system, common widgets
-│   ├── features/                      # Feature packages
-│   │   ├── auth/                      # Authentication feature
+
+Key expectations:├── packages/                          # Flutter packages managed by Melos
+
+- Feature packages expose **only** `use_cases/` and `presentation/`. No `data/` or `domain/` folders live inside features.│   ├── core/                          # Core utilities, data layer, base classes
+
+- All persistence, networking, caching, and Serverpod integration lives under `packages/core/`.│   ├── shared/                        # Shared models, design system, common widgets
+
+- Shared UI primitives, tokens, and accessibility utilities live under `packages/shared/`.│   ├── features/                      # Feature packages
+
+- `video_window_client/` and `video_window_shared/` are regenerated via `serverpod generate` and must remain untouched.│   │   ├── auth/                      # Authentication feature
+
 │   │   ├── timeline/                  # Timeline editing feature
-│   │   ├── publishing/                # Content publishing feature
-│   │   ├── commerce/                  # Commerce features
-│   │   └── notifications/             # Notification management
-│   └── mobile_client/                 # Main Flutter application
-├── serverpod/                         # Serverpod backend
-│   ├── packages/
-│   │   └── modules/                   # Serverpod modules
-│   │       ├── identity/              # User authentication and management
-│   │       ├── story/                 # Story content management
-│   │       ├── offers/                # Offers and auctions
-│   │       ├── payments/              # Payment processing
-│   │       └── orders/                # Order fulfillment
-├── docs/                              # Architecture documentation
-├── melos.yaml                         # Workspace configuration
-└── README.md                          # Project documentation
-```
 
-**Note**: This implements the simplified 3-level structure (core, shared, features) as recommended for better maintainability.
+## Bootstrap Steps│   │   ├── publishing/                # Content publishing feature
 
-### Main Flutter Application Structure (`packages/mobile_client/`)
+1. `cd video_window`│   │   ├── commerce/                  # Commerce features
 
-The mobile client contains the app shell and global state management:
+2. Create workspace skeleton:│   │   └── notifications/             # Notification management
 
-```
-packages/mobile_client/
-├── lib/
-│   ├── main.dart                      # App initialization
-│   ├── app.dart                       # App configuration and providers
+   ```bash│   └── mobile_client/                 # Main Flutter application
+
+   mkdir -p video_window_flutter/packages/{core,shared,features}├── serverpod/                         # Serverpod backend
+
+   mkdir -p video_window_flutter/lib/presentation/bloc│   ├── packages/
+
+   ```│   │   └── modules/                   # Serverpod modules
+
+3. Initialize Melos in `video_window_flutter/` (see `melos-configuration.md`).│   │       ├── identity/              # User authentication and management
+
+4. Scaffold feature directories:│   │       ├── story/                 # Story content management
+
+   ```bash│   │       ├── offers/                # Offers and auctions
+
+   for feature in auth timeline commerce publishing notifications; do│   │       ├── payments/              # Payment processing
+
+     mkdir -p "video_window_flutter/packages/features/$feature/lib/use_cases"│   │       └── orders/                # Order fulfillment
+
+     mkdir -p "video_window_flutter/packages/features/$feature/lib/presentation/{bloc,pages,widgets}"├── docs/                              # Architecture documentation
+
+   done├── melos.yaml                         # Workspace configuration
+
+   ```└── README.md                          # Project documentation
+
+5. Add minimal `pubspec.yaml` for each package (`core`, `shared`, and every feature). Ensure each package has a unique `name` and `publish_to: 'none'`.```
+
+6. Wire path dependencies:
+
+   ```yaml**Note**: This implements the simplified 3-level structure (core, shared, features) as recommended for better maintainability.
+
+   # Example: video_window_flutter/packages/features/auth/pubspec.yaml
+
+   dependencies:### Main Flutter Application Structure (`packages/mobile_client/`)
+
+     flutter:
+
+       sdk: flutterThe mobile client contains the app shell and global state management:
+
+     core:
+
+       path: ../../core```
+
+     shared:packages/mobile_client/
+
+       path: ../../shared├── lib/
+
+   ```│   ├── main.dart                      # App initialization
+
+7. Create barrel exports (`lib/core.dart`, `lib/shared.dart`, `lib/auth.dart`, etc.).│   ├── app.dart                       # App configuration and providers
+
 │   └── presentation/
-│       ├── bloc/                      # Global BLoCs
-│       │   ├── app_bloc.dart          # Global app state
-│       │   ├── auth_bloc.dart         # Global authentication state
-│       │   └── user_session_bloc.dart # User session management
-│       └── routes/
-│           └── app_router.dart        # GoRouter configuration
-├── android/                           # Android platform configuration
-├── ios/                               # iOS platform configuration
-├── macos/                             # macOS platform configuration
-├── linux/                             # Linux platform configuration
-├── windows/                           # Windows platform configuration
-└── test/                              # Integration and widget tests
-```
 
-### Feature Package Structure
+## Migrating Existing Code│       ├── bloc/                      # Global BLoCs
+
+1. Move repositories, datasources, and value objects into `packages/core/`.│       │   ├── app_bloc.dart          # Global app state
+
+2. Update imports to use barrel exports (`package:core/core.dart`, `package:auth/auth.dart`).│       │   ├── auth_bloc.dart         # Global authentication state
+
+3. Relocate UI widgets and design tokens into `packages/shared/`.│       │   └── user_session_bloc.dart # User session management
+
+4. Refactor feature-specific logic into use cases + presentation layers.│       └── routes/
+
+5. Ensure global blocs (auth/app/session) live in `video_window_flutter/lib/presentation/bloc/`.│           └── app_router.dart        # GoRouter configuration
+
+6. Run `melos run format`, `melos run analyze`, and `melos run test` to verify migration.├── android/                           # Android platform configuration
+
+├── ios/                               # iOS platform configuration
+
+## Serverpod Alignment├── macos/                             # macOS platform configuration
+
+- Back-end modules mirror front-end features (identity, story, offers, payments, orders, notifications).├── linux/                             # Linux platform configuration
+
+- After modifying protocol YAML or Serverpod models, run:├── windows/                           # Windows platform configuration
+
+  ```bash└── test/                              # Integration and widget tests
+
+  cd video_window_server```
+
+  serverpod generate
+
+  ```### Feature Package Structure
+
+  Commit updated `video_window_client/` and `video_window_shared/` along with your backend changes.
 
 **Feature packages follow the simplified structure defined in PSR2 (see `package-architecture-requirements.md#feature-packages`).**
 
-According to **PSR2**: "Each feature package SHALL contain `use_cases/` and `presentation/` layers only. Data layer operations SHALL be centralized in the core package."
+## Quality Gates
 
-**For detailed feature structure examples, see:**
-- `package-architecture-requirements.md#feature-packages` - Complete structure specification
+- Each package ships with unit tests (≥80% coverage) and README documentation.According to **PSR2**: "Each feature package SHALL contain `use_cases/` and `presentation/` layers only. Data layer operations SHALL be centralized in the core package."
+
+- No feature package introduces its own HTTP client or database access.
+
+- Dependency graph remains acyclic per [`package-dependency-governance.md`](package-dependency-governance.md).**For detailed feature structure examples, see:**
+
+- CI validates `melos run format`, `melos run analyze`, `melos run test`, and coverage thresholds.- `package-architecture-requirements.md#feature-packages` - Complete structure specification
+
 - `coding-standards.md#feature-package-structure` - Implementation examples
+
+Following this plan keeps the workspace consistent with the documented architecture and prevents regressions as new features are added.
 
 This section focuses on implementation steps for creating feature packages within this architecture.
 

@@ -17,10 +17,164 @@
 - **External:** Payment provider for eligibility checks, notification service for maker alerts
 
 ### Technology Stack
-- **Flutter:** BLoC state management, form validation, real-time UI updates
-- **Serverpod:** Business rule engine, transaction management, event emission
-- **Database:** PostgreSQL for ACID compliance, comprehensive indexing
-- **Security:** Server-side validation, authentication checks, rate limiting
+- **Observability & Compliance:** Datadog Agent 7.53.0 (`offers.validation.duration_ms`, `offers.submission.success_rate`), Kibana 8.14 dashboards for audit log review, HashiCorp Vault 1.15.3/1Password Connect 1.7.3 for secret distribution, CloudWatch Logs Insights queries automated via `cwlogs` 3.1.2.
+
+### Source Tree & File Directives
+```text
+video_window_flutter/
+  packages/
+    features/
+      commerce/
+        lib/
+          presentation/
+            pages/
+              offer_submission_page.dart         # Modify: integrate validation + submission flows (Story 9.1)
+              offer_cancellation_page.dart       # Create: cancellation flow UI (Story 9.3)
+            widgets/
+              offer_validation_banner.dart       # Create: real-time rule feedback (Story 9.1)
+              offer_summary_sheet.dart           # Create: confirmation & terms (Story 9.1)
+              offer_cancellation_dialog.dart     # Create: reason capture + SLA display (Story 9.3)
+            bloc/
+              offer_bloc.dart                    # Modify: validation/submission state machine (Story 9.1)
+              offer_cancellation_bloc.dart       # Create: cancellation workflows (Story 9.3)
+              offer_history_bloc.dart            # Create: audit/history stream (Story 9.4)
+          use_cases/
+            submit_offer_use_case.dart           # Create: orchestrate client submission (Story 9.1)
+            cancel_offer_use_case.dart           # Create: cancellation + analytics (Story 9.3)
+            fetch_offer_history_use_case.dart    # Create: timelines + audit retrieval (Story 9.4)
+    core/
+      lib/
+        data/
+          repositories/
+            offers_repository.dart               # Modify: Serverpod client integration & caching (Story 9.1)
+          services/
+            offers_validation_service.dart       # Create: debounce, currency normalization (Story 9.1)
+            offers_audit_service.dart            # Create: local audit context logging (Story 9.4)
+        security/
+          rate_limit_guard.dart                  # Create: client-side submission throttling (Story 9.1)
+
+video_window_server/
+  lib/
+    src/
+      endpoints/
+        offers/
+          offer_validation_endpoint.dart         # Create: eligibility + rule evaluation (Story 9.2)
+          offer_submit_endpoint.dart             # Modify: idempotent submission + auction trigger (Story 9.2)
+          offer_cancel_endpoint.dart             # Create: cancellation SLA enforcement (Story 9.3)
+          offer_history_endpoint.dart            # Create: audit trail retrieval (Story 9.4)
+      services/
+        offers/
+          offer_validation_service.dart          # Modify: incorporate OPA rule engine (Story 9.2)
+          offer_submission_service.dart          # Modify: Stripe/Sift integration + event emission (Story 9.2)
+          offer_cancellation_service.dart        # Create: cancellation business rules (Story 9.3)
+          offer_audit_service.dart               # Create: audit log persistence + exports (Story 9.4)
+        auctions/
+          auction_trigger_service.dart           # Modify: triggered by offer events (Story 9.2)
+      integrations/
+        stripe_connect_client.dart               # Modify: payment method eligibility check (Story 9.2)
+        sns_notification_client.dart             # Create: maker alert publishing (Story 9.2)
+        sift_risk_client.dart                    # Create: risk scoring integration (Story 9.2)
+    test/
+      endpoints/offers/
+        offer_validation_endpoint_test.dart      # Create: eligibility scenarios
+        offer_submit_endpoint_test.dart          # Create: idempotency + auction trigger
+        offer_cancel_endpoint_test.dart          # Create: SLA + auth scenarios
+        offer_history_endpoint_test.dart         # Create: pagination + audit filtering
+      services/offers/
+        offer_validation_service_test.dart       # Expand coverage for rule engine
+        offer_submission_service_test.dart       # Add payment/risk checks
+        offer_cancellation_service_test.dart     # Verify modification windows
+        offer_audit_service_test.dart            # Ensure logging completeness
+
+infrastructure/
+  terraform/
+    offers.tf                                   # Modify: SNS topics, EventBridge rules, Redis cluster, audit log storage
+    offers_audit_glacier.tf                     # Create: Glacier vault for audit retention (Story 9.4)
+  ci/
+    offers_checks.yaml                          # Create: lint + integration suite + contract tests
+```
+- **Flutter SDK & Packages:** Flutter 3.19.6, Dart 3.5.6, `flutter_bloc` 9.1.0, `formz` 0.6.2, `intl` 0.19.0, `currency_text_input_formatter` 2.1.1, `dio` 5.5.0, `retry` 3.1.2 for resilient inbound/outbound API calls.
+- **Client Security & Storage:** `flutter_secure_storage` 9.2.1 for credential escrow, `package_info_plus` 8.0.2 for device metadata, `sentry_flutter` 8.4.0 for runtime error capture with privacy scrubbing enabled.
+- **Server Platform:** Serverpod 2.9.2, `serverpod_auth_server` 2.9.2, `postgres` 2.6.3 driver (PostgreSQL 15.6 cluster), Redis 7.2.4 (ElastiCache) for idempotency tokens and hot caches, `dart_jsonwebtoken` 2.5.1 for signed offer tickets.
+- **Business Rule Engine:** Internal `offer_rule_engine` 1.0.0 (ReGo-backed) deployed via OPA sidecar v0.64.0, referencing policy bundle `opa-offers-bundle@2025-10-15` for eligibility thresholds.
+- **Payment & Risk Integrations:** Stripe Connect API version `2024-10-15`, `stripe_dart` 8.1.0 for payment method verification, Sift Decision API v206 with SDK `sift` 0.10.0 for fraud scoring, Plaid Identity API `2024-08-01` (plaid client 5.6.0) for bank-backed qualification.
+- **Notification & Messaging:** AWS SNS SDK (`aws_sns` 1.4.0) for maker alerts, EventBridge bus `commerce-offers-events@2025-09`, Segment ingestion backend 4.5.1 for analytics fan-out, Slack webhook orchestrated via `slack_notifier` 2.1.0 for operations alerts.
+- **Observability & Compliance:** Datadog Agent 7.53.0 (`offers.validation.duration_ms`, `offers.submission.success_rate`), Kibana 8.14 dashboards for audit log review, HashiCorp Vault 1.15.3/1Password Connect 1.7.3 for secret distribution, CloudWatch Logs Insights queries automated via `cwlogs` 3.1.2.
+
+### Implementation Guide
+1. **Real-time Offer Entry (Story 9.1)**
+  - Extend `offer_bloc.dart` to validate every field change through `offers_validation_service.dart`, emitting `OfferValidationInProgress` → `OfferValidationSuccess|Failure` states with localized error payloads for `offer_validation_banner.dart`.
+  - Update `offer_submission_page.dart` to hydrate `OfferDraft` from `maker_profiles` policy data, gating submission until currency normalization, maker consent, and market eligibility flags pass `formz` constraints.
+  - Implement `submit_offer_use_case.dart` with debounce + exponential backoff via `retry` 3.1.2 and client-side rate limiting using `rate_limit_guard.dart` to enforce `MAX_OFFERS_PER_STORY` before touching the backend.
+2. **Server Validation Pipeline (Story 9.2)**
+  - Create `offer_validation_endpoint.dart` orchestrating synchronous policy evaluation (`offer_validation_service.dart` → `offer_rule_engine` OPA bundle) with maker policy cache hydrated from `offer_policy_repository`.
+  - Refactor `offer_submit_endpoint.dart` to require a valid `idempotency_key`, stamp `submission_trace_id`, and call `auction_trigger_service.dart` when `isOpening` flag transitions from false → true.
+  - Introduce `OfferSubmissionSaga` within `offer_submission_service.dart` to run validation → payment pre-authorization → persistence → audit logging in a single transaction, posting domain events to EventBridge.
+3. **Payment & Risk Clearance (Story 9.2)**
+  - Enforce two-step verification inside `offer_submission_service.dart`: first leverage `stripe_connect_client.dart` for payment method verification, then send buyer, device, and offer context to `sift_risk_client.dart` for a fraud score before persisting.
+  - Implement compensating actions for negative outcomes (reverse payment hold, emit `OfferSubmissionRejected` event) and ensure `offers_repository.dart` consumes new failure enums for consistent client messaging.
+  - Cache qualification results in Redis with 10-minute TTL keyed by `(storyId, buyerId)` to minimize redundant third-party calls while respecting compliance logging.
+4. **Cancellation & Audit Trail (Stories 9.3 & 9.4)**
+  - Build `offer_cancellation_bloc.dart` and `offer_cancellation_page.dart` to fetch SLA metadata and reason catalogs from `offer_policy` payloads, writing analytics via `OfferAnalytics.cancelled` helper.
+  - Add `offer_cancel_endpoint.dart` enforcing maker/buyer authority, modification window (`OFFER_MODIFICATION_WINDOW_MINUTES`), and audit log append through `offer_audit_service.dart` with immutable records stored to Glacier via `offers_audit_glacier.tf`.
+  - Implement `fetch_offer_history_use_case.dart` to page `offer_history_endpoint.dart`, merging local audit context from `offers_audit_service.dart` for offline display consistency.
+5. **Infrastructure & QA Hardening**
+  - Update `offers.tf` to provision SNS topics (`offers.submitted`, `offers.cancelled`), EventBridge rules routing to Auctions, Datadog monitors, and Redis replication group sized for 99p < 5ms latency.
+  - Expand CI workflow `offers_checks.yaml` to run unit tests, contract tests against ephemeral Serverpod, and Pact verification for external partners.
+  - Add load test profile `offers_locustfile.py` (CI artifact) to simulate 200 RPS offer submissions ensuring idempotency and latency budgets.
+6. **Observability & Runbooks**
+  - Emit structured logs with `submission_trace_id`, buyer risk metadata, and rule evaluation summaries; aggregate in Kibana index `offers-submission-*` with retention policy aligned to compliance.
+  - Document escalation procedures in `docs/runbooks/offers-submission.md`, linking Datadog monitors and Slack channels for on-call rotations.
+  - Update `docs/analytics/offers-dashboard.md` with new widgets tied to metrics defined below.
+
+### Monitoring & Analytics
+- **Datadog Metrics:** `offers.validation.duration_ms` (p95 ≤ 400ms), `offers.submission.success_rate` (target ≥ 98%), `offers.cancellation.success_rate` (target ≥ 95%), `offers.auction_trigger.lag_ms` (target ≤ 1000ms), `offers.risk_check.duration_ms` (p95 ≤ 600ms).
+- **Segment Events:** `offer_draft_started`, `offer_validation_failed`, `offer_submitted`, `offer_auto_rejected`, `offer_cancelled`, `auction_triggered_from_offer`, all enriched with `submission_trace_id` and rule outcome metadata.
+- **Kibana Dashboards:** `offers-submission-overview` for structured logs, `offers-risk-review` for Sift score distributions, with anomaly detection thresholds mirroring Datadog alerts.
+- **Alerting:** EventBridge rule `offers-validation-alerts` posts to Slack `#eng-offers` on validation duration p95 > 500ms (5-minute window); PagerDuty service `Offers Submission` pages when success rate < 95% for 10 minutes; Opsgenie email alerts when auction trigger lag > 2s.
+- **Health & QA Checks:** Synthetic flow hitting validation → submission → cancellation nightly; CI smoke test verifying Stripe, Sift, Plaid sandbox availability with SLA dashboards in Datadog.
+
+### Environment Configuration
+```yaml
+offers_service:
+  IDEMPOTENCY_WINDOW_SECONDS: 300
+  OFFER_MODIFICATION_WINDOW_MINUTES: 5
+  MAX_OFFERS_PER_STORY: 3
+  DEFAULT_MINIMUM_OFFER_MINOR_UNITS: 500000   # $5,000 default floor expressed in cents
+  OFFER_SUBMISSION_QUEUE: "commerce-offers-events@2025-09"
+  SUBMISSION_TRACE_HEADER: "x-offer-trace-id"
+  RISK_SCORE_REJECTION_THRESHOLD: 72
+
+integrations:
+  STRIPE_CONNECT_API_VERSION: "2024-10-15"
+  SIFT_DECISION_API_VERSION: "v206"
+  PLAID_IDENTITY_API_VERSION: "2024-08-01"
+  STRIPE_WEBHOOK_SECRET: "op://commerce/stripe/WEBHOOK_SECRET"
+  SIFT_API_KEY: "op://commerce/sift/API_KEY"
+  PLAID_CLIENT_ID: "op://commerce/plaid/CLIENT_ID"
+
+infrastructure:
+  POSTGRES_URL: "postgresql://offers_writer:${OFFERS_DB_PASSWORD}@${OFFERS_DB_HOST}:5432/offers"
+  REDIS_URL: "rediss://offers-cache.${REGION}.amazonaws.com:6379"
+  SNS_TOPIC_OFFERS_SUBMITTED: "arn:aws:sns:${REGION}:${ACCOUNT}:offers-submitted"
+  SNS_TOPIC_OFFERS_CANCELLED: "arn:aws:sns:${REGION}:${ACCOUNT}:offers-cancelled"
+  GLACIER_VAULT: "offers-audit-${ENV}"
+
+observability:
+  DATADOG_DASHBOARD: "offers-submission-overview"
+  DATADOG_MONITOR_SLO_ID: "slo:offers-submission"
+  SEGMENT_WRITE_KEY: "op://video-window-commerce/segment/WRITE_KEY"
+  SLACK_ALERT_CHANNEL: "#eng-offers"
+  RUNBOOK_URL: "https://docs.craft.video/runbooks/offers-submission"
+```
+
+### Test Traceability
+| Story | Acceptance Criteria | Automated Coverage |
+| ----- | ------------------- | ------------------ |
+| 9.1 Offer Entry UI & Validation | AC1 real-time rule feedback, AC2 currency/limit enforcement, AC3 rate limiting | Flutter widget tests in `offer_submission_page_test.dart`, bloc unit tests `offer_bloc_test.dart`, repository tests `offers_validation_service_test.dart` |
+| 9.2 Server Validation & Auction Trigger | AC1 OPA policy compliance, AC2 idempotent submission, AC3 auction trigger fire | Server unit tests `offer_validation_service_test.dart`, endpoint tests `offer_validation_endpoint_test.dart` & `offer_submit_endpoint_test.dart`, contract tests `offers_contract_test.dart` |
+| 9.3 Offer Withdrawal & Cancellation | AC1 modification window enforcement, AC2 audit append, AC3 maker notification | Bloc tests `offer_cancellation_bloc_test.dart`, endpoint tests `offer_cancel_endpoint_test.dart`, SNS integration test `offers_notification_contract_test.dart` |
+| 9.4 Offer State Management & Audit Trail | AC1 history pagination, AC2 immutable audit storage, AC3 export pipeline | Endpoint tests `offer_history_endpoint_test.dart`, service tests `offer_audit_service_test.dart`, Terraform integration test `offers_terraform_test.dart` |
 
 ## Data Models
 
@@ -1074,37 +1228,7 @@ CREATE INDEX idx_offer_audit_created_at ON offer_audit_log(created_at);
 - **Chain of Custody:** Complete history of offer lifecycle
 - **Compliance Reporting:** Export capabilities for regulatory requirements
 
-## Monitoring and Analytics
-
-### Key Metrics
-- Offer submission success rate
-- Validation failure rates by reason
-- Time from first offer to auction creation
-- Offer cancellation rate
-- Maker response time to offers
-
-### Health Checks
-- Database connectivity and performance
-- External service availability (payment, notifications)
-- Offer validation performance
-- Queue depth for async processing
-
 ## Deployment Considerations
-
-### Environment Variables
-```dart
-// Required Environment Variables
-OFFERS_SERVICE_DB_URL=postgresql://user:pass@host:5432/offers
-REDIS_URL=redis://host:6379
-NOTIFICATION_SERVICE_URL=https://api.notification.com
-PAYMENT_SERVICE_URL=https://api.payment.com
-ANALYTICS_API_KEY=your-analytics-key
-IDEMPOTENCY_WINDOW_SECONDS=300
-OFFER_MODIFICATION_WINDOW_MINUTES=5
-MAX_OFFERS_PER_STORY=3
-DEFAULT_MINIMUM_OFFER=5000
-```
-
 ### Feature Flags
 - `OFFER_SUBMISSION_ENABLED`: Enable/disable offer submission
 - `REAL_TIME_VALIDATION`: Enable client-side validation
@@ -1162,3 +1286,11 @@ CREATE INDEX CONCURRENTLY idx_offers_composite ON offers(story_id, status, creat
 
 **Dependencies:** Epic 1 (Viewer Authentication), Epic F2 (Core Platform Services)
 **Blocks:** Epic 10 (Auction Timer) requires offer submission foundation for auction triggering
+
+## Change Log
+| Date       | Version | Description                                                                                     | Author            |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------- | ----------------- |
+| 2025-10-29 | v0.5    | Promoted to definitive: pinned stack, source directives, implementation guide, monitoring, env config, traceability | GitHub Copilot AI |
+
+---
+*This technical specification defines the definitive implementation plan for the Offer Submission flow and must be updated alongside corresponding stories, runbooks, and validation artifacts.*

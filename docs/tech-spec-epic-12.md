@@ -17,10 +17,173 @@
 - **External:** Stripe Connect Express (hosted checkout, payouts, compliance)
 
 ### Technology Stack
-- **Stripe:** Stripe Connect Express, Checkout Sessions, Payment Intents, Webhooks
-- **Flutter:** WebView integration for Stripe Checkout, payment status polling
-- **Serverpod:** Stripe SDK, webhook signature verification, secure session storage
-- **Security:** PCI SAQ A compliance, webhook signature validation, idempotency keys
+- **Flutter SDK & Packages:** Flutter 3.19.6, Dart 3.5.6, `flutter_bloc` 9.1.0, `flutter_stripe` 10.1.0, `webview_flutter` 4.7.0, `equatable` 2.0.5, `intl` 0.19.0, `uni_links` 0.5.1 for return URL handling, `flutter_secure_storage` 9.2.1 for token persistence, `sentry_flutter` 8.4.0 for crash breadcrumbs.
+- **Client Networking & Timing:** `dio` 5.4.2 for REST fallbacks, `retry` 3.1.2 for status polling backoff, `clock` 1.1.1 for deterministic countdown timers, `rxdart` 0.27.7 for countdown stream throttling.
+- **Server Platform:** Serverpod 2.9.2, `stripe` 8.0.0 (server-side Stripe SDK), `postgres` 3.2.0 for transactional storage, `redis_client` 3.3.0 (Redis 7.2.4 cluster) for window tracking, `aws_sqs_api` 2.0.0 for retry queue integration, `serverpod_cloud` 2.9.2 for scheduled tasks.
+- **Documents & Storage:** AWS S3 (bucket `craft-video-receipts-${ENV}` with Object Lock), `pdfx` 2.6.0 for receipt rendering, AWS KMS CMK `payments-receipts` for envelope encryption, CloudFront signed URLs for receipt delivery.
+- **Infrastructure & Scheduling:** AWS EventBridge Scheduler 2025.09 to trigger payment window expirations, AWS Step Functions 2025.10 orchestrating retry workflows, AWS SNS 2025.08 for buyer/maker payment notifications, Terraform 1.8.5 modules under `infrastructure/terraform/payments`.
+- **Observability:** Datadog Agent 7.53.0 with metrics namespace `payments.checkout.*`, Datadog Logs pipeline `payments-stripe`, Kibana 8.14 index `payments-*`, PagerDuty service `Payments Checkout`, Segment workspace `commerce.payments` capturing analytics events, Opsgenie escalation for webhook failures.
+- **Secrets & Compliance:** HashiCorp Vault 1.15.3 (Stripe webhook secret, receipt signing keys), 1Password Connect 1.7.3 (Stripe API keys, Segment keys), Stripe Radar policy pack 2025-09, Vanta SOC2 evidence hooks for payment events.
+
+### Source Tree & File Directives
+```text
+video_window_flutter/
+  packages/
+    features/
+      commerce/
+        lib/
+          presentation/
+            pages/
+              payment_checkout_page.dart           # Modify: embed Stripe launcher + countdown (Stories 12.1, 12.2)
+              payment_status_page.dart             # Create: post-checkout status & retry CTA (Story 12.3)
+            widgets/
+              payment_window_timer.dart            # Create: accessible countdown widget (Story 12.2)
+              payment_receipt_card.dart            # Create: show receipt summary + download (Story 12.4)
+            bloc/
+              payment_bloc.dart                    # Modify: orchestrate checkout + webhook status (Story 12.1)
+              payment_window_bloc.dart             # Create: 24h window state machine (Story 12.2)
+              payment_retry_bloc.dart              # Create: limited retry flow coordination (Story 12.3)
+          use_cases/
+            create_checkout_session_use_case.dart  # Create: idempotent checkout creation (Story 12.1)
+            observe_payment_status_use_case.dart   # Modify: poll + subscribe for completion (Stories 12.1, 12.2)
+            schedule_payment_retry_use_case.dart   # Create: queue retry attempt (Story 12.3)
+            fetch_receipt_use_case.dart            # Create: retrieve signed receipt URL (Story 12.4)
+    core/
+      lib/
+        data/
+          repositories/
+            payments_repository.dart               # Modify: checkout, window, retry, receipt APIs (Stories 12.1-12.4)
+          services/
+            stripe_checkout_service.dart           # Create: wraps client secret + ephemeral keys (Story 12.1)
+            payment_window_service.dart            # Create: local countdown cache + drift correction (Story 12.2)
+            receipt_storage_service.dart           # Create: manage signed download URLs (Story 12.4)
+        telemetry/
+          payments_metrics.dart                    # Create: Datadog + Segment emitters (Stories 12.3-12.4)
+
+video_window_server/
+  lib/
+    src/
+      endpoints/
+        payments/
+          payment_checkout_endpoint.dart          # Modify: Stripe session creation + metadata (Story 12.1)
+          payment_window_endpoint.dart            # Create: expose window status + admin overrides (Story 12.2)
+          payment_retry_endpoint.dart             # Create: restart payment attempt with limits (Story 12.3)
+          payment_receipt_endpoint.dart           # Create: signed receipt delivery (Story 12.4)
+      services/
+        payments/
+          stripe_service.dart                     # Modify: checkout + intent orchestration (Story 12.1)
+          payment_window_service.dart             # Create: enforce 24h expiry via Redis + EventBridge (Story 12.2)
+          payment_retry_service.dart              # Create: SQS retry queue + exponential backoff (Story 12.3)
+          receipt_generation_service.dart         # Create: PDF render + S3 upload (Story 12.4)
+      tasks/
+        payment_window_task.dart                  # Create: EventBridge-triggered expiration worker (Story 12.2)
+        payment_retry_worker.dart                 # Create: processes retry queue (Story 12.3)
+      webhooks/
+        stripe_checkout_webhook.dart              # Modify: handle completed/expired intents (Stories 12.1-12.3)
+      repositories/
+        payment_session_repository.dart           # Modify: window metadata + retries (Stories 12.2-12.3)
+        receipt_repository.dart                   # Create: persist receipt ledger (Story 12.4)
+      utils/
+        webhook_signature_validator.dart          # Create: shared Stripe signature verification (Story 12.1)
+        receipt_number_generator.dart             # Create: sequential numbering w/ prefix (Story 12.4)
+    test/
+      endpoints/payments/
+        payment_checkout_endpoint_test.dart       # Create
+        payment_window_endpoint_test.dart         # Create
+        payment_retry_endpoint_test.dart          # Create
+        payment_receipt_endpoint_test.dart        # Create
+      services/payments/
+        stripe_service_test.dart                  # Expand coverage for new flows
+        payment_window_service_test.dart          # Create
+        payment_retry_service_test.dart           # Create
+        receipt_generation_service_test.dart      # Create
+      webhooks/
+        stripe_checkout_webhook_test.dart         # Create
+      tasks/
+        payment_window_task_test.dart             # Create
+        payment_retry_worker_test.dart            # Create
+
+infrastructure/
+  terraform/
+    payments.tf                                  # Modify: Stripe webhook endpoint, EventBridge rule, SQS queue
+    payments_observability.tf                    # Create: Datadog monitors, CloudWatch alarms, SNS topics
+  ci/
+    payments_checks.yaml                         # Create: workflow for Stripe integration & drift tests
+
+docs/
+  analytics/
+    stripe-payments-dashboard.md                 # Create: operational metrics specification (Monitoring §)
+  runbooks/
+    stripe-payments.md                           # Create: on-call response playbook (Implementation Guide §4)
+```
+
+### Implementation Guide
+1. **Stripe Checkout Integration (Story 12.1)**
+   - Implement `payment_checkout_endpoint.dart` to create Stripe Checkout Sessions with idempotency keys, metadata (`payment_session_id`, `auction_id`, `buyer_id`), and 24h expiry; persist via `payment_session_repository.dart` and update Stripe metadata.
+   - Build `create_checkout_session_use_case.dart` and extend `payment_bloc.dart` to launch `payment_checkout_page.dart` and emit analytics (`payments.checkout.started`) through `payments_metrics.dart`.
+   - Harden webhook handling in `stripe_checkout_webhook.dart` using `webhook_signature_validator.dart`, updating sessions and transactions, and logging to Datadog (`payments.checkout.session_completed`).
+2. **Payment Window Enforcement (Story 12.2)**
+   - Create `payment_window_task.dart` invoked by EventBridge `payments-window-expire-${ENV}` every 5 minutes to mark expired sessions, expire Stripe checkout objects, and publish SNS notifications.
+   - Add `payment_window_service.dart` on server/client to compute remaining duration, backfill drift via Redis TTL (`payment:window:{sessionId}`), and expose status through `payment_window_endpoint.dart` for admin overrides.
+   - Update `payment_window_bloc.dart` and `payment_window_timer.dart` to surface countdown with accessibility cues (WCAG 2.1 AA), pausing when user is offline and resyncing on reconnect.
+3. **Payment Retry Mechanisms (Story 12.3)**
+   - Provision SQS queue `payments-retry-${ENV}`; `payment_retry_service.dart` enqueues retry jobs with exponential backoff (1, 5, 15 minutes) and maximum 3 attempts, storing counters on `payment_session_repository.dart`.
+   - Implement `payment_retry_worker.dart` to create new checkout sessions via `payment_retry_endpoint.dart` while preserving original metadata and raising Datadog event `payments.retry.initiated`.
+   - Extend `payment_retry_bloc.dart` and `schedule_payment_retry_use_case.dart` to let users trigger retry within allowed window, gating by server-provided limits and showing audit in `payment_status_page.dart`.
+4. **Receipt Generation & Storage (Story 12.4)**
+   - Implement `receipt_generation_service.dart` using `pdfx` templates to render receipts, store them in S3 with KMS encryption, and persist metadata in `receipt_repository.dart` with sequential IDs via `receipt_number_generator.dart`.
+   - Create `payment_receipt_endpoint.dart` returning signed CloudFront URLs and ensure `fetch_receipt_use_case.dart` caches metadata and invalidates after download.
+   - Update `payments_metrics.dart` and Segment tracking to log `payments.receipt.generated` with receipt language/currency; document incident handling in `docs/runbooks/stripe-payments.md` and dashboards in `docs/analytics/stripe-payments-dashboard.md`.
+
+### Monitoring & Analytics
+- **Datadog Metrics:** `payments.checkout.sessions_active`, `payments.checkout.success_rate`, `payments.window.expired_count`, `payments.retry.attempt_count`, `payments.retry.failures`, `payments.receipt.render_time_ms`. Each monitor alerts Slack `#eng-commerce` when breaching defined thresholds (Monitoring Dashboard §3).
+- **Logs & Dashboards:** Kibana index `payments-*` focuses on webhook processing latency, SQS retry backlog, and receipt generation errors. Dashboard definition lives in `docs/analytics/stripe-payments-dashboard.md` with widget-level guidance.
+- **Alerts:** PagerDuty service `Payments Checkout` triggered when success rate < 97% over 15 minutes or webhook lag > 2 minutes; Opsgenie escalation handles receipt rendering failures > 5/min.
+- **Analytics Events:** Segment events `payments.checkout.started`, `payments.checkout.completed`, `payments.checkout.expired`, `payments.retry.initiated`, `payments.receipt.generated` with properties (`payment_session_id`, `auction_id`, `amount_usd`, `retry_count`, `receipt_number`).
+- **Synthetic Tests:** Nightly synthetic checkout from staging hitting Stripe test mode, verifying webhook handling and receipt generation; results exported to Datadog service checks `payments.synthetic.checkout`.
+
+### Environment Configuration
+```yaml
+payment_service:
+  STRIPE_SECRET_KEY: "op://video-window-commerce/stripe/SECRET_KEY"
+  STRIPE_PUBLISHABLE_KEY: "op://video-window-commerce/stripe/PUBLISHABLE_KEY"
+  STRIPE_WEBHOOK_SECRET: "vault://payments/stripe/webhook_secret"
+  PAYMENT_WINDOW_MINUTES: 1440
+  PAYMENT_RETRY_LIMIT: 3
+  PAYMENT_RETRY_BACKOFF_MINUTES: [1, 5, 15]
+  PAYMENT_RECEIPT_BUCKET: "craft-video-receipts-${ENV}"
+  PAYMENT_RECEIPT_CLOUDFRONT_DISTRIBUTION: "d1234payments${ENV}.cloudfront.net"
+  RECEIPT_TEMPLATE_VERSION: "2025-09-15"
+  EVENTBRIDGE_SCHEDULE_ARN: "arn:aws:scheduler:${REGION}:${ACCOUNT}:schedule/payments-window-expire-${ENV}"
+  SQS_RETRY_QUEUE_URL: "https://sqs.${REGION}.amazonaws.com/${ACCOUNT}/payments-retry-${ENV}"
+
+integrations:
+  DATADOG_API_KEY: "op://video-window-observability/datadog/API_KEY"
+  SEGMENT_WRITE_KEY: "op://video-window-commerce/segment/PAYMENTS_WRITE_KEY"
+  PAGERDUTY_SERVICE_ID: "PD_PAYMENTS_CHECKOUT"
+  SLACK_ALERT_WEBHOOK: "op://video-window-ops/slack/PAYMENTS_ALERT_WEBHOOK"
+  OPSGENIE_INTEGRATION_KEY: "vault://payments/opsgenie/integration_key"
+
+security:
+  STRIPE_SIGNING_PUBLIC_KEY: "vault://payments/stripe/rsa_public_key"
+  RECEIPT_KMS_KEY_ARN: "arn:aws:kms:${REGION}:${ACCOUNT}:key/payments-receipts"
+  REDIS_TLS_CERT: "vault://payments/redis/ca_cert"
+
+client:
+  PAYMENT_STATUS_POLL_SECONDS: 20
+  PAYMENT_TIMER_SKEW_THRESHOLD_MS: 400
+  CHECKOUT_RETURN_URL: "https://app.craftvideo.market/payments/return"
+  CHECKOUT_CANCEL_URL: "https://app.craftvideo.market/payments/cancel"
+  RECEIPT_CACHE_TTL_MINUTES: 60
+```
+
+### Test Traceability
+| Story | Acceptance Criteria | Automated Coverage |
+| ----- | ------------------- | ------------------ |
+| 12.1 Stripe Checkout Integration | AC1 checkout session creation + metadata, AC2 webhook processing, AC3 client launch + analytics | Unit tests `stripe_service_test.dart`, endpoint tests `payment_checkout_endpoint_test.dart`, widget tests `payment_checkout_page_test.dart`, integration `stripe_checkout_webhook_test.dart` |
+| 12.2 Payment Window Enforcement | AC1 expiration enforcement, AC2 countdown accuracy, AC3 admin override + notifications | Task tests `payment_window_task_test.dart`, service tests `payment_window_service_test.dart`, bloc/widget tests `payment_window_bloc_test.dart`, integration `payment_window_endpoint_test.dart` |
+| 12.3 Payment Retry Mechanisms | AC1 retry eligibility gating, AC2 SQS enqueue + worker processing, AC3 analytics + alerts | Service tests `payment_retry_service_test.dart`, worker test `payment_retry_worker_test.dart`, bloc tests `payment_retry_bloc_test.dart`, infrastructure test `payments_retry_queue_integration_test.dart` |
+| 12.4 Receipt Generation & Storage | AC1 PDF render + S3 upload, AC2 signed URL delivery, AC3 audit trail + metrics | Service tests `receipt_generation_service_test.dart`, endpoint tests `payment_receipt_endpoint_test.dart`, use case tests `fetch_receipt_use_case_test.dart`, synthetic `payments_receipt_smoke_test.dart` |
 
 ## Data Models
 
@@ -867,5 +1030,9 @@ class PaymentRetryService {
 5. **Generate Receipt System** - PDF generation, delivery, storage
 6. **Security Testing** - PCI compliance validation, webhook security testing
 
-**Dependencies:** Epic 10 (Auction Timer) for auction completion trigger, Epic 13 (Orders) for order creation
-**Blocks:** Epic 14 (Issue Resolution) for payment disputes and refunds
+---
+
+**Version:** v0.5 (Definitive)
+**Date:** 2025-10-29
+**Dependencies:** Epic 1 (Authentication), Epic 10 (Auction Timer) for auction completion trigger, Epic 11 (Notifications)
+**Blocks:** Epic 13 (Shipping & Tracking), Epic 14 (Issue Resolution & Refunds)
