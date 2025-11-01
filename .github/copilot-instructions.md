@@ -209,7 +209,6 @@ This project uses **BMAD (Business Methodology for Agile Development)** conventi
 - **Story Approval**: `docs/process/story-approval-workflow.md` - Complete story lifecycle
 - **Epic Validation**: `docs/process/epic-validation-backlog.md` - Epic validation tracking
 - **Test Strategy**: `docs/testing/master-test-strategy.md` - Comprehensive testing approach
-- **Validation Template**: `docs/process/validation-report-template.md` - Standard validation format
 
 ### **Development Prerequisites**
 **BEFORE starting ANY development work, confirm:**
@@ -274,7 +273,6 @@ melos run test
 - **Development readiness**: Use `docs/process/epic-validation-backlog.md` to confirm epic status
 - **Story management**: Follow `docs/process/story-approval-workflow.md` for complete lifecycle
 - **Quality gates**: Review `docs/testing/master-test-strategy.md` for testing requirements
-- **Validation reports**: Check `docs/validation-report-*.md` for epic approval status
 
 ---
 

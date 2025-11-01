@@ -83,7 +83,6 @@ docs/architecture/bloc-implementation-guide.md # ✅ Good
 | [Definition of Done](./definition-of-done.md) | Story completion criteria | ✅ Complete | 2025-10-30 |
 | [Story Approval Workflow](./story-approval-workflow.md) | Complete story lifecycle | ✅ Complete | 2025-10-30 |
 | [Epic Validation Backlog](./epic-validation-backlog.md) | Epic validation tracking | ✅ Complete | 2025-10-30 |
-| [Validation Report Template](./validation-report-template.md) | Standard validation format | ✅ Complete | 2025-10-30 |
 
 ### Testing Framework ✅
 
@@ -311,13 +310,10 @@ cp docs/tech-spec-template.md docs/tech-spec-epic-[NN].md
 # 2. Fill out epic details
 # Edit tech spec with epic requirements
 
-# 3. Create validation report
-cp docs/process/validation-report-template.md docs/validation-report-$(date -u +%Y%m%dT%H%M%SZ).md
-
-# 4. Run validation
+# 3. Run validation
 *validation-check epic-[NN]
 
-# 5. Schedule stakeholder review
+# 4. Schedule stakeholder review
 *stakeholder-review epic-[NN]
 ```
 
