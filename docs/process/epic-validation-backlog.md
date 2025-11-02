@@ -172,7 +172,7 @@
 ### Immediate Actions Required
 
 1. **Create Missing Stories** ✅ **COMPLETE** (7/7 created on 2025-10-30):
-   - ✅ Epic 02: 4 stories created (Design tokens, Navigation, Feature flags, Telemetry)
+   - ✅ Epic 02: Capability story set (2.1–2.4) updated to absorb design system, navigation, configuration, and telemetry foundations
    - ✅ Epic 03: 3 stories created (Logging/metrics, Privacy/legal, Backup/recovery)
    - Note: Epic 8, 11, 13 stories already exist (verified 53→65 total story files)
 

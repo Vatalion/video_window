@@ -309,11 +309,11 @@
 ## Next Sprint Preview (Sprint 2)
 
 **Tentative Scope:**
-- Epic 02: Core Platform Services (4 stories)
-  - 02.1: Design Tokens & Theming
-  - 02.2: Navigation Shell & Route Registry
-  - 02.3: Feature Flags Infrastructure
-  - 02.4: Telemetry & Analytics Setup
+- Epic 02: Capability Enablement (foundation merged)
+  - 02.1: Capability Enablement Request Flow (includes design system baseline)
+  - 02.2: Verification Requirements within Publish Flow (includes navigation shell work)
+  - 02.3: Payout & Compliance Activation (includes configuration/feature flags)
+  - 02.4: Device Trust & Risk Monitoring (includes telemetry scaffolding)
 
 **Estimated Points:** 15
 
@@ -321,8 +321,8 @@
 
 ## Related Documents
 
-- [Epic 01 Tech Spec](../tech-spec-epic-01.md)
-- [Story 01.1](../stories/1-1-bootstrap-repository-and-flutter-app.md)
+- [Epic 1 Tech Spec](./tech-spec-epic-1.md)
+- [Story 1.1](./stories/1-1-bootstrap-repository-and-flutter-app.md)
 - [Definition of Done](./process/definition-of-done.md)
 - [Epic Validation Backlog](./process/epic-validation-backlog.md)
 

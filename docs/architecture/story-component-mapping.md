@@ -28,13 +28,15 @@ This document maps each PRD story to the concrete technical components that will
 - **features/story/**: Story detail layout, section navigation, playback & transcript UI
 - **features/commerce/**: Offer entry, auction UI, checkout flow, payment integration
 - **features/shipping/**: Shipping details, tracking, order management
-- **features/publishing/**: Timeline editor, publishing workflow, maker dashboard
+- **features/publishing/**: Timeline editor, publishing workflow, creator workspace surfaces
 - **features/notifications/**: In-app inbox, push notification handling, badge counts
 
 ### Serverpod Services & Modules
-- `identity_service`: Viewer/maker auth, OTP, social login federation, session tokens.
-- `maker_access_service`: Invite management, applications, RBAC enforcement, device + 2FA management.
-- `profile_service`: Viewer/maker settings, notification/consent preferences, public maker cards.
+- `identity_service`: Unified account authentication, OTP, social login federation, session tokens.
+- `capability_service`: Capability requests, lifecycle orchestration, blockers, and audit events.
+- `verification_service`: Identity verification (Persona), payout onboarding (Stripe), compliance document storage.
+- `device_trust_service`: Device telemetry ingestion, trust scoring, capability downgrade triggers.
+- `profile_service`: User settings, notification/consent preferences, public profile surfaces.
 - `story_service`: ArtifactStory CRUD, section content, publish status, versioning.
 - `media_pipeline`: Upload ingestion, transcoding jobs, watermark enforcement, signed URL issuance.
 - `offers_service`: Offer submission, eligibility checks, minimum thresholds, cancellation logic.
@@ -74,10 +76,10 @@ Each table lists the implementing components per story. Components marked with `
 ### Epic 02 — Core Platform Services
 | Story | Components | Notes |
 | --- | --- | --- |
-| 02.1 Design Tokens and Theming | `design_system*`, `app_shell`, docs | Central theme extension, sample widgets, lint rules.
-| 02.2 Navigation Shell and Route Registry | `app_shell*`, `config`, `analytics` | Navigator 2.0 routing, guarded maker routes, route analytics hooks.
-| 02.3 Configuration & Feature Flags | `config*`, `config_service`, `app_shell` | Remote JSON pull with local fallback, typed toggles, docs for adding flags.
-| 02.4 Telemetry Scaffolding | `analytics*`, `observability_core`, `analytics_service` | Event dispatcher, server ingestion, schema alignment with analytics doc.
+| 02.1 Capability Enablement Request Flow | `design_system*`, `capability_center`, `analytics` | Capability center UI + design-system foundation (tokens, theming, sample screens).
+| 02.2 Verification Requirements within Publish Flow | `story_editor*`, `app_shell`, `persona_service` | Inline Persona flow + navigation shell foundation (typed routes, guards, analytics).
+| 02.3 Payout & Compliance Activation | `checkout*`, `config_service`, `verification_service` | Stripe onboarding + configuration/feature-flag foundation.
+| 02.4 Device Trust & Risk Monitoring | `profile/security*`, `device_trust_service`, `analytics_service` | Device trust enforcement + telemetry foundation (client/server analytics).
 
 ### Epic 03 — Observability & Compliance Baseline
 | Story | Components | Notes |
@@ -93,18 +95,19 @@ Each table lists the implementing components per story. Components marked with `
 | 1.2 Social Sign-In | `auth*`, `identity_service`, Apple/Google SDKs | Federated identities, fallback to OTP, analytics.
 | 1.3 Session Persistence & Logout | `auth*`, `identity_service`, `config` | Refresh tokens, logout wipe, account recovery path.
 
-### Epic 2 — Maker Authentication & Access Control
+### Epic 2 — Capability Enablement & Verification
 | Story | Components | Notes |
 | --- | --- | --- |
-| 2.1 Maker Invite & Application | `auth`, `maker_studio`, `maker_access_service*`, `admin_service` | Invite lifecycle, application intake, notifications.
-| 2.2 RBAC Enforcement | `app_shell`, `maker_studio`, `maker_access_service*`, `security_service` | Role claims, guarded routes, audit logging.
-| 2.3 Maker Session Security | `auth`, `maker_access_service*`, device inventory UI | Device list, revoke, optional 2FA, session policies.
+| 2.1 Capability Enablement Request Flow | `profile*`, `core`, `capability_service` | Capability center UI, request pipeline, analytics + audit integration.
+| 2.2 Verification within Publish Flow | `publishing*`, `verification_service`, Persona SDK | Inline verification, webhook handling, auto-unlock.
+| 2.3 Payout & Compliance Activation | `commerce*`, `verification_service`, `payment_service` | Stripe Express onboarding, tax document storage, checkout guard.
+| 2.4 Device Trust & Risk Monitoring | `profile`, `device_trust_service*`, `capability_service` | Device telemetry, trust scoring, capability downgrade events.
 
 ### Epic 3 — Profile & Settings Management
 | Story | Components | Notes |
 | --- | --- | --- |
 | 3.1 Viewer Profile Editing | `profile*`, `identity_service`, `profile_service` | Optimistic updates, validations, analytics.
-| 3.2 Maker Profile & Shop Settings | `maker_studio*`, `profile_service`, `story_service` | Shop metadata, surfaced on story pages, compliance checks.
+| 3.2 Creator Profile & Shop Settings | `publishing*`, `profile_service`, `story_service` | Shop metadata, surfaced on story pages, compliance checks.
 | 3.3 Notification & Consent Preferences | `profile*`, `notification_service`, `security_service` | Preference matrix, suppression lists, legal exports.
 
 ### Epic 4 — Feed Browsing Experience
@@ -124,29 +127,29 @@ Each table lists the implementing components per story. Components marked with `
 ### Epic 6 — Media Pipeline & Content Protection
 | Story | Components | Notes |
 | --- | --- | --- |
-| 6.1 Upload Ingestion Service | `maker_studio`, `media_pipeline*`, object storage | Resumable uploads, virus scanning, encryption.
+| 6.1 Upload Ingestion Service | `publishing`, `media_pipeline*`, object storage | Resumable uploads, virus scanning, encryption.
 | 6.2 Transcode to HLS with Watermarking | `media_pipeline*`, transcoder workers, CDN | Renditions, watermark overlays, job status updates.
 | 6.3 Signed URLs & Policies | `media_pipeline*`, CDN, `security_service` | Short-lived tokens, revocation, geo/IP enforcement.
 
-### Epic 7 — Maker Story Capture & Editing Tools
+### Epic 7 — Creator Story Capture & Editing Tools
 | Story | Components | Notes |
 | --- | --- | --- |
-| 7.1 Capture & Import | `maker_studio*`, device camera APIs, local secure storage | Multi-clip capture, format validation, encryption.
-| 7.2 Timeline Editing & Captioning | `maker_studio*`, `design_system`, `analytics` | Timeline UI, caption editor, autosave instrumentation.
-| 7.3 Draft Autosave & Sync | `maker_studio*`, `story_service`, offline queue | Version history, conflict resolution, dashboard listing.
+| 7.1 Capture & Import | `publishing*`, device camera APIs, local secure storage | Multi-clip capture, format validation, encryption.
+| 7.2 Timeline Editing & Captioning | `publishing*`, `design_system`, `analytics` | Timeline UI, caption editor, autosave instrumentation.
+| 7.3 Draft Autosave & Sync | `publishing*`, `story_service`, offline queue | Version history, conflict resolution, dashboard listing.
 
 ### Epic 8 — Story Publishing & Moderation Pipeline
 | Story | Components | Notes |
 | --- | --- | --- |
-| 8.1 Moderation Queue | `maker_studio`, `admin_service*`, `story_service` | Submission workflow, moderator UI, decision logging.
-| 8.2 Publishing Approvals & Scheduling | `maker_studio*`, `story_service`, scheduler | Timezone-aware scheduler, prerequisite checks.
+| 8.1 Moderation Queue | `publishing`, `admin_service*`, `story_service` | Submission workflow, moderator UI, decision logging.
+| 8.2 Publishing Approvals & Scheduling | `publishing*`, `story_service`, scheduler | Timezone-aware scheduler, prerequisite checks.
 | 8.3 Versioning & Rollback | `story_service*`, `admin_service`, object storage | Immutable versions, rollback actions, audit trail.
 
 ### Epic 9 — Offer Submission Flow
 | Story | Components | Notes |
 | --- | --- | --- |
 | 9.1 Offer Entry UI & Checks | `offer_bid*`, `offers_service`, `identity_service` | Offer modal, eligibility checks, abandon analytics.
-| 9.2 Server Validation & Auction Trigger | `offers_service*`, `auction_service`, `notification_service` | Payment eligibility, auction state init, maker alerts.
+| 9.2 Server Validation & Auction Trigger | `offers_service*`, `auction_service`, `notification_service` | Payment eligibility, auction state init, creator alerts.
 | 9.3 Offer Withdrawal & Cancellation | `offer_bid`, `offers_service*`, `auction_service` | Withdrawal rules, history, dashboard sync.
 
 ### Epic 10 — Auction Timer & State Management
@@ -160,7 +163,7 @@ Each table lists the implementing components per story. Components marked with `
 | Story | Components | Notes |
 | --- | --- | --- |
 | 11.1 Notification Service | `notification_service*`, provider SDKs, Redis queue | Template rendering, provider abstraction, retries.
-| 11.2 Offer & Auction Notifications | `offer_bid`, `notification_service*`, `auction_service` | Buyer/maker alerts, deep links, countdown context.
+| 11.2 Offer & Auction Notifications | `offer_bid`, `notification_service*`, `auction_service` | Buyer/creator alerts, deep links, countdown context.
 | 11.3 Activity Inbox UI | `notifications*`, `notification_service`, `design_system` | Inbox list, filters, read status, accessibility compliance.
 
 ### Epic 12 — Checkout & Payment Processing
@@ -174,7 +177,7 @@ Each table lists the implementing components per story. Components marked with `
 | Story | Components | Notes |
 | --- | --- | --- |
 | 13.1 Shipping Details at Checkout | `checkout`, `order_service*`, Stripe | Address collection sync, edit window, validation.
-| 13.2 Maker Tracking & Reminders | `orders`, `order_service*`, notification scheduler | SLA timers, tracking form, escalation flow.
+| 13.2 Creator Tracking & Reminders | `orders`, `order_service*`, notification scheduler | SLA timers, tracking form, escalation flow.
 | 13.3 Buyer Tracking Visibility | `orders*`, `order_service`, notification service | Tracking timeline, milestone notifications, auto-complete trigger.
 
 ### Epic 14 — Issue Resolution & Refund Handling

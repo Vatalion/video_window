@@ -312,10 +312,10 @@ To Do → In Progress → Code Review → QA → Done
 **Focus:** Core Platform Services + Design System
 
 **Likely Stories:**
-- Story 02.1: Design Tokens & Theming (5 pts)
-- Story 02.2: Navigation Shell & Route Registry (5 pts)
-- Story 02.3: Feature Flags & Telemetry (3 pts)
-- Story 03.1: Logging/Metrics Foundation (5 pts)
+- Story 02.1: Capability Enablement Request Flow (design system foundation included) – 5 pts
+- Story 02.2: Verification Requirements within Publish Flow (navigation shell foundation included) – 5 pts
+- Story 02.3: Payout & Compliance Activation (feature flag/config foundation included) – 5 pts
+- Story 02.4: Device Trust & Risk Monitoring (telemetry foundation included) – 5 pts
 
 **Estimated Commitment:** 18-20 story points (based on Sprint 1 velocity)
 
