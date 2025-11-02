@@ -72,7 +72,7 @@ No previous stories - this is the foundational story for the project.
 
 ### Technical Architecture [Source: architecture/front-end-architecture.md]
 - **State Management**: Global BLoCs in `video_window_flutter/lib/presentation/bloc/`; feature BLoCs in `video_window_flutter/packages/features/<feature>/lib/presentation/bloc/`.
-- **Navigation**: GoRouter configuration lives in `video_window_flutter/lib/app_shell/router.dart` with guards for maker-only routes.
+- **Navigation**: GoRouter configuration lives in `video_window_flutter/lib/app_shell/router.dart` with capability-based guards that evaluate `canPublish`, `canCollectPayments`, and `canFulfillOrders`.
 - **Directory Structure**:
   - `video_window_flutter/lib/app_shell/`: App bootstrap, router, theme, provider wiring.
   - `video_window_flutter/packages/shared/`: Design system, tokens, reusable widgets shared across features.

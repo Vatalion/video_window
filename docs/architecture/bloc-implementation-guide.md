@@ -712,4 +712,4 @@ This BLoC implementation provides a robust, scalable foundation for state manage
 - [BLoC Library Documentation](https://bloclibrary.dev/)
 - [Flutter State Management](https://docs.flutter.dev/development/data-and-backend/state-mgmt)
 - [Serverpod Documentation](https://serverpod.dev/)
-- [ADR-0007: State Management: BLoC Pattern](../adr/ADR-0007-state-management.md)
+- [ADR-0007: State Management: BLoC Pattern](adr/ADR-0007-state-management.md)

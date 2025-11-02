@@ -48,6 +48,7 @@ A user story is considered **"Ready for Development"** when ALL of the following
 - [ ] **API contracts defined:** Backend endpoints, data models, and integration points specified
 - [ ] **File locations identified:** Story references specific file paths or directory structure
 - [ ] **Technical approach validated:** Architect has reviewed and approved the implementation approach
+- [ ] **Capability mapping:** Required capability states and unlock paths documented for restricted flows
 
 ### 4. Dependencies & Prerequisites ✓
 
@@ -70,6 +71,7 @@ A user story is considered **"Ready for Development"** when ALL of the following
 - [ ] **Security testing:** Security test requirements included for auth, payments, or sensitive data flows
 - [ ] **Performance testing:** Performance test requirements specified (if applicable)
 - [ ] **Test data requirements:** Test scenarios and data needs documented
+- [ ] **Capability gating tests:** Plan covers blocked/unblocked scenarios where capabilities apply
 
 ### 7. Task Breakdown ✓
 

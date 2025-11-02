@@ -354,7 +354,7 @@ class StripeWebhookHandler {
 - [Stripe Connect Documentation](https://stripe.com/docs/connect)
 - [Stripe API Reference](https://stripe.com/docs/api)
 - [PCI Compliance Guide](https://stripe.com/docs/security)
-- [Payment Processing Best Practices](../payment-processing.md)
+- [Payment Processing Technical Specification](../../tech-spec-epic-12.md)
 
 ## Status Updates
 - **2025-10-09**: Accepted - Payment processing solution confirmed

@@ -343,6 +343,6 @@ Chosen solution balances integration with existing Serverpod infrastructure whil
 - ADR-008: Database Architecture Strategy
 
 **Related Documentation:**
-- [API Gateway Implementation Guide](../guides/api-gateway-implementation.md)
-- [Service Migration Guide](../guides/service-migration.md)
-- [Gateway Configuration Reference](../reference/gateway-config.md)
+- [API Gateway Implementation Guide](../api-gateway-routing-design.md)
+- [Service Migration Guide](../project-structure-implementation.md)
+- [Gateway Configuration Reference](../system-integration-maps.md)

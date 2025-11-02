@@ -274,7 +274,7 @@
 - [PRD Epic 2](../prd.md#epic-2-maker-authentication--access-control) - Business requirements
 - [Epic Validation Backlog](../process/epic-validation-backlog.md) - Epic tracking (100% Complete 36/36)
 - [Master Test Strategy](../testing/master-test-strategy.md) - Testing validation standards
-- [Epic 1 Tech Spec](./tech-spec-epic-1.md) - Authentication foundation dependency
+- [Epic 1 Tech Spec](../tech-spec-epic-1.md) - Authentication foundation dependency
 
 ---
 

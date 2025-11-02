@@ -6,6 +6,43 @@
 ## Executive Summary
 Comprehensive analysis identified **7 CRITICAL** and **15 MODERATE** misalignments between Brief/PRD and implementation stories. All issues resolved through systematic corrections prioritizing developer clarity and MVP scope adherence.
 
+## 2025-11-02 — Unified Account Capability Model
+**Initiated By:** Documentation Task Force (PM, Architect, Dev Lead, QA, Scrum Master)  
+**Scope:** Brief, PRD, Tech Specs Epics 1 & 2, Stories 2.x, Architecture, Analytics, Testing, Process Docs, Runbooks
+
+### Summary
+- Replaced invitation/RBAC-based maker onboarding with capability enablement model driven by verification and payout steps.
+- Updated product narrative and requirements to describe single polymorphic account with capability flags (`can_publish`, `can_collect_payments`, `can_fulfill_orders`).
+- Rewrote Epic 2 technical specification, stories, and architecture mappings to align with capability services, verification workflows, and device trust.
+- Adjusted analytics dashboard, runbook, testing strategy, and process governance to track capability unlock funnels and ensure readiness/DoD criteria cover capability gating.
+- Logged new capability operations flows in runbooks and ensured change captured in correction log.
+
+### Files Updated
+- `docs/brief.md`
+- `docs/prd.md`
+- `docs/tech-spec-epic-1.md`
+- `docs/tech-spec-epic-2.md`
+- `docs/stories/2.1.capability-enable-request-flow.md`
+- `docs/stories/2.2.verification-within-publish-flow.md`
+- `docs/stories/2.3.payout-and-compliance-activation.md`
+- `docs/stories/2.4.device-trust-and-risk-monitoring.md`
+- `docs/architecture/front-end-architecture.md`
+- `docs/architecture/story-component-mapping.md`
+- `docs/architecture/data-flow-mapping.md`
+- `docs/analytics/maker-access-dashboard.md`
+- `docs/runbooks/maker-access.md`
+- `docs/testing/master-test-strategy.md`
+- `docs/process/definition-of-ready.md`
+- `docs/process/definition-of-done.md`
+- `docs/process/story-approval-workflow.md`
+- `docs/unified-account-correction-plan.md`
+
+### Impact
+- Eliminates dual-account drift and deprecated `is_maker` boolean.
+- Ensures restricted flows (publish, checkout, fulfillment) rely on auditable capability state machine.
+- Provides governance teams with updated readiness/DoD checkpoints for capability mapping and testing.
+- Aligns analytics/runbooks with capability metrics to monitor unlock funnel and device trust health.
+
 ## Critical Misalignments Resolved
 
 ### 1. Timeline Carousel Feature (CRITICAL)

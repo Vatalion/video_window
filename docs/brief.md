@@ -16,17 +16,17 @@ Date: 2025-09-26
 - Urgency: The short-form wave continues; makers seek direct monetization and control. A focused MVP can validate conversion and unit economics.
 
 ## Proposed Solution
-- Approach: A TikTok-style feed that links to a Story page where an artifact’s narrative lives. Viewers can make offers; the first qualified offer (≥ maker minimum) opens a fixed 72h auction. Makers can accept the current high bid at any time, which ends the auction. Accepted sales move into a 24h payment window, followed by shipping and completion. Auctions use a 15‑minute soft close (bids in final 15 minutes extend by 15, capped at +24h).
-- Differentiators: Story-first artifact pages; clean separation of discovery (no prices in feed) vs. transaction in Story; soft-close auction tuned for crafts; maker-controlled auto-reject thresholds; lightweight maker dashboard.
-- Why it wins: Aligns with natural maker content, reduces friction from interest to purchase, and supports fair pricing via transparent bidding.
-- Vision: Become the default place to turn story-rich craft videos into owned artifacts, expanding into categories, richer creator tools, and community features.
+- Approach: A TikTok-style feed that links to a Story page where an artifact’s narrative lives. Any signed-in user can explore, make offers, and—once they enable creator capabilities—publish their own stories and fulfill orders. The first qualified offer (≥ creator minimum) opens a fixed 72h auction. Creators can accept the current high bid at any time, which ends the auction. Accepted sales move into a 24h payment window, followed by shipping and completion. Auctions use a 15‑minute soft close (bids in final 15 minutes extend by 15, capped at +24h).
+- Differentiators: Story-first artifact pages; clean separation of discovery (no prices in feed) vs. transaction in Story; soft-close auction tuned for crafts; configurable auto-reject thresholds; lightweight creator workspace unlocked only when needed.
+- Why it wins: Aligns with natural craft storytelling, keeps onboarding friction low by defaulting everyone to a shopper experience, and progressively unlocks selling tools only when a user chooses to create.
+- Vision: Become the default place to turn story-rich craft videos into owned artifacts, expanding into categories, richer creator tools, and community features without fragmenting the account model.
 
 ## Target Users
-### Primary User Segment: Independent Makers (Creators)
-**ICP**: Makers aged 25-45 producing unique physical artifacts (ceramics, jewelry, custom art, handcrafted goods) with strong narrative potential, earning $1K-$10K/month from existing channels, having 10K-100K social media followers. Needs: simple listing and storytelling, fair pricing, minimal back-and-forth, reliable payouts, inventory management.
+### Primary Persona: Creator-Capable Users
+**ICP**: Craft storytellers aged 25-45 producing unique physical artifacts (ceramics, jewelry, custom art, handcrafted goods) with strong narrative potential, earning $1K-$10K/month from existing channels, having 10K-100K social media followers. They join as shoppers, then enable **creator capabilities** (publish, collect payments, ship) after completing lightweight verification inside the flows that require it. Needs: simple listing and storytelling, fair pricing, minimal back-and-forth, reliable payouts, inventory management—all without a separate account.
 
-### Secondary User Segment: Viewers/Buyers of Maker Content
-**ICP**: Art collectors and craft enthusiasts aged 28-55, income $60K+, active on social platforms, purchase art/crafts 2-5x annually, value authenticity and maker stories. Wants: clear, trustworthy path to express intent, bid, and pay with predictable shipping and issue handling.
+### Secondary Persona: Shoppers & Fans
+**ICP**: Art collectors and craft enthusiasts aged 28-55, income $60K+, active on social platforms, purchasing art/crafts 2-5x annually, valuing authenticity and maker stories. They can remain shopper-only or opt into creator capabilities over time. Wants: clear, trustworthy path to express intent, bid, and pay with predictable shipping and issue handling.
 
 ## Goals & Success Metrics
 ### North Star Metric
@@ -62,13 +62,13 @@ Date: 2025-09-26
 - Clip Creator: In-app timeline to stitch and trim in-app clips; drag-to-reorder; choose Local (offline) or Server processing. See Technical Considerations → Clip Creator (MVP).
 - Offers/Auction mechanics: first qualified offer (≥ maker minimum) opens a 72h auction; 15‑minute soft close (extends by 15 on late bids, max +24h); min next bid = max(1%, 5 units); maker can accept the current high bid anytime to end the auction.
 - Payments/Checkout: via Stripe Checkout (hosted) with a 24h payment window; collect shipping address at payment; show fees/tax lines; webhook-driven state; retry/cancel on timeout.
-- Maker Dashboard: offers queue, active auctions, to-ship list, offer auto‑reject policy.
+- Creator Workspace: offers queue, active auctions, to-ship list, offer auto‑reject policy—surfaced only after the user unlocks publish + fulfill capabilities.
 - Social login: Sign in with Apple and Google; minimal profile + email (consent); link to existing accounts.
 - Push Notifications: Real-time alerts for offers, bids, auction endings, order updates, and maker activity.
 - Analytics: event set across feed→story→offer→bid→accept→pay→ship (consent); link to existing accounts.
 
 ### Out of Scope for MVP
-- External NLE/editor workflows, third-party ingest hardware, and advanced timeline editing; comments and real-time chat; integrated shipping label purchase; SMS authentication; saved payment methods; offline downloads/playback; robust search.
+- External NLE/editor workflows, third-party ingest hardware, and advanced timeline editing; comments and real-time chat; integrated shipping label purchase; SMS authentication; saved payment methods; offline downloads/playback; robust search; separate seller account type.
 
 ### MVP Success Criteria
 A cohort of listings converts from Story views to offers, auctions, and paid orders with SLA adherence (72h ship, 48h issues), demonstrating viable conversion and operational feasibility.
@@ -159,7 +159,7 @@ A cohort of listings converts from Story views to offers, auctions, and paid ord
 - At rest: Provider-managed encryption for DB, object storage, and backups.
 - Least data: Store only shipping/contact details required for fulfillment; never store PAN.
 - Secrets: Managed secret store; rotation ≤ 90 days; no secrets in code or logs.
-- AuthZ: Role-scoped access (buyer, maker, admin); server-side checks on all state transitions.
+- AuthZ: Capability-flag enforcement (`canPublish`, `canCollectPayments`, `canFulfillOrders`) validated server-side on every restricted transition.
 - Webhooks: Verify signatures; process idempotently; respond 2xx within 5s; safe retries.
 - Logging hygiene: Redact PII, tokens, and addresses; structured logs only; sampling on noisy paths.
 

@@ -266,7 +266,7 @@ class RedisService {
 ## References
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [Redis Documentation](https://redis.io/documentation)
-- [Database Architecture Guide](../database-architecture.md)
+- [Database Indexing Strategy](../database-indexing-strategy.md)
 - [Performance Optimization Guide](../performance-optimization-guide.md)
 
 ## Status Updates

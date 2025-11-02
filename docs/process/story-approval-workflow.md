@@ -103,6 +103,7 @@ Author   Validation      Sprint      Development   Testing      Complete
 - [ ] Integration points properly specified
 - [ ] Performance and security considerations addressed
 - [ ] Implementation guidance sufficient for development
+- [ ] Capability impacts documented for restricted flows (publish, payouts, fulfillment)
 
 **Outcomes:**
 - ✅ **Approve:** Sign off and proceed to test review
@@ -120,6 +121,7 @@ Author   Validation      Sprint      Development   Testing      Complete
 - [ ] Security testing requirements adequate
 - [ ] Performance testing criteria realistic and measurable
 - [ ] Test automation feasibility confirmed
+- [ ] Capability gating scenarios (blocked/unblocked) covered when applicable
 
 **Outcomes:**
 - ✅ **Approve:** Sign off and proceed to dev review
@@ -152,6 +154,7 @@ Author   Validation      Sprint      Development   Testing      Complete
 - [ ] Update story status to "Approved"
 - [ ] Add story to sprint planning backlog
 - [ ] Document approval date and approvers
+- [ ] Confirm capability mapping sign-off captured for restricted flow stories
 
 **Exit Criteria:**
 - All stakeholder approvals documented

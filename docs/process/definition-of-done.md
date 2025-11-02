@@ -55,6 +55,7 @@ A user story is considered **"Done"** when ALL of the following criteria are met
 - [ ] **Security review completed:** Security-sensitive changes reviewed by security-aware team member
 - [ ] **Data privacy validated:** Personal data handling complies with privacy requirements
 - [ ] **Authentication/authorization tested:** Auth flows work correctly with proper permission enforcement
+- [ ] **Capability gating validated:** Capability unlock and downgrade scenarios tested where applicable
 - [ ] **Input validation verified:** User inputs properly validated and sanitized
 - [ ] **Secrets management verified:** No hardcoded secrets, proper use of secret management systems
 
@@ -211,7 +212,7 @@ In exceptional circumstances, a story may be marked "Done" without meeting all D
 - [Definition of Ready](./definition-of-ready.md) - Criteria for story readiness
 - [Story Approval Workflow](./story-approval-workflow.md) - Complete story lifecycle
 - [Master Test Strategy](../testing/master-test-strategy.md) - Testing requirements and standards
-- [Quality Assurance Checklist](../testing/qa-checklist.md) - Detailed QA validation steps
+- [Quality Assurance Checklist](../testing/test-strategy-checklist.md) - Detailed QA validation steps
 
 ---
 

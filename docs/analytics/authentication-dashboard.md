@@ -1,7 +1,7 @@
 # Authentication Dashboard Specification
 
 ## Purpose
-Monitor the health and security posture of viewer and maker authentication flows across email OTP, social login, session refresh, and recovery.
+ Monitor the health and security posture of unified account authentication flows across email OTP, social login, session refresh, and recovery.
 
 ## Data Sources
 - **Datadog RUM/APM**: `auth.*` metrics emitted by mobile apps and Serverpod services.

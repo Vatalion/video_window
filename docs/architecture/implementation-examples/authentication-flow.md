@@ -1609,4 +1609,4 @@ class AuthEndpoint extends Endpoint {
 ---
 
 **Last Updated:** 2025-10-09
-**Related Examples:** [BLoC Patterns](../bloc-patterns.md) | [Serverpod Integration](../serverpod-integration-guide.md) | [Security Patterns](../security-patterns.md)
+**Related Examples:** [BLoC Implementation Guide](../bloc-implementation-guide.md) | [Serverpod Integration](../serverpod-integration-guide.md) | [Security Patterns](../pattern-library.md#security-patterns)

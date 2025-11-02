@@ -952,9 +952,9 @@ spec:
 ---
 
 **Related Documents:**
-- [Background Job Processing System](../background_jobs/)
-- [Event-Driven Architecture](../adr/ADR-0012-event-driven-architecture.md)
-- [API Gateway Implementation](../adr/ADR-001-api-gateway.md)
+- [Background Job Processing System](../serverpod-integration-guide.md#background-jobs-and-scheduled-tasks)
+- [Event-Driven Architecture](adr/ADR-0012-event-driven-architecture.md)
+- [API Gateway Implementation](adr/ADR-0011-api-gateway.md)
 
 **Next Steps:**
 1. Implement message queue monitoring

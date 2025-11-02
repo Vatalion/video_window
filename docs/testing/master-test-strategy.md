@@ -94,6 +94,7 @@ Unit Tests (70%)
 - External service integration (Stripe, SendGrid, S3)
 - Flutter integration tests for critical user flows
 - Serverpod service layer testing
+- Capability enablement pipeline (request → verification → unlock)
 
 **Tools & Frameworks:**
 - **Flutter:** `integration_test` package
@@ -119,7 +120,8 @@ Unit Tests (70%)
 - Video browsing and story consumption
 - Offer submission and auction participation
 - Payment processing and order fulfillment
-- Maker story creation and publishing
+- Creator story creation and publishing
+- Capability unlock flows (publish, payout, fulfillment)
 
 **Tools & Frameworks:**
 - **Flutter:** `integration_test` with golden tests
@@ -156,7 +158,7 @@ Unit Tests (70%)
 
 **Areas:**
 - **Authentication testing:** OTP generation, JWT validation, session management
-- **Authorization testing:** RBAC implementation, permission boundaries
+- **Authorization testing:** Capability gating enforcement, permission boundaries
 - **Input validation:** SQL injection, XSS, command injection resistance
 - **Cryptographic testing:** Encryption strength, key management, secure storage
 
@@ -369,6 +371,7 @@ For each user story, the following testing must be included:
 - [ ] **Security testing planned:** Security requirements identified and planned
 - [ ] **Performance criteria:** Performance targets specified with test approach
 - [ ] **Test data requirements:** Test scenarios and data needs documented
+- [ ] **Capability impact assessed:** Required capability states and unlock paths documented when story touches restricted flows
 
 #### **Definition of Done Testing Requirements**
 - [ ] **Unit tests implemented:** ≥80% coverage for new code
@@ -376,6 +379,7 @@ For each user story, the following testing must be included:
 - [ ] **Security tests executed:** Security requirements validated
 - [ ] **Performance tests passed:** Performance targets met
 - [ ] **Accessibility tested:** WCAG 2.1 AA compliance verified
+- [ ] **Capability gating verified:** Capability unlock/blocked states covered in automated tests
 
 ### Testing Checklist Template
 

@@ -1133,11 +1133,11 @@ CREATE INDEX idx_dsar_requests_status ON dsar_requests(status);
 **Blocks:** Epic 4 (Content Creation & Publishing) for user content management integration
 
 **Cross-References:**
-- [Security Configuration](../architecture/security-configuration.md) - Encryption, access controls, and security measures
+- [Security Configuration](architecture/security-configuration.md) - Encryption, access controls, and security measures
 - [OpenAPI Specification](../architecture/openapi-spec.yaml) - API endpoints and data models
-- [Compliance Guide](../compliance/compliance-guide.md) - GDPR/CCPA requirements and data protection
-- [Front-End Architecture](../architecture/front-end-architecture.md) - BLoC patterns and state management
-- [Database Architecture](../architecture/adr/ADR-0003-database-architecture.md) - Database schema and indexing
+- [Compliance Guide](compliance/compliance-guide.md) - GDPR/CCPA requirements and data protection
+- [Front-End Architecture](architecture/front-end-architecture.md) - BLoC patterns and state management
+- [Database Architecture](architecture/adr/ADR-0003-database-architecture.md) - Database schema and indexing
 
 ## Change Log
 | Date       | Version | Description                            | Author            |

@@ -13,12 +13,12 @@
 | Epic | Title | Document | Tech Spec | Stories | Validation Status |
 |------|-------|----------|-----------|---------|-------------------|
 | 1 | Viewer Authentication & Session Handling | [tech-spec-epic-1.md](tech-spec-epic-1.md) | ✅ Complete | ✅ 4 Stories | Ready for Validation |
-| 2 | Maker Authentication & Access Control | [tech-spec-epic-2.md](tech-spec-epic-2.md) | ✅ Complete | ✅ 4 Stories | Ready for Validation |
+| 2 | Capability Enablement & Verification | [tech-spec-epic-2.md](tech-spec-epic-2.md) | ✅ Complete | ✅ 4 Stories | Ready for Validation |
 | 3 | Profile & Settings Management | [tech-spec-epic-3.md](tech-spec-epic-3.md) | ✅ Complete | ✅ 5 Stories | Ready for Validation |
 | 4 | Feed Browsing Experience | [tech-spec-epic-4.md](tech-spec-epic-4.md) | ✅ Complete | ✅ 6 Stories | Ready for Validation |
 | 5 | Story Detail Playback & Consumption | [tech-spec-epic-5.md](tech-spec-epic-5.md) | ✅ Complete | ✅ 3 Stories | Ready for Validation |
 | 6 | Media Pipeline & Content Protection | [tech-spec-epic-6.md](tech-spec-epic-6.md) | ✅ Complete | ✅ 3 Stories | Ready for Validation |
-| 7 | Maker Story Capture & Editing Tools | [tech-spec-epic-7.md](tech-spec-epic-7.md) | ✅ Complete | ✅ 3 Stories | Ready for Validation |
+| 7 | Creator Story Capture & Editing Tools | [tech-spec-epic-7.md](tech-spec-epic-7.md) | ✅ Complete | ✅ 3 Stories | Ready for Validation |
 | 8 | Story Publishing & Moderation Pipeline | [tech-spec-epic-8.md](tech-spec-epic-8.md) | ✅ Complete | ❌ Missing | **CRITICAL** - No Stories |
 | 9 | Offer Submission Flow | [tech-spec-epic-9.md](tech-spec-epic-9.md) | ✅ Complete | ✅ 4 Stories | Ready for Validation |
 | 10 | Auction Timer & State Management | [tech-spec-epic-10.md](tech-spec-epic-10.md) | ✅ Complete | ✅ 4 Stories | Ready for Validation |

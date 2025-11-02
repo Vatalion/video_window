@@ -516,7 +516,7 @@ dart analyze --fatal-infos
 - [Flutter Documentation](https://docs.flutter.dev/)
 - [Serverpod Documentation](https://serverpod.dev/)
 - [Dart Style Guide](https://dart.dev/guides/language/effective-dart/style)
-- [Project Architecture](docs/architecture.md)
+- [Project Architecture](../architecture/tech-stack.md)
 
 ### 2. Tools
 - [Flutter DevTools](https://docs.flutter.dev/tools/devtools/overview)

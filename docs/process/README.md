@@ -114,7 +114,7 @@ Before any development work begins, confirm all items are ✅:
 #### **Technical Readiness**  
 - ✅ [Tech specs](../tech-spec.md) for target epics
 - ✅ Architecture decisions documented
-- ✅ Environment setup guides (see [GitHub Copilot Instructions](../.github/copilot-instructions.md))
+- ✅ Environment setup guides (see [GitHub Copilot Instructions](../../.github/copilot-instructions.md))
 
 #### **Process Readiness**
 - ✅ All governance documents in place
@@ -401,7 +401,7 @@ git merge emergency/docs-update-$(date +%Y%m%d)
 ## Related Links
 
 - [**Project README**](../../README.md) - Main project documentation
-- [**GitHub Copilot Instructions**](../.github/copilot-instructions.md) - AI agent guidance
+- [**GitHub Copilot Instructions**](../../.github/copilot-instructions.md) - AI agent guidance
 - [**PRD**](../prd.md) - Product Requirements Document
 - [**Architecture Overview**](../architecture/greenfield-implementation-guide.md) - Technical architecture
 

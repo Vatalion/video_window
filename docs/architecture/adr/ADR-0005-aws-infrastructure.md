@@ -412,7 +412,7 @@ Resources:
 - [AWS Documentation](https://docs.aws.amazon.com/)
 - [AWS Well-Architected Framework](https://docs.aws.amazon.com/wellarchitected/)
 - [Infrastructure Security Best Practices](../security-configuration.md)
-- [Cost Optimization Guide](../cost-optimization.md)
+- [Performance Optimization Guide](../performance-optimization-guide.md)
 
 ## Status Updates
 - **2025-10-09**: Accepted - AWS infrastructure strategy confirmed

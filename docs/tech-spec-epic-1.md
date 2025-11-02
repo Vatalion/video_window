@@ -33,14 +33,22 @@ class User {
   final String email;
   final String? phone;
   final AuthProvider authProvider;
-  final List<UserRole> roles;
+  final CapabilityFlags capabilities;
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
 }
 
+class CapabilityFlags {
+  final bool canPublish;
+  final bool canCollectPayments;
+  final bool canFulfillOrders;
+  final DateTime? identityVerifiedAt;
+  final DateTime? payoutConfiguredAt;
+  final DateTime? fulfillmentEnabledAt;
+}
+
 enum AuthProvider { email, google, apple }
-enum UserRole { viewer, maker, admin }
 ```
 
 ### Session Entity
@@ -251,7 +259,11 @@ class SessionService {
     final claims = {
       'sub': user.id,
       'email': user.email,
-      'roles': user.roles.map((r) => r.name).toList(),
+      'capabilities': {
+        'canPublish': user.capabilities.canPublish,
+        'canCollectPayments': user.capabilities.canCollectPayments,
+        'canFulfillOrders': user.capabilities.canFulfillOrders,
+      },
       'exp': DateTime.now().add(15.minutes).millisecondsSinceEpoch ~/ 1000,
     };
 
@@ -295,7 +307,11 @@ class SessionService {
 {
   "sub": "user_id",
   "email": "user@example.com",
-  "roles": ["viewer"],
+  "capabilities": {
+    "canPublish": true,
+    "canCollectPayments": false,
+    "canFulfillOrders": false
+  },
   "iat": 1697049600,
   "exp": 1697050500
 }
@@ -489,7 +505,12 @@ CREATE TABLE users (
   auth_provider VARCHAR(50) NOT NULL DEFAULT 'email',
   google_id VARCHAR(255),
   apple_id VARCHAR(255),
-  roles JSONB DEFAULT '["viewer"]',
+  can_publish BOOLEAN DEFAULT false,
+  can_collect_payments BOOLEAN DEFAULT false,
+  can_fulfill_orders BOOLEAN DEFAULT false,
+  identity_verified_at TIMESTAMP,
+  payout_configured_at TIMESTAMP,
+  fulfillment_enabled_at TIMESTAMP,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()

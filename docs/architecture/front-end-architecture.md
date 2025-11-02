@@ -97,7 +97,7 @@ packages/features/auth/
 - **Route definitions** centralized in the mobile client package for type safety
 - **Deep link handling** via dedicated deep link handler mapping URLs to features
 - **Feature route integration**: Feature packages export route constants but mobile client handles routing
-- **Route guards**: Maker-only areas protected via auth role checks in route middleware
+- **Route guards**: Capability-aware middleware checks user capability flags (publish, collect payments, fulfill orders) before entering restricted routes
 - **Navigation flow**: Mobile client BLoCs handle navigation state and route changes
 
 ## Networking & Data Layer Architecture
@@ -218,7 +218,7 @@ Future<Either<AuthFailure, User>> signIn(SignInParams params) async {
 
 ## Testing Strategy (Client)
 - Unit test BLoCs with bloc_test package and widgets with flutter_test.
-- Widget tests for critical screens (feed, story, offer modal, checkout, maker dashboard) verifying layout and accessibility semantics.
+- Widget tests for critical screens (feed, story, offer modal, checkout, creator workspace) verifying layout and accessibility semantics.
 - Golden tests once hi-fi designs finalized; store baselines under `test/goldens/` with story references.
 
 ## Collaboration Notes

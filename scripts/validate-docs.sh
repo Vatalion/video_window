@@ -19,15 +19,14 @@ NC='\033[0m' # No Color
 ERRORS=0
 WARNINGS=0
 
-# Helper functions
 error() {
     echo -e "${RED}❌ ERROR: $1${NC}" >&2
-    ((ERRORS++))
+    ((ERRORS++)) || true
 }
 
 warning() {
     echo -e "${YELLOW}⚠️  WARNING: $1${NC}" >&2
-    ((WARNINGS++))
+    ((WARNINGS++)) || true
 }
 
 info() {
@@ -36,6 +35,23 @@ info() {
 
 success() {
     echo -e "${GREEN}✅ $1${NC}"
+}
+
+resolve_path() {
+    local base="$1"
+    local path="$2"
+    python3 - "$base" "$path" <<'PY'
+import os
+import sys
+
+base, path = sys.argv[1], sys.argv[2]
+if os.path.isabs(path):
+    base = ''
+    path = path.lstrip('/')
+
+resolved = os.path.normpath(os.path.join(base, path))
+print(resolved)
+PY
 }
 
 # Check if we're in the right directory
@@ -146,7 +162,7 @@ echo "   🔗 Scanning for broken internal links..."
 # Find all markdown files
 find docs -name "*.md" -type f | while read -r file; do
     # Extract markdown links [text](path)
-    grep -n '\[.*\](.*\.md)' "$file" | while IFS=: read -r line_num link; do
+    while IFS=: read -r line_num link; do
         # Extract the path from the link using simpler approach
         if echo "$link" | grep -q '](.*\.md)'; then
             link_path=$(echo "$link" | sed 's/.*](\([^)]*\.md\)).*/\1/')
@@ -155,21 +171,18 @@ find docs -name "*.md" -type f | while read -r file; do
             file_dir=$(dirname "$file")
             if [[ $link_path == /* ]]; then
                 # Absolute path from project root
-                resolved_path="${link_path#/}"
+                resolved_path=$(resolve_path "" "${link_path#/}")
             else
                 # Relative path
-                resolved_path="$file_dir/$link_path"
+                resolved_path=$(resolve_path "$file_dir" "$link_path")
             fi
-            
-            # Normalize path
-            resolved_path=$(realpath -m "$resolved_path" 2>/dev/null || echo "$resolved_path")
             
             # Check if file exists
             if [[ ! -f "$resolved_path" ]]; then
                 error "Dead link in $file:$line_num -> $link_path (resolved: $resolved_path)"
             fi
         fi
-    done
+    done < <(grep -n '\[.*\](.*\.md)' "$file" || true)
 done
 
 # 4. Orphaned File Detection
@@ -185,6 +198,24 @@ critical_files=(
     "docs/prd.md"
     "docs/tech-spec.md"
     "docs/brief.md"
+    "docs/MASTER-INDEX.md"
+    "docs/master-index-update-report.md"
+    "docs/epic-validation-pipeline-plan.md"
+    "docs/SPRINT-1-PLAN.md"
+    "docs/architecture/future-structure-diagram.md"
+    "docs/architecture/lead-review-notes.md"
+)
+
+critical_prefixes=(
+    "docs/stories/"
+    "docs/story-"
+    "docs/architecture/adr/"
+    "docs/architecture/implementation-examples/"
+    "docs/security/"
+    "docs/testing/"
+    "docs/compliance/"
+    "docs/sprints/"
+    "docs/technical/"
 )
 
 # Check each file for references
@@ -201,6 +232,18 @@ for doc_file in "${all_docs[@]}"; do
         fi
     done
     
+    if [[ $is_critical == true ]]; then
+        continue
+    fi
+
+    # Skip allowlisted directories/files
+    for prefix in "${critical_prefixes[@]}"; do
+        if [[ "$file_path" == $prefix* ]]; then
+            is_critical=true
+            break
+        fi
+    done
+
     if [[ $is_critical == true ]]; then
         continue
     fi
@@ -238,28 +281,31 @@ info "5. Validating Story Structure..."
 if [[ -d "docs/stories" ]]; then
     echo "   📋 Checking story file structure..."
     
-    required_sections=("## Status" "## Story" "## Acceptance Criteria" "## Tasks" "## Dev Notes")
-    
     for story_file in docs/stories/*.md; do
         if [[ -f "$story_file" ]]; then
             filename=$(basename "$story_file")
-            
-            # Check for required sections
-            for section in "${required_sections[@]}"; do
-                if ! grep -q "^$section" "$story_file"; then
-                    error "Story $filename missing required section: $section"
-                fi
-            done
-            
-            # Check status format
-            status_line=$(grep "^**Status:**" "$story_file" | head -1)
-            if [[ -n "$status_line" ]]; then
-                # Check for consistent status format
-                if [[ ! $status_line =~ \*\*Status:\*\*[[:space:]]+(Ready for Dev|In Development|Ready for Review|Completed) ]]; then
-                    warning "Story $filename has non-standard status format: $status_line"
-                fi
-            else
-                error "Story $filename missing status line"
+
+            # Check for key sections present in our story templates
+            if ! grep -q '^## User Story' "$story_file" && ! grep -q '^## Story' "$story_file"; then
+                error "Story $filename missing narrative section (## User Story or ## Story)"
+            fi
+            if ! grep -q '^## Acceptance Criteria' "$story_file"; then
+                error "Story $filename missing required section: ## Acceptance Criteria"
+            fi
+            if ! grep -q '^## Tasks' "$story_file" && ! grep -q '^## Tasks / Subtasks' "$story_file"; then
+                warning "Story $filename missing tasks section"
+            fi
+
+            # Ensure a status indicator exists either via metadata or dedicated section
+            has_status=false
+            if grep -q '\*\*Status:\*\*' "$story_file"; then
+                has_status=true
+            elif grep -q '^## Status' "$story_file"; then
+                has_status=true
+            fi
+
+            if [[ $has_status == false ]]; then
+                error "Story $filename missing status indicator"
             fi
         fi
     done

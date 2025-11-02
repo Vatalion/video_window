@@ -17,11 +17,6 @@
 - [Validation Report Template](process/validation-report-template.md)
 
 ## Technical Specifications (18 Total)
-### Foundation Epics (Infrastructure)
-- [Epic 01: Environment & CI/CD Enablement](tech-spec-epic-01.md) ✅ APPROVED
-- [Epic 02: Core Platform Services](tech-spec-epic-02.md)
-- [Epic 03: Observability & Compliance](tech-spec-epic-03.md)
-
 ### Feature Epics (User-Facing)
 - [Epic 1: Viewer Authentication](tech-spec-epic-1.md)
 - [Epic 2: Maker Authentication](tech-spec-epic-2.md)
@@ -62,31 +57,22 @@
 - [17.2: KPI Dashboards](stories/17.2-dashboards.md) - 8 pts
 - [17.3: Automated Reporting](stories/17.3-reporting.md) - 5 pts
 
-## Validation Reports (20 Total)
-- [Epic 01 Validation](validation-report-20251028T000000Z.md)
-- [Epic 02 Validation](validation-report-epic-02-20251030.md)
-- [Epic 03 Validation](validation-report-epic-03-20251030.md)
-- [Epic 1 Validation](validation-report-20251028T000300Z.md)
-- [Epic 2 Validation](validation-report-20251028T000400Z.md)
-- [Epic 3 Validation](validation-report-20251028T000500Z.md)
-- [Epic 4 Validation](validation-report-20251028T000600Z.md)
-- [Epic 5 Validation](validation-report-20251028T000700Z.md)
-- [Epic 6 Validation](validation-report-20251028T000800Z.md)
-- [Epic 7 Validation](validation-report-20251028T000900Z.md)
-- [Epic 8 Validation](validation-report-epic-08-20251030.md)
-- [Epic 11 Validation](validation-report-epic-11-20251030.md)
-- [Epic 12 Validation](validation-report-20251028T000000Z.md)
-- [Epic 13 Validation](validation-report-epic-13-20251030.md)
-- [Epic 14 Validation](validation-report-epic-14.md)
-- [Epic 15 Validation](validation-report-epic-15.md)
-- [Epic 16 Validation](validation-report-epic-16.md)
-- [Epic 17 Validation](validation-report-epic-17.md)
-- [Validation Status Consolidation](validation-status-consolidation.md)
+## Validation Reports
+- [Epic 01 Validation](validation-reports/epic-01-validation-report.md)
+- [Epic 02 Validation](validation-reports/epic-2-validation-report.md)
+- [Epic 03 Validation](validation-reports/epics-6-17-consolidated-validation-report.md#epic-3)
+- [Epic 1 Validation](validation-reports/epic-1-validation-report.md)
+- [Epic 2 Validation](validation-reports/epic-2-validation-report.md)
+- [Epic 3 Validation](validation-reports/epic-3-validation-report.md)
+- [Epic 4 Validation](validation-reports/epic-4-validation-report.md)
+- [Epic 5 Validation](validation-reports/epic-5-validation-report.md)
+- [Epics 6-17 Consolidated](validation-reports/epics-6-17-consolidated-validation-report.md)
+- [Master Validation Summary](validation-reports/MASTER-VALIDATION-SUMMARY-REPORT.md)
 
 ## Status Reports
-- [TODO Comprehensive Fix List](TODO-COMPREHENSIVE-FIX-LIST.md) ✅ COMPLETE
-- [Final Status Report](FINAL-TODO-STATUS-REPORT.md) ✅ COMPLETE
-- [Approval & Validation Completion](APPROVAL-VALIDATION-COMPLETION-REPORT.md)
+- [Documentation Maintenance Report](documentation-maintenance-implementation-report.md)
+- [Documentation Readiness Final Report](documentation-readiness-final-report.md)
+- [Process Alignment Verification](process-alignment-verification.md)
 
 ## Metrics
 - **Epic Coverage:** 20/20 (100%) ✅

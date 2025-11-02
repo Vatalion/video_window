@@ -458,6 +458,6 @@ void main() {
 
 **Related Documentation**:
 - [Testing Strategy](testing-strategy.md)
-- [Quality Criteria](quality-criteria.md)
-- [User Story Template](../product/user-story-template.md)
-- [Test Management Guide](testing/test-management-guide.md)
+- [Quality Criteria Checklist](test-strategy-checklist.md)
+- [User Story Template](../../bmad/bmm/workflows/2-plan-workflows/tech-spec/user-story-template.md)
+- [Test Management Guide](master-test-strategy.md)

@@ -87,9 +87,9 @@ Chose Option B: Video Auctions Platform. This provides:
 - ADR-0008: API Design: Serverpod RPC + REST
 
 ## References
-- [Platform Vision Document](../../vision-craft-auctions.md)
-- [Market Analysis](../experiments/2025-09-22-spike-auction-rules-mvp.md)
-- [Technical Spike Results](../experiments/summaries/README.md)
+- [Platform Vision Document](../../brief.md)
+- [Market Analysis](../../analytics/offers-dashboard.md)
+- [Technical Spike Results](../../architecture-consolidation-report.md)
 
 ## Status Updates
 - **2025-09-22**: Accepted - Direction pivot approved

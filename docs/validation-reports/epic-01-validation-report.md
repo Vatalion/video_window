@@ -262,7 +262,7 @@
 - [PRD Epic 01](../prd.md#epic-01-environment--cicd-enablement) - Business requirements
 - [Epic Validation Backlog](../process/epic-validation-backlog.md) - Epic tracking and prioritization
 - [Master Test Strategy](../testing/master-test-strategy.md) - Testing validation standards
-- [Copilot Instructions](.github/copilot-instructions.md) - Architecture patterns and monorepo structure
+- [Copilot Instructions](../../.github/copilot-instructions.md) - Architecture patterns and monorepo structure
 - [Definition of Ready](../process/definition-of-ready.md) - Story readiness criteria
 
 ---

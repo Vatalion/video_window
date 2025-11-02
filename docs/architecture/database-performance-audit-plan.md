@@ -703,8 +703,8 @@ alerts:
 
 **Related Documents:**
 - [Database Indexing Strategy](database-indexing-strategy.md)
-- [API Gateway Implementation](../adr/ADR-001-api-gateway.md)
-- [Event-Driven Architecture](../adr/ADR-002-event-driven-architecture.md)
+- [API Gateway Implementation](adr/ADR-0011-api-gateway.md)
+- [Event-Driven Architecture](adr/ADR-0012-event-driven-architecture.md)
 
 **Next Steps:**
 1. Implement automated audit scripts

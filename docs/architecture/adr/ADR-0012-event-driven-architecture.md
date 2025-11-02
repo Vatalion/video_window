@@ -639,6 +639,6 @@ class ConsumerHealthMonitor {
 - ADR-004: Background Job Processing
 
 **Related Documentation:**
-- [Event Bus Implementation Guide](../guides/event-bus-implementation.md)
-- [Event Schema Reference](../reference/event-schemas.md)
-- [Consumer Group Configuration](../reference/consumer-groups.md)
+- [Event Bus Implementation Guide](../message-queue-architecture.md)
+- [Event Schema Reference](../../stories/17.1-event-schema.md)
+- [Consumer Group Configuration](../message-queue-architecture.md)

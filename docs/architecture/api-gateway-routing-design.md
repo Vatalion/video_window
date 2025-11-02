@@ -713,5 +713,5 @@ This routing design provides a solid foundation for scaling the Video Window pla
 
 **Related Documents:**
 - [ADR-0011: API Gateway Implementation](adr/ADR-0011-api-gateway.md)
-- [API Gateway Implementation Guide](../guides/api-gateway-implementation.md)
-- [Service Migration Guide](../guides/service-migration.md)
+- [API Gateway Implementation Guide](system-integration-maps.md)
+- [Service Migration Guide](project-structure-implementation.md)

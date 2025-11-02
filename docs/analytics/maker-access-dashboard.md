@@ -1,44 +1,50 @@
-# Maker Access Dashboard Specification
+# Capability Enablement Dashboard Specification
 
 ## Purpose
-Provide visibility into maker onboarding, RBAC changes, KYC processing, and device security posture.
+Provide unified-account visibility into capability requests, verification throughput, payout activation, and device trust health so operations teams can keep publish, payment, and fulfillment flows unblocked.
 
 ## Data Sources
-- **Datadog Metrics**: `maker.invitation.*`, `maker.rbac.*`, `maker.kyc.*`, `maker.device.*`
-- **Serverpod Audit Stream**: `audit.invitation`, `audit.rbac`, `audit.kyc`
-- **Segment Analytics**: Onboarding funnel events (`maker_invite_sent`, `maker_invite_claimed`, `maker_kyc_submitted`, `maker_device_registered`).
+- **Metrics Warehouse**: `capability.requests.*`, `capability.unlocked.*`, `capability.blockers.*`, `device.trust.*`
+- **Datadog Metrics**: `capability.api.latency`, `capability.api.errors`, `capability.blockers.active`
+- **Serverpod Audit Stream**: `audit.capability`, `audit.verification`, `audit.device_trust`
+- **Analytics Events**: `capability_request_submitted`, `publish_verification_completed`, `payout_activation_completed`, `device_trust_revoked`
+- **Stripe/Persona Webhooks**: Aggregated success/failure payloads for payout onboarding and identity checks
 
 ## Panels & Metrics
-1. **Invitation Lifecycle**
-   - Invitations created vs. claimed vs. expired
-   - Claim success rate by role bundle
-   - Rate limit violations and brute-force attempts
-2. **RBAC Activity**
-   - Role assignment volume (heatmap by actor)
-  - Cache invalidation latency (target <5s)
-   - Permission denial count by API endpoint
-3. **KYC Processing**
-   - Persona session statuses (pending, under_review, verified, rejected)
-   - Average time from submission to decision (target <24h)
-   - Document upload failure reasons (oversize, mime, encryption errors)
-4. **Device Security**
-   - New device registrations per day
-   - High-risk device revocations
-   - MFA/attestation failures
+1. **Capability Funnel**
+   - Requests → in review → unlocked counts by capability (`publish`, `collect_payments`, `fulfill_orders`)
+   - Auto-approval vs. manual review rate (target ≥85% auto for publish)
+   - Median time-to-unlock per capability (SLO: publish <10m, payout <1h, fulfillment <2h)
+   - Rate-limit violations and duplicate requests flagged as anomalies
+2. **Blocker Diagnostics**
+   - Top blocker codes (`identity_docs_missing`, `stripe_requirements_due`, `device_trust_low`)
+   - Age distribution of active blockers (<1h, 1–24h, >24h)
+   - Cache invalidation latency (target <5s) and retry success rate after blocker surfaced
+3. **Verification Health**
+   - Persona outcome mix (approved, rejected, pending) with rejection reasons
+   - Stripe Express onboarding completion vs. abandonment funnel
+   - Tax document submission success rate and average resubmissions
+4. **Device Trust Monitoring**
+   - New trusted devices per day and average trusted devices per user
+   - Low-trust alerts and revocations (threshold breaches, jailbreak/root detections)
+   - Capability downgrades triggered by device events with follow-through status
 5. **Compliance Snapshot**
-   - Makers by verification status
-   - Audit log ingestion lag
-   - CSV export success rate
+   - Users with active capabilities by geography and content volume
+   - Audit event ingestion lag (ingest → warehouse) target <2 min
+   - CSV export success rate for compliance reviews
 
 ## Alerts
-- **Invitation Failures > 10/min** → Ops Slack `#maker-ops`
-- **RBAC Changes > 5/10min by same actor** → Security Ops PagerDuty
-- **Persona Webhook Failures > 3 consecutive** → Compliance On-Call
-- **Device Revocation Spike (>5 in 10min)** → Maker Reliability On-Call
+- **Capability Request Backlog > 50 pending for 15 min** → Slack `#capability-ops`
+- **Manual review queue > 10 for >30 min** → PagerDuty Capability Ops
+- **Persona webhook failures ≥3 consecutive** → PagerDuty Compliance On-Call
+- **Stripe onboarding failures >5 in 10 min** → PagerDuty Payments On-Call
+- **Device trust downgrades >10 in 10 min** → Slack `#security-ops`
+- **Blocker age >24h for ≥5 users** → Slack `#support-escalations`
 
 ## Ownership
-- **Primary**: Maker Access Team Lead
+- **Primary**: Capability Operations Lead
 - **Secondary**: Compliance Program Manager
+- **Engineering Support**: Identity & Payments squad for data anomalies
 
 ## Runbook
-Refer to `docs/runbooks/maker-access.md` for incident remediation steps and manual overrides.
+Refer to `docs/runbooks/maker-access.md` for incident remediation steps, manual overrides, and escalation paths.

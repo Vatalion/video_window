@@ -333,6 +333,23 @@ extension UserExtension on User {
 }
 ```
 
+### 5. Capability Enablement Data Flow
+
+Unified accounts rely on capability flags (`canPublish`, `canCollectPayments`, `canFulfillOrders`) instead of maker-only roles. Each restricted action follows the transformation chain below:
+
+1. **UI Layer** — Inline guards (publish CTA, checkout button, fulfillment actions) consult `CapabilityBloc`/`CapabilityCenterBloc` to read the latest `UserCapabilities` snapshot. Missing capability triggers the guided checklist dialog and dispatches a capability request event.
+2. **BLoC Layer** — Emits `CapabilityRequested` event containing capability enum, entry point, and optional draft/order identifiers. The BLoC validates client-side prerequisites and delegates to `RequestCapabilityUseCase`.
+3. **Use Case Layer** — Normalizes metadata (caps enum strings, trims context) and calls `CapabilityRepository.requestCapability`, attaching idempotency tokens and device fingerprint hash where required.
+4. **Repository Layer** — Translates domain objects to Serverpod DTOs, invokes `capability_service.requestCapability`, and maps the `CapabilityStatusDto` response back to domain `UserCapabilities` with blocker messages.
+5. **Serverpod Layer** — `capability_service` upserts `capability_requests`, triggers verification tasks (Persona, Stripe), evaluates device trust via `device_trust_service`, and emits audit events (`capability.requested`, `capability.unlocked`).
+6. **Client Update** — Repository response updates BLoC state; unlock events remove UI guards. Downstream flows subscribe to capability event stream so publish/checkout buttons enable without full-screen refresh.
+
+**Transformation Rules**
+- Treat capability names as enums/value objects to avoid raw string drift.
+- Map server-provided blocker codes to localized copy via `CapabilityBlockerMapper` before reaching UI layer.
+- Preserve correlation IDs across layers for audit traceability and analytics funnels.
+- Device telemetry is redacted client-side; trust scoring occurs server-side with only score/blocker returned.
+
 ## Error Handling Across Layer Boundaries
 
 ### Error Transformation Chain
