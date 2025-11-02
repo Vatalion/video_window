@@ -367,7 +367,7 @@ DELETE /users/me/blocked-users/{userId}
   - Modify `video_window_flutter/packages/core/lib/data/repositories/profile/profile_repository.dart` to expose async methods for avatar upload, privacy updates, notification settings, and DSAR actions. Ensure value objects wrap inbound strings before Serverpod calls. (Stories 3.1–3.5)
   - Create `profile_media_repository.dart` with presigned URL retrieval, multipart upload via `dio`, and virus scan status polling using retry with exponential backoff. (Story 3.2)
 2. **Serverpod Endpoint Expansion**
-  - Extend `video_window_server/lib/src/endpoints/profile/profile_endpoint.dart` with handlers for `/privacy-settings`, `/notification-preferences`, `/dsar/export`, `/dsar/delete`, and `/account`. Gate each mutation with RBAC checks from Epic 2 and encrypt sensitive payloads via `profile_encryption_service.dart`. (Stories 3.3–3.5)
+  - Extend `video_window_server/lib/src/endpoints/profile/profile_endpoint.dart` with handlers for `/privacy-settings`, `/notification-preferences`, `/dsar/export`, `/dsar/delete`, and `/account`. Gate each mutation with capability checks per Epic 2 and encrypt sensitive payloads via `profile_encryption_service.dart`. (Stories 3.3–3.5)
   - Create `media_endpoint.dart` to issue presigned uploads and receive AWS Lambda scan callbacks; enqueue resizing tasks through `media_processing_service.dart`. (Story 3.2)
 3. **Security & Compliance Hardening**
   - Update `profile_encryption_service.dart` to use AES-256-GCM with per-user DEKs sealed by KMS CMK `alias/video-window-profile`. Store DEK metadata in `user_profiles.encryption_context` and rotate keys quarterly. (Story 3.5)
@@ -875,7 +875,7 @@ class PrivacyEnforcementService {
 | AC3 – Granular privacy controls | `privacy_settings_page_test.dart`, `privacy_manager_service_test.dart` | Widget + Unit |
 | AC4 – PII encryption | `profile_encryption_service_test.dart`, `encryption_roundtrip_test.dart` | Unit + Integration |
 | AC5 – DSAR functionality | `dsar_workflow_integration_test.dart` | Integration |
-| AC6 – RBAC enforcement | `profile_endpoint_authorization_test.dart` | Integration |
+| AC6 – Authorization enforcement | `profile_endpoint_authorization_test.dart` | Integration |
 | AC7 – Notification preferences matrix | `notification_preferences_page_test.dart`, `notification_manager_service_test.dart` | Widget + Unit |
 | AC8 – Security regression coverage | `security_profile_regression_test.dart` | Security |
 

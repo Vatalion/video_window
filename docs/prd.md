@@ -272,7 +272,7 @@ I want to authenticate with Apple and Google,
 so that I can use existing accounts seamlessly.
 #### Acceptance Criteria
 1. Configure Apple Sign-In (iOS) and Google Sign-In (iOS/Android) per platform guidelines.
-2. Serverpod reconciles social identities, preventing duplicate viewer accounts.
+2. Serverpod reconciles social identities, preventing duplicate user accounts.
 3. Fallback to email OTP if social auth fails, with analytics capturing drop-off.
 4. **UNIFIED AUTH**: Social accounts link to the same user model as email OTP sign-ins, with capability unlock handled after sign-in.
 

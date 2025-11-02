@@ -276,7 +276,7 @@ class TimerError extends AuctionTimerState {
    - Create `soft_close_service.dart` evaluating incoming bids: extend auction by `SOFT_CLOSE_EXTENSION_MINUTES` when bids arrive within final 15 minutes, capping at `SOFT_CLOSE_MAX_EXTENSION_MINUTES`.
    - Persist soft-close windows in Redis sorted set to avoid duplicate extensions; record audit entries in `auction_state_service.dart`.
    - Build `auction_soft_close_bloc.dart` to display active extensions and countdown UI animations via `soft_close_indicator.dart`.
-   - Introduce manual override endpoint `auction_soft_close_endpoint.dart` for operations to extend/terminate soft-close windows; secure with admin RBAC.
+   - Introduce manual override endpoint `auction_soft_close_endpoint.dart` for operations to extend/terminate soft-close windows; secure with admin authorization (infrastructure RBAC).
 3. **Auction State Transitions & Notifications (Story 10.3)**
    - Enhance `auction_state_service.dart` to manage state machine: `pending → active → ended|accepted → completed`, with transitions triggered by timer expiry, maker acceptance, or cancellation.
    - Emit EventBridge events (`auctions.state.changed`) and SNS notifications for maker/buyer updates.
