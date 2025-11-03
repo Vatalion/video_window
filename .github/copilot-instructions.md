@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**Craft Video Marketplace** is a Flutter-based mobile marketplace enabling video content creators to monetize through auction-based sales. Built with **Flutter 3.19.6**, **Dart 3.5.6**, and **Serverpod 2.9.x** as a modular monolith backend with PostgreSQL + Redis.
+**Craft Video Marketplace** is a Flutter-based mobile marketplace enabling video content creators to monetize through auction-based sales. Built with **Flutter 3.35.4+** (minimum 3.19.6), **Dart 3.9.2+** (minimum 3.5.6), and **Serverpod 2.9.x** as a modular monolith backend with PostgreSQL 15+ + Redis 7.2.4+.
 
 **Business Model**: TikTok-style feed → Story pages → Offer/Auction mechanics → Stripe-hosted checkout → Shipping & fulfillment.
 
@@ -276,4 +276,4 @@ melos run test
 
 ---
 
-**Last Updated**: 2025-10-30 | **Flutter**: 3.19.6 | **Dart**: 3.5.6 | **Serverpod**: 2.9.x | **Governance**: ✅ Complete
+**Last Updated**: 2025-11-03 | **Flutter**: 3.35.4+ (min 3.19.6) | **Dart**: 3.9.2+ (min 3.5.6) | **Serverpod**: 2.9.x | **Governance**: ✅ Complete

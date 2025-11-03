@@ -3,9 +3,9 @@
 A Flutter-based mobile marketplace enabling video content creators to monetize through auction-based sales.
 
 **Tech Stack:**
-- **Frontend**: Flutter 3.19.6 / Dart 3.5.6
+- **Frontend**: Flutter 3.35.4+ / Dart 3.9.2+ (minimum: Flutter 3.19.6 / Dart 3.5.6)
 - **Backend**: Serverpod 2.9.x (Modular Monolith)
-- **Database**: PostgreSQL 15 + Redis 7.2.4
+- **Database**: PostgreSQL 15+ + Redis 7.2.4+
 
 ---
 
@@ -13,17 +13,19 @@ A Flutter-based mobile marketplace enabling video content creators to monetize t
 
 Before you begin, ensure you have the following installed:
 
-- **Flutter SDK**: 3.19.6 or later
-- **Dart SDK**: 3.5.6 or later
+- **Flutter SDK**: 3.19.6 or later (tested with 3.35.4)
+- **Dart SDK**: 3.5.6 or later (tested with 3.9.2)
 - **Serverpod CLI**: `dart pub global activate serverpod_cli`
+- **Melos**: `dart pub global activate melos` (for workspace management)
 - **Docker Desktop**: For running PostgreSQL and Redis
 - **Git**: For version control
 
 ### Verify Installation
 
 ```bash
-flutter --version   # Should be >=3.19.6
-dart --version      # Should be >=3.5.6
+flutter --version   # Should be >=3.19.6 (current: 3.35.4)
+dart --version      # Should be >=3.5.6 (current: 3.9.2)
+melos --version     # Should be >=3.0.0
 serverpod --version # Should be 2.9.x
 docker --version    # For database services
 ```

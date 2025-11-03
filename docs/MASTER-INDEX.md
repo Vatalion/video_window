@@ -1,7 +1,7 @@
 # Master Documentation Index
 
-**Last Updated:** 2025-11-03 (Framework docs completed)
-**Status:** ✅ COMPREHENSIVE - All Documentation Indexed + 21 Framework Guides Complete
+**Last Updated:** 2025-11-03 (Infrastructure epics completed)
+**Status:** ✅ COMPREHENSIVE - All Documentation Indexed + 23 Tech Specs + 21 Framework Guides Complete
 
 ---
 
@@ -79,7 +79,12 @@
 
 ---
 
-## 🎯 Technical Specifications (20 Total)
+## 🎯 Technical Specifications (23 Total)
+
+### Infrastructure Epics
+- [Epic 01: Environment & CI/CD Setup](tech-spec-epic-01.md) ✅ NEW
+- [Epic 02: Core Platform Services](tech-spec-epic-02.md) ✅ NEW
+- [Epic 03: Observability & Compliance](tech-spec-epic-03.md) ✅ NEW
 
 ### Foundational Epics
 - [Epic 1: Viewer Authentication](tech-spec-epic-1.md)
@@ -355,7 +360,7 @@
 - **Core Documents:** 3/3 (100%) ✅
 - **Process Docs:** 8/8 (100%) ✅
 - **Architecture Docs:** 35+ files ✅
-- **Tech Specs:** 20/20 (100%) ✅
+- **Tech Specs:** 23/23 (100%) ✅
 - **User Stories:** 77 total ✅
 - **Validation Reports:** 17 reports ✅
 - **Testing Docs:** 4/4 (100%) ✅
