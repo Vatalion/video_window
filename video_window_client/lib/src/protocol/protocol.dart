@@ -33,6 +33,21 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i1.getType<_i2.Greeting?>()) {
       return (data != null ? _i2.Greeting.fromJson(data) : null) as T;
     }
+    if (t == Map<String, dynamic>) {
+      return (data as Map).map((k, v) =>
+          MapEntry(deserialize<String>(k), deserialize<dynamic>(v))) as T;
+    }
+    if (t == _i1.getType<Map<String, dynamic>?>()) {
+      return (data != null
+          ? (data as Map).map((k, v) =>
+              MapEntry(deserialize<String>(k), deserialize<dynamic>(v)))
+          : null) as T;
+    }
+    if (t == List<Map<String, dynamic>>) {
+      return (data as List)
+          .map((e) => deserialize<Map<String, dynamic>>(e))
+          .toList() as T;
+    }
     return super.deserialize<T>(data, t);
   }
 

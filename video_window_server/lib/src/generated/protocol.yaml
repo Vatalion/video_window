@@ -1,2 +1,17 @@
+health:
+  - check:
+auth:
+  - sendOtp:
+  - verifyOtp:
+offer:
+  - submitOffer:
+order:
+  - getOrder:
+  - updateShipping:
+payment:
+  - createCheckoutSession:
+story:
+  - getFeed:
+  - getStory:
 greeting:
   - hello:

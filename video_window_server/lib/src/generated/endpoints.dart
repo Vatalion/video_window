@@ -10,19 +10,275 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
-import '../greeting_endpoint.dart' as _i2;
+import '../endpoints/health_endpoint.dart' as _i2;
+import '../endpoints/identity/auth_endpoint.dart' as _i3;
+import '../endpoints/offers/offer_endpoint.dart' as _i4;
+import '../endpoints/orders/order_endpoint.dart' as _i5;
+import '../endpoints/payments/payment_endpoint.dart' as _i6;
+import '../endpoints/story/story_endpoint.dart' as _i7;
+import '../greeting_endpoint.dart' as _i8;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
   void initializeEndpoints(_i1.Server server) {
     var endpoints = <String, _i1.Endpoint>{
-      'greeting': _i2.GreetingEndpoint()
+      'health': _i2.HealthEndpoint()
+        ..initialize(
+          server,
+          'health',
+          null,
+        ),
+      'auth': _i3.AuthEndpoint()
+        ..initialize(
+          server,
+          'auth',
+          null,
+        ),
+      'offer': _i4.OfferEndpoint()
+        ..initialize(
+          server,
+          'offer',
+          null,
+        ),
+      'order': _i5.OrderEndpoint()
+        ..initialize(
+          server,
+          'order',
+          null,
+        ),
+      'payment': _i6.PaymentEndpoint()
+        ..initialize(
+          server,
+          'payment',
+          null,
+        ),
+      'story': _i7.StoryEndpoint()
+        ..initialize(
+          server,
+          'story',
+          null,
+        ),
+      'greeting': _i8.GreetingEndpoint()
         ..initialize(
           server,
           'greeting',
           null,
-        )
+        ),
     };
+    connectors['health'] = _i1.EndpointConnector(
+      name: 'health',
+      endpoint: endpoints['health']!,
+      methodConnectors: {
+        'check': _i1.MethodConnector(
+          name: 'check',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['health'] as _i2.HealthEndpoint).check(session),
+        )
+      },
+    );
+    connectors['auth'] = _i1.EndpointConnector(
+      name: 'auth',
+      endpoint: endpoints['auth']!,
+      methodConnectors: {
+        'sendOtp': _i1.MethodConnector(
+          name: 'sendOtp',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint).sendOtp(
+            session,
+            params['email'],
+          ),
+        ),
+        'verifyOtp': _i1.MethodConnector(
+          name: 'verifyOtp',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'code': _i1.ParameterDescription(
+              name: 'code',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint).verifyOtp(
+            session,
+            params['email'],
+            params['code'],
+          ),
+        ),
+      },
+    );
+    connectors['offer'] = _i1.EndpointConnector(
+      name: 'offer',
+      endpoint: endpoints['offer']!,
+      methodConnectors: {
+        'submitOffer': _i1.MethodConnector(
+          name: 'submitOffer',
+          params: {
+            'storyId': _i1.ParameterDescription(
+              name: 'storyId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'amount': _i1.ParameterDescription(
+              name: 'amount',
+              type: _i1.getType<double>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['offer'] as _i4.OfferEndpoint).submitOffer(
+            session,
+            params['storyId'],
+            params['amount'],
+          ),
+        )
+      },
+    );
+    connectors['order'] = _i1.EndpointConnector(
+      name: 'order',
+      endpoint: endpoints['order']!,
+      methodConnectors: {
+        'getOrder': _i1.MethodConnector(
+          name: 'getOrder',
+          params: {
+            'orderId': _i1.ParameterDescription(
+              name: 'orderId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['order'] as _i5.OrderEndpoint).getOrder(
+            session,
+            params['orderId'],
+          ),
+        ),
+        'updateShipping': _i1.MethodConnector(
+          name: 'updateShipping',
+          params: {
+            'orderId': _i1.ParameterDescription(
+              name: 'orderId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'trackingNumber': _i1.ParameterDescription(
+              name: 'trackingNumber',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['order'] as _i5.OrderEndpoint).updateShipping(
+            session,
+            params['orderId'],
+            params['trackingNumber'],
+          ),
+        ),
+      },
+    );
+    connectors['payment'] = _i1.EndpointConnector(
+      name: 'payment',
+      endpoint: endpoints['payment']!,
+      methodConnectors: {
+        'createCheckoutSession': _i1.MethodConnector(
+          name: 'createCheckoutSession',
+          params: {
+            'orderId': _i1.ParameterDescription(
+              name: 'orderId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['payment'] as _i6.PaymentEndpoint)
+                  .createCheckoutSession(
+            session,
+            params['orderId'],
+          ),
+        )
+      },
+    );
+    connectors['story'] = _i1.EndpointConnector(
+      name: 'story',
+      endpoint: endpoints['story']!,
+      methodConnectors: {
+        'getFeed': _i1.MethodConnector(
+          name: 'getFeed',
+          params: {
+            'limit': _i1.ParameterDescription(
+              name: 'limit',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'offset': _i1.ParameterDescription(
+              name: 'offset',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['story'] as _i7.StoryEndpoint).getFeed(
+            session,
+            limit: params['limit'],
+            offset: params['offset'],
+          ),
+        ),
+        'getStory': _i1.MethodConnector(
+          name: 'getStory',
+          params: {
+            'storyId': _i1.ParameterDescription(
+              name: 'storyId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['story'] as _i7.StoryEndpoint).getStory(
+            session,
+            params['storyId'],
+          ),
+        ),
+      },
+    );
     connectors['greeting'] = _i1.EndpointConnector(
       name: 'greeting',
       endpoint: endpoints['greeting']!,
@@ -40,7 +296,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['greeting'] as _i2.GreetingEndpoint).hello(
+              (endpoints['greeting'] as _i8.GreetingEndpoint).hello(
             session,
             params['name'],
           ),

@@ -220,13 +220,22 @@ UI Widget → BLoC Event → Use Case → Repository → Serverpod Client → Ba
 
 ## 📚 Documentation
 
+### Getting Started
+- **[Development Guide](docs/development.md)** - Setup, workflows, and common tasks ⭐
+- **[AI Agent Instructions](.github/copilot-instructions.md)** - Guardrails for AI-assisted development
+
+### Architecture & Standards
 - **[PRD](docs/prd.md)** - Product Requirements Document
 - **[Tech Stack](docs/architecture/tech-stack.md)** - Technology choices
 - **[Coding Standards](docs/architecture/coding-standards.md)** - Code conventions
 - **[BLoC Guide](docs/architecture/bloc-implementation-guide.md)** - State management patterns
 - **[Serverpod Docs](docs/frameworks/serverpod/README.md)** - Framework integration
+
+### Process & Testing
 - **[Test Strategy](docs/testing/master-test-strategy.md)** - Testing approach
 - **[Process Guide](docs/process/README.md)** - Development process
+- **[Definition of Ready](docs/process/definition-of-ready.md)** - Story readiness checklist
+- **[Definition of Done](docs/process/definition-of-done.md)** - Completion criteria
 
 ---
 

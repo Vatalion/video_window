@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="13.3.delivery-confirmation-flow" generated="2025-11-05">
+  <metadata>
+    <epic>13</epic>
+    <story>3</story>
+    <title>Delivery Confirmation Flow</title>
+    <status>ready-for-dev</status>
+    <story-file>docs/stories/13.3.delivery-confirmation-flow.md</story-file>
+    <epic-context>docs/epic-13-context.md</epic-context>
+  </metadata>
+  <user-story>
+    <as-a>user</as-a>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
+  </user-story>
+  <acceptance-criteria>
+    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+  </acceptance-criteria>
+  <story-tasks>
+    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+  </story-tasks>
+  <artifacts>
+    <docs>
+      <doc><path>docs/tech-spec-epic-13.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
+      <doc><path>docs/epic-13-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+    </docs>
+    <code>
+      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
+      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+    </code>
+  </artifacts>
+  <constraints>
+    <constraint priority="HIGH">Follow architecture patterns and coding standards</constraint>
+    <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
+  </constraints>
+  <tests>
+    <standards><standard>Unit and integration tests required</standard></standards>
+    <locations><location>test/</location></locations>
+    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+  </tests>
+</story-context>

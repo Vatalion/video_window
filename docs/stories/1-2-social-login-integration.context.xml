@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="1-2-social-login-integration" generated="2025-11-05">
+  <metadata>
+    <epic>1</epic>
+    <story>2</story>
+    <title>Social Login Integration</title>
+    <status>ready-for-dev</status>
+    <story-file>docs/stories/1.2.add-social-sign-in-options.md</story-file>
+    <epic-context>docs/epic-1-context.md</epic-context>
+  </metadata>
+  <user-story>
+    <as-a>viewer</as-a>
+    <i-want>to authenticate with Apple and Google</i-want>
+    <so-that>I can use existing accounts seamlessly</so-that>
+  </user-story>
+  <acceptance-criteria>
+    <criterion id="ac1">Configure Apple Sign-In (iOS) and Google Sign-In (iOS/Android) per platform guidelines</criterion>
+    <criterion id="ac2">Serverpod reconciles social identities, preventing duplicate viewer accounts</criterion>
+    <criterion id="ac3">Fallback to email OTP if social auth fails, with analytics capturing drop-off</criterion>
+    <criterion id="ac4" priority="UNIFIED AUTH">Uses same authentication flow as Story 1.1 - social auth creates/links accounts using same user model</criterion>
+  </acceptance-criteria>
+  <story-tasks>
+    <task id="task1"><description>Set up social authentication dependencies - Add Apple/Google Sign-In SDKs</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task2"><description>Create social authentication UI components following design system tokens</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task3"><description>Implement Apple Sign-In integration with BLoC flow</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task4"><description>Implement Google Sign-In integration with BLoC flow</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task5"><description>Build Serverpod social auth endpoints with account reconciliation logic</description><acceptance-criteria>ac2</acceptance-criteria></task>
+    <task id="task6"><description>Implement fallback authentication flow with analytics</description><acceptance-criteria>ac3</acceptance-criteria></task>
+  </story-tasks>
+  <artifacts>
+    <docs>
+      <doc><path>docs/tech-spec-epic-1.md</path><section>Authentication Endpoints</section><snippet>Social authentication endpoints for Apple/Google token validation and account reconciliation</snippet></doc>
+      <doc><path>docs/stories/1.1.implement-email-sms-sign-in.md</path><section>Dev Notes</section><snippet>Security patterns for JWT tokens, rate limiting, and secure storage to extend to social flows</snippet></doc>
+    </docs>
+    <code>
+      <artifact><path>video_window_flutter/packages/features/auth/lib/presentation/widgets/social_sign_in/</path><kind>ui-components</kind><symbol>social_sign_in_widgets</symbol><reason>Social sign-in buttons and flow screens</reason></artifact>
+      <artifact><path>video_window_server/lib/src/endpoints/identity/</path><kind>backend-endpoint</kind><symbol>social_auth_endpoints</symbol><reason>Apple/Google token validation and account reconciliation</reason></artifact>
+    </code>
+    <interfaces>
+      <interface><name>Apple Sign-In SDK</name><kind>platform-sdk</kind><signature>iOS platform-specific implementation</signature></interface>
+      <interface><name>Google Sign-In SDK</name><kind>platform-sdk</kind><signature>Cross-platform iOS/Android implementation</signature></interface>
+    </interfaces>
+    <dependencies>
+      <flutter><package name="sign_in_with_apple" version="6.1.1"/><package name="google_sign_in" version="6.2.1"/></flutter>
+    </dependencies>
+  </artifacts>
+  <constraints>
+    <constraint priority="CRITICAL">Social auth tokens must follow same security patterns as JWT tokens (RS256, 15-minute expiry)</constraint>
+    <constraint priority="HIGH">Account reconciliation must handle same email across providers and prevent duplicates</constraint>
+    <constraint priority="HIGH">Rate limiting extends to social auth attempts to prevent abuse</constraint>
+    <constraint priority="MEDIUM">Analytics tracking for social auth success/failure/drop-off rates required</constraint>
+  </constraints>
+  <tests>
+    <standards><standard>Unit tests for token validation and account reconciliation logic</standard><standard>Integration tests for Apple/Google sign-in flows (mocked)</standard><standard>≥80% coverage required</standard></standards>
+    <locations><location>video_window_flutter/packages/features/auth/test/</location><location>video_window_server/test/endpoints/identity/</location></locations>
+    <ideas>
+      <test-case ac="ac1">Apple Sign-In success flow → Account created/linked</test-case>
+      <test-case ac="ac2">Same email via Google and Apple → Single account maintained</test-case>
+      <test-case ac="ac3">Social auth failure → Fallback to email OTP triggered</test-case>
+    </ideas>
+  </tests>
+</story-context>

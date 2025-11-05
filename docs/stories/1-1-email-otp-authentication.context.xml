@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="1-1-email-otp-authentication" generated="2025-11-05">
+  <metadata>
+    <epic>1</epic>
+    <story>1</story>
+    <title>Email OTP Authentication</title>
+    <status>ready-for-dev</status>
+    <story-file>docs/stories/1.1.implement-email-sms-sign-in.md</story-file>
+    <epic-context>docs/epic-1-context.md</epic-context>
+  </metadata>
+
+  <user-story>
+    <as-a>user (viewer or maker)</as-a>
+    <i-want>to sign in with email one-time passwords</i-want>
+    <so-that>I can access the marketplace without needing a password</so-that>
+  </user-story>
+
+  <acceptance-criteria>
+    <criterion id="ac1">OTP-based email flow with multi-layer rate limiting, account lockout, and comprehensive success/failure messaging</criterion>
+    <criterion id="ac2">Secure token storage using enhanced Flutter secure storage with AES-256-GCM encryption, RS256 JWT tokens, 15-minute expiry, and automatic refresh rotation via Serverpod</criterion>
+    <criterion id="ac3">Integration tests cover happy path, invalid OTP attempts, brute force resistance, and token manipulation scenarios</criterion>
+    <criterion id="ac4" priority="SECURITY CRITICAL">Implement cryptographically secure OTP generation with user-specific salts and 5-minute maximum validity</criterion>
+    <criterion id="ac5" priority="SECURITY CRITICAL">Implement progressive account lockout (5 failed attempts → 30 min → 1 hour → 24 hour locks)</criterion>
+    <criterion id="ac6" priority="SECURITY CRITICAL">Implement comprehensive JWT token validation with device binding and token blacklisting</criterion>
+    <criterion id="ac7" priority="UNIFIED AUTH">Same authentication flow serves both viewers and makers, with role differentiation happening after successful sign-in</criterion>
+  </acceptance-criteria>
+
+  <story-tasks>
+    <task id="task1" phase="Phase 1 Critical Security Controls">
+      <description>SECURITY CRITICAL - SEC-001: Implement cryptographically secure OTP generation service with user-specific salts and SHA-256 hashing</description>
+      <acceptance-criteria>ac4, ac6</acceptance-criteria>
+      <subtasks>
+        <subtask>Use Random.secure() for 6-digit code generation with 5-minute maximum validity</subtask>
+        <subtask>Store OTP hashes only, never plaintext, with user-specific salt generation</subtask>
+        <subtask>Implement one-time use enforcement and immediate OTP invalidation after successful use</subtask>
+      </subtasks>
+    </task>
+    <task id="task2" phase="Phase 1 Critical Security Controls">
+      <description>SECURITY CRITICAL - SEC-001: Implement multi-layer rate limiting with Redis-based enforcement</description>
+      <acceptance-criteria>ac1, ac4, ac5</acceptance-criteria>
+      <subtasks>
+        <subtask>Layer 1: Per-identifier rate limiting (3 requests/5min, 5 requests/1hr, 10 requests/24hr)</subtask>
+        <subtask>Layer 2: Per-IP rate limiting (20 requests/5min, 100 requests/1hr)</subtask>
+        <subtask>Layer 3: Global rate limiting with progressive delays for failed attempts</subtask>
+      </subtasks>
+    </task>
+    <task id="task3" phase="Phase 1 Critical Security Controls">
+      <description>SECURITY CRITICAL - SEC-001: Implement progressive account lockout mechanism</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+      <subtasks>
+        <subtask>3 failed attempts → 5 minute lock</subtask>
+        <subtask>5 failed attempts → 30 minute lock</subtask>
+        <subtask>10 failed attempts → 1 hour lock</subtask>
+        <subtask>15 failed attempts → 24 hour lock</subtask>
+        <subtask>Secure email notifications for account lockouts</subtask>
+      </subtasks>
+    </task>
+    <task id="task4" phase="Phase 1 Critical Security Controls">
+      <description>SECURITY CRITICAL - SEC-003: Implement secure JWT token generation with RS256 asymmetric encryption</description>
+      <acceptance-criteria>ac2, ac6</acceptance-criteria>
+      <subtasks>
+        <subtask>Use RS256 algorithm with asymmetric key pairs (more secure than HS256)</subtask>
+        <subtask>Set 15-minute access token expiry with comprehensive claims (jti, device_id, session_id)</subtask>
+        <subtask>Implement key rotation policy with secure key management</subtask>
+      </subtasks>
+    </task>
+    <task id="task5" phase="Standard Implementation">
+      <description>Implement OTP request UI and BLoC state to capture email identifiers using shared design tokens</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task6" phase="Standard Implementation">
+      <description>Connect the OTP request flow to the Identity service POST /auth/email/send-otp</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+  </story-tasks>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/security/story-1.1-authentication-security-research.md</path>
+        <title>Authentication Security Research</title>
+        <section>OTP Security Best Practices</section>
+        <snippet>Cryptographically secure OTP generation with user-specific salts, SHA-256 hashing, 5-minute validity, and one-time use enforcement</snippet>
+      </doc>
+      <doc>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic 1 Technical Specification</title>
+        <section>Authentication Endpoints</section>
+        <snippet>POST /auth/email/send-otp accepts email and returns 200 on dispatch or 429 on rate limit; Identity service federates OTP and social login</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/front-end-architecture.md</path>
+        <title>Frontend Architecture</title>
+        <section>State Management</section>
+        <snippet>BLoC-based state management with feature-scoped BLoCs; auth module owns OTP, session refresh, and logout UX</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/architecture.md</path>
+        <title>System Architecture</title>
+        <section>Identity Service</section>
+        <snippet>Identity service manages token issuance, refresh logic via Postgres users and sessions tables; JWT/session tokens with refresh handling</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Functional Requirements</section>
+        <snippet>Email OTP authentication with SendGrid dispatch, analytics events for OTP request attempts</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>video_window_flutter/packages/features/auth/lib/presentation/</path>
+        <kind>feature-presentation</kind>
+        <symbol>auth_feature</symbol>
+        <reason>UI and state code for OTP flows with BLoC pattern</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_flutter/packages/core/lib/data/</path>
+        <kind>data-layer</kind>
+        <symbol>repositories</symbol>
+        <reason>Secure storage, encryption helpers, and repository implementations</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/identity/</path>
+        <kind>backend-endpoint</kind>
+        <symbol>identity_endpoints</symbol>
+        <reason>Serverpod API handlers for OTP generation and verification</reason>
+      </artifact>
+    </code>
+
+    <interfaces>
+      <interface>
+        <name>POST /auth/email/send-otp</name>
+        <kind>REST endpoint</kind>
+        <signature>Request: { "email": string } | Response: 200 OK | 429 Too Many Requests</signature>
+        <path>video_window_server/lib/src/endpoints/identity/</path>
+      </interface>
+      <interface>
+        <name>flutter_secure_storage</name>
+        <kind>package</kind>
+        <signature>SecureStorage.write(key, value) | SecureStorage.read(key) | AES-256-GCM encryption</signature>
+        <path>video_window_flutter/packages/core/</path>
+      </interface>
+      <interface>
+        <name>AuthBloc</name>
+        <kind>BLoC</kind>
+        <signature>Events: SendOtpRequested, VerifyOtpRequested | States: OtpSent, OtpVerified, AuthError</signature>
+        <path>video_window_flutter/packages/features/auth/lib/presentation/bloc/</path>
+      </interface>
+    </interfaces>
+
+    <dependencies>
+      <flutter>
+        <package name="flutter_secure_storage" version="9.2.2"/>
+        <package name="google_sign_in" version="6.2.1"/>
+        <package name="sign_in_with_apple" version="6.1.1"/>
+        <package name="flutter_bloc" version="^8.1.0"/>
+      </flutter>
+      <dart>
+        <package name="bcrypt" version="4.0.1"/>
+        <package name="jwt" version="3.0.1"/>
+      </dart>
+      <serverpod>
+        <package name="serverpod" version="2.9.2"/>
+        <package name="sendgrid-dart" version="7.12.0"/>
+      </serverpod>
+      <infrastructure>
+        <service name="PostgreSQL" version="15+"/>
+        <service name="Redis" version="7.2.4"/>
+        <service name="SendGrid" version="API v3"/>
+      </infrastructure>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint priority="CRITICAL">All OTP implementations must use cryptographically secure generation with user-specific salts and never store plaintext OTPs</constraint>
+    <constraint priority="CRITICAL">JWT tokens must use RS256 asymmetric encryption with 15-minute expiry and comprehensive claims including device binding</constraint>
+    <constraint priority="CRITICAL">Rate limiting must be multi-layer (per-identifier, per-IP, global) with progressive account lockout mechanisms</constraint>
+    <constraint priority="CRITICAL">Flutter secure storage must use AES-256-GCM encryption with platform-specific security configurations</constraint>
+    <constraint priority="HIGH">Email delivery service rate limits apply; implement client-side rate messaging aligned with backend protections</constraint>
+    <constraint priority="HIGH">Error handling must surface friendly messages and retry actions via shared ErrorView components</constraint>
+    <constraint priority="HIGH">All security controls must implement comprehensive logging and monitoring for security incident detection</constraint>
+    <constraint priority="MEDIUM">Maintain ≥80% test coverage for auth flows</constraint>
+  </constraints>
+
+  <tests>
+    <standards>
+      <standard>Integration tests required for identity flows with ≥80% coverage</standard>
+      <standard>Auth BLoCs use bloc_test package for state transitions</standard>
+      <standard>Widget tests for critical screens using flutter_test</standard>
+      <standard>Run `dart format`, `flutter analyze`, `flutter test --no-pub` before submission</standard>
+    </standards>
+    <locations>
+      <location>video_window_flutter/packages/features/auth/test/presentation/</location>
+      <location>video_window_flutter/packages/features/auth/test/use_cases/</location>
+      <location>video_window_server/test/endpoints/identity/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Happy path: User enters email → OTP sent → User enters valid OTP → Session created</test-case>
+      <test-case ac="ac1,ac5">Invalid OTP: User enters wrong OTP 3 times → 5 minute lockout triggered</test-case>
+      <test-case ac="ac2">Token refresh: Access token expires → Refresh token used → New access token issued</test-case>
+      <test-case ac="ac3">Brute force resistance: 1000+ OTP attempts within rate limits → All blocked by rate limiter</test-case>
+      <test-case ac="ac3,ac6">Token manipulation: Modified JWT signature → Validation fails → Request rejected</test-case>
+      <test-case ac="ac4">OTP expiration: OTP older than 5 minutes → Verification fails</test-case>
+      <test-case ac="ac6">Device binding: Token used from different device → Validation fails</test-case>
+    </ideas>
+  </tests>
+
+  <notes>
+    <note type="architecture">Monorepo structure with Serverpod backend, Melos-managed Flutter workspace, and path dependencies between packages</note>
+    <note type="security">This story implements SEC-001 and SEC-003 security controls from the security research document</note>
+    <note type="integration">SendGrid integration for email delivery with rate limiting coordination between client and server</note>
+    <note type="unified-auth">Unified authentication flow serves both viewers and makers with role differentiation post-authentication</note>
+  </notes>
+</story-context>

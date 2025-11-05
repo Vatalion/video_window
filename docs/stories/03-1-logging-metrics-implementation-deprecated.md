@@ -1,10 +1,12 @@
-# Story 3.1: Implement Structured Logging and Metrics
+# Story 03.1: Implement Structured Logging and Metrics (DEPRECATED - See 03-1)
 
-**Epic:** 3 - Observability & Compliance Baseline  
-**Story ID:** 3.1  
+**Epic:** 03 - Observability & Compliance Baseline  
+**Story ID:** 03.1 (DEPRECATED)  
 **Priority:** P0 - Critical (Foundation)  
 **Estimated Effort:** 8 story points  
-**Status:** Draft
+**Status:** DEPRECATED - Replaced by 03-1-logging-metrics-implementation.md
+
+**NOTE:** This file has been deprecated due to duplicate story numbering. The active story is `03-1-logging-metrics-implementation.md`.
 
 ---
 

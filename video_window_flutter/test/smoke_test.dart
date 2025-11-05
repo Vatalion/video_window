@@ -6,17 +6,22 @@ void main() {
   testWidgets('App smoke test - launches without crashing',
       (WidgetTester tester) async {
     // Build our app and trigger a frame
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const VideoWindowApp());
 
-    // Verify the app launches
+    // Allow async initialization to complete
+    await tester.pumpAndSettle();
+
+    // Verify the app launches with MaterialApp.router
     expect(find.byType(MaterialApp), findsOneWidget);
   });
 
-  testWidgets('App displays Serverpod demo UI', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
+  testWidgets('App displays welcome screen', (WidgetTester tester) async {
+    await tester.pumpWidget(const VideoWindowApp());
+    await tester.pumpAndSettle();
 
-    // Verify demo text appears (Serverpod-generated content)
-    expect(find.textContaining('Serverpod'), findsWidgets);
+    // Verify welcome text appears
+    expect(find.text('Welcome to Craft Video Marketplace'), findsOneWidget);
+    expect(find.text('Foundation infrastructure ready'), findsOneWidget);
   });
 
   test('Story 01.1 AC1 - Flutter project with passing widget test', () {
