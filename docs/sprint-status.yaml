@@ -38,7 +38,7 @@ story_location: "{project-root}/docs/stories"
 development_status:
   # Epic 01: Environment & CI/CD Setup
   epic-01: contexted
-  01-1-bootstrap-repository-structure: ready-for-dev
+  01-1-bootstrap-repository-structure: done
   01-2-local-development-environment: ready-for-dev
   01-3-code-generation-workflows: ready-for-dev
   01-4-ci-cd-pipeline: ready-for-dev
