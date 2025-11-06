@@ -44,7 +44,8 @@ void main() {
 
     test('isEnabled returns default value for new flag', () async {
       final enabled = await service.isEnabled(FeatureFlags.socialLoginEnabled);
-      expect(enabled, equals(FeatureFlags.defaults[FeatureFlags.socialLoginEnabled]));
+      expect(enabled,
+          equals(FeatureFlags.defaults[FeatureFlags.socialLoginEnabled]));
     });
 
     test('setOverride changes flag value', () async {
@@ -81,7 +82,7 @@ void main() {
 
     test('getAllFlags returns all flags', () async {
       final flags = await service.getAllFlags();
-      
+
       expect(flags.length, equals(FeatureFlags.defaults.length));
       expect(flags, containsPair(FeatureFlags.socialLoginEnabled, isFalse));
       expect(flags, containsPair(FeatureFlags.videoEditingEnabled, isTrue));

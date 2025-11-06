@@ -49,7 +49,7 @@ development_status:
   02-1-design-system-theme-foundation: done
   02-2-navigation-infrastructure-routing: done
   02-3-configuration-management-feature-flags: done
-  02-4-analytics-service-foundation: ready-for-dev
+  02-4-analytics-service-foundation: done
   epic-02-retrospective: optional
 
   # Epic 03: Operational Foundation

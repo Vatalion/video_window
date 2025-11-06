@@ -2,7 +2,7 @@
 
 **Epic:** 03 - Observability & Compliance  
 **Story ID:** 03-1  
-**Status:** Ready for Development
+**Status:** ready-for-dev
 
 ## User Story
 **As an** operations team  
@@ -31,7 +31,7 @@
 
 ### Context Reference
 
-<!-- Path(s) to story context XML will be added here by context workflow -->
+- `docs/stories/03-1-logging-metrics-implementation.context.xml`
 
 ### Agent Model Used
 
