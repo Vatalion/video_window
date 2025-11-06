@@ -19,6 +19,12 @@
 - [x] **AC5:** Flutter app can connect to local Serverpod backend
 - [x] **AC6:** Developer documentation includes setup instructions (<10 min to complete)
 
+## Tasks / Subtasks
+
+<!-- Tasks will be defined based on acceptance criteria -->
+- [ ] Task 1: Define implementation tasks
+  - [ ] Subtask 1.1: Break down acceptance criteria into actionable items
+
 ## Technical Notes
 
 ### Dependencies
@@ -44,14 +50,6 @@
 - [x] Update README.md with improved Quick Start instructions
 - [x] Write integration tests for all acceptance criteria
 - [x] Verify all tests pass
-
-## File List
-
-- `docker-compose.yml` - Docker Compose configuration with PostgreSQL 16 and Redis 7.2.4
-- `.env.example` - Environment variable template with documentation
-- `docs/runbooks/local-development-setup.md` - Comprehensive setup guide
-- `README.md` - Updated Quick Start section
-- `video_window_server/test/integration/local_environment_test.dart` - Integration tests
 
 ## Dev Agent Record
 
@@ -86,6 +84,14 @@
 - Correct versions specified
 - Environment variables properly externalized
 - Documentation complete and accurate
+
+### File List
+
+- `docker-compose.yml` - Docker Compose configuration with PostgreSQL 16 and Redis 7.2.4
+- `.env.example` - Environment variable template with documentation
+- `docs/runbooks/local-development-setup.md` - Comprehensive setup guide
+- `README.md` - Updated Quick Start section
+- `video_window_server/test/integration/local_environment_test.dart` - Integration tests
 
 ## Change Log
 
@@ -204,3 +210,5 @@ Test validates:
 ### Action Items
 
 **No action items required** - Story approved for completion ✅
+
+

@@ -16,6 +16,12 @@
 - [x] **AC4:** Pre-commit hooks validate generated code is up-to-date
 - [x] **AC5:** CI pipeline fails if generated code is stale
 
+## Tasks / Subtasks
+
+<!-- Tasks will be defined based on acceptance criteria -->
+- [ ] Task 1: Define implementation tasks
+  - [ ] Subtask 1.1: Break down acceptance criteria into actionable items
+
 ## Definition of Done
 - [x] All acceptance criteria met
 - [x] Documentation complete
@@ -91,15 +97,15 @@
 - ✅ README updated with clear instructions
 - ✅ CI workflow syntax validated
 
-## File List
+### File List
 
-### Created Files
+#### Created Files
 - `docs/runbooks/code-generation-workflow.md` - Comprehensive runbook (450+ lines)
 - `scripts/validate-generated-code.sh` - Validation automation script
 - `scripts/install-git-hooks.sh` - Git hooks installation script
 - `scripts/test-validation.sh` - Test suite for validation scripts
 
-### Modified Files
+#### Modified Files
 - `video_window_flutter/.gitignore` - Added generated file patterns
 - `video_window_server/.gitignore` - Added generated/ folder exclusion
 - `.github/workflows/quality-gates.yml` - Added generated code validation step
@@ -211,3 +217,5 @@ All tasks claimed as complete have been verified:
 - Note: Consider adding validation to the existing `melos run setup` command to ensure generated code is fresh after initial setup
 - Note: Future enhancement could include auto-generation on file save for protocol files (similar to generate:watch for Flutter)
 - Note: Documentation is comprehensive - future stories can reference this runbook as the authoritative guide
+
+
