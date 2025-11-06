@@ -46,8 +46,8 @@ development_status:
 
   # Epic 02: App Shell & Core Infrastructure
   epic-02: contexted
-  02-1-design-system-theme-foundation: ready-for-dev
-  02-2-navigation-infrastructure-routing: ready-for-dev
+  02-1-design-system-theme-foundation: done
+  02-2-navigation-infrastructure-routing: done
   02-3-configuration-management-feature-flags: ready-for-dev
   02-4-analytics-service-foundation: ready-for-dev
   epic-02-retrospective: optional
