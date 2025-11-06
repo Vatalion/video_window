@@ -1,0 +1,10 @@
+{
+  "apiBaseUrl": "https://api.videowindow.app",
+  "serverpodHost": "api.videowindow.app",
+  "serverpodPort": 443,
+  "useHttps": true,
+  "firebaseProjectId": "video-window-prod",
+  "enableAnalytics": true,
+  "enableCrashReporting": true,
+  "debugMode": false
+}

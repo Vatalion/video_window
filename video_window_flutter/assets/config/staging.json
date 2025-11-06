@@ -1,0 +1,10 @@
+{
+  "apiBaseUrl": "https://staging-api.videowindow.app",
+  "serverpodHost": "staging-api.videowindow.app",
+  "serverpodPort": 443,
+  "useHttps": true,
+  "firebaseProjectId": "video-window-staging",
+  "enableAnalytics": true,
+  "enableCrashReporting": true,
+  "debugMode": true
+}
