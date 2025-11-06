@@ -172,8 +172,19 @@ dart test
 
 ## 🔧 Development Workflows
 
+### Initial Setup - Install Git Hooks (Recommended)
+
+Install pre-commit hooks to automatically validate generated code:
+
+```bash
+./scripts/install-git-hooks.sh
+```
+
+This ensures generated code stays synchronized and prevents common mistakes.
+
 ### Code Generation
 
+**Serverpod Backend:**
 After making changes to Serverpod protocol files:
 
 ```bash
@@ -181,11 +192,30 @@ cd video_window_server
 serverpod generate
 ```
 
+**Flutter Packages:**
+For build_runner code generation (JSON serialization, Freezed, etc.):
+
+```bash
+# From project root or video_window_flutter
+melos run generate
+```
+
+**Validate Generated Code:**
+Check if all generated code is up-to-date:
+
+```bash
+./scripts/validate-generated-code.sh
+```
+
 This regenerates:
-- `video_window_client/` - API client
-- `video_window_shared/` - Shared models
+- `video_window_client/` - API client (from Serverpod)
+- `video_window_shared/` - Shared models (from Serverpod)
+- `**/*.g.dart` - JSON serialization
+- `**/*.freezed.dart` - Freezed immutable classes
 
 **⚠️ NEVER edit generated files manually!**
+
+> 📖 **Detailed Guide**: See [Code Generation Workflow](docs/runbooks/code-generation-workflow.md) for complete documentation.
 
 ### Database Migrations
 

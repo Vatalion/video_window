@@ -45,7 +45,28 @@ jobs:
         run: melos run deps
 
       - name: Generate code
-        run: melos run generate
+        run: |
+          cd video_window_server
+          serverpod generate
+          cd ..
+          melos run generate
+
+      - name: Check generated code is up-to-date
+        run: |
+          if ! git diff --quiet --exit-code; then
+            echo "❌ Generated code is stale!"
+            echo ""
+            echo "Files with uncommitted changes:"
+            git diff --name-only
+            echo ""
+            echo "Run code generation locally and commit the changes:"
+            echo "  cd video_window_server && serverpod generate"
+            echo "  melos run generate"
+            echo "  git add ."
+            echo "  git commit -m 'chore: update generated code'"
+            exit 1
+          fi
+          echo "✅ All generated code is up-to-date"
 
       - name: Check code formatting
         run: melos run format-check
