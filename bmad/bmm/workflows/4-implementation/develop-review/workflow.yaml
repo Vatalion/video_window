@@ -1,0 +1,58 @@
+# Develop-Review Loop Workflow
+name: develop-review
+description: "Automated development and review loop - continuously develops story, reviews implementation, addresses findings, and repeats until approved. One-shot ping-pong workflow."
+author: "BMad"
+
+# Critical variables from config
+config_source: "{project-root}/bmad/bmm/config.yaml"
+output_folder: "{config_source}:output_folder"
+user_name: "{config_source}:user_name"
+communication_language: "{config_source}:communication_language"
+user_skill_level: "{config_source}:user_skill_level"
+document_output_language: "{config_source}:document_output_language"
+story_dir: "{config_source}:dev_story_location"
+date: system-generated
+
+# Workflow components
+installed_path: "{project-root}/bmad/bmm/workflows/4-implementation/develop-review"
+instructions: "{installed_path}/instructions.md"
+validation: "{installed_path}/checklist.md"
+
+# Sub-workflows to orchestrate
+dev_story_workflow: "{project-root}/bmad/bmm/workflows/4-implementation/dev-story/workflow.yaml"
+code_review_workflow: "{project-root}/bmad/bmm/workflows/4-implementation/code-review/workflow.yaml"
+
+# Variables
+variables:
+  story_path: "" # Optional: Explicit story path. If empty, auto-discovers next ready story
+  max_iterations: 5 # Safety limit - max review cycles before requiring user intervention
+  auto_approve: false # If true, automatically marks story done when approved
+  auto_commit: true # Automatically commit changes when story is approved
+  commit_and_push: true # If true, also pushes to remote after commit
+
+# No template - this is an orchestration workflow
+template: false
+
+standalone: true
+
+# Web bundle configuration
+web_bundle:
+  name: "develop-review"
+  description: "Automated dev-review ping-pong loop until story approved"
+  author: "BMad"
+  instructions: "bmad/bmm/workflows/4-implementation/develop-review/instructions.md"
+  validation: "bmad/bmm/workflows/4-implementation/develop-review/checklist.md"
+  template: false
+
+  # Include orchestrated workflows
+  existing_workflows:
+    dev_story_workflow: "bmad/bmm/workflows/4-implementation/dev-story/workflow.yaml"
+    code_review_workflow: "bmad/bmm/workflows/4-implementation/code-review/workflow.yaml"
+
+  web_bundle_files:
+    - "bmad/bmm/workflows/4-implementation/develop-review/instructions.md"
+    - "bmad/bmm/workflows/4-implementation/develop-review/checklist.md"
+    - "bmad/bmm/workflows/4-implementation/dev-story/workflow.yaml"
+    - "bmad/bmm/workflows/4-implementation/dev-story/instructions.md"
+    - "bmad/bmm/workflows/4-implementation/code-review/workflow.yaml"
+    - "bmad/bmm/workflows/4-implementation/code-review/instructions.md"

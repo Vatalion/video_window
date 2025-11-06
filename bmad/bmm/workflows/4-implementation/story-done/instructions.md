@@ -81,12 +81,64 @@ Story is marked Done in file, but sprint-status.yaml may be out of sync.
 
 </step>
 
-<step n="3" goal="Confirm completion to user">
+<step n="3" goal="Git commit changes" tag="git-commit">
+<check if="{{auto_commit}} == true">
+  <action>Stage all changed files for commit:</action>
+  <action>Run: git add {story_dir}/{story_key}.md</action>
+  <action>Run: git add {output_folder}/sprint-status.yaml</action>
+  
+  <action>Create commit message:
+    - Format: "feat({story_key}): Story complete - {story_title}"
+    - Body: Include story ID, acceptance criteria count, completion date
+  </action>
+  
+  <action>Run git commit with formatted message</action>
+  
+  <check if="commit successful">
+    <output>✅ Changes committed to Git
+    
+Commit: feat({story_key}): Story complete - {story_title}
+    </output>
+    
+    <check if="{{commit_and_push}} == true">
+      <action>Run: git push origin {current_branch}</action>
+      <check if="push successful">
+        <output>✅ Changes pushed to remote repository</output>
+      </check>
+      <check if="push failed">
+        <output>⚠️ Commit successful but push failed. Run `git push` manually.</output>
+      </check>
+    </check>
+  </check>
+  
+  <check if="commit failed">
+    <output>⚠️ Git commit failed - changes are staged but not committed
+    
+Please review git status and commit manually if needed.
+    </output>
+  </check>
+</check>
+
+<check if="{{auto_commit}} == false">
+  <output>ℹ️ Auto-commit disabled - changes not committed to Git
+  
+To commit manually:
+```bash
+git add {story_dir}/{story_key}.md {output_folder}/sprint-status.yaml
+git commit -m "feat({story_key}): Story complete - {story_title}"
+```
+  </output>
+</check>
+</step>
+
+<step n="4" goal="Confirm completion to user">
 
 <output>**Story Approved and Marked Done, {user_name}!**
 
 ✅ Story file updated → Status: done
 ✅ Sprint status updated: review → done
+{{#if auto_commit}}✅ Changes committed to Git{{/if}}
+{{#if commit_and_push}}✅ Changes pushed to remote{{/if}}
 
 **Completed Story:**
 

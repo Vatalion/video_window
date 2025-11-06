@@ -34,6 +34,8 @@ docker --version    # For database services
 
 ## 🚀 Quick Start
 
+**⏱️ Setup Time:** < 10 minutes
+
 ### 1. Clone the Repository
 
 ```bash
@@ -41,35 +43,51 @@ git clone https://github.com/your-org/video_window.git
 cd video_window
 ```
 
-### 2. Start Backend Services
+### 2. Configure Environment
 
 ```bash
-cd video_window_server
-docker compose up --build --detach
+# Copy environment template
+cp .env.example .env
+
+# Generate secure passwords (run 5 times)
+openssl rand -base64 32
+
+# Edit .env and replace all placeholder passwords
+# Required: POSTGRES_PASSWORD, REDIS_PASSWORD, POSTGRES_TEST_PASSWORD, 
+#           REDIS_TEST_PASSWORD, SERVICE_SECRET
+```
+
+### 3. Start Backend Services
+
+```bash
+# Start PostgreSQL 16 and Redis 7.2.4
+docker compose up -d
+
+# Verify services are healthy
+docker compose ps
 ```
 
 This starts:
-- PostgreSQL (port 5432)
-- Redis (port 6379)
-- Serverpod development server (port 8080)
+- PostgreSQL (port 8090) - Uses pgvector/pg16
+- Redis (port 8091) - Version 7.2.4+
 
-### 3. Apply Database Migrations
+### 4. Apply Database Migrations
 
 ```bash
 cd video_window_server
 dart bin/main.dart --apply-migrations
 ```
 
-### 4. Start Serverpod Backend
+### 5. Start Serverpod Backend
 
 ```bash
-cd video_window_server
+# From video_window_server directory
 dart bin/main.dart
 ```
 
 The server will be running at `http://localhost:8080`
 
-### 5. Run Flutter App
+### 6. Run Flutter App
 
 In a new terminal:
 
@@ -78,6 +96,8 @@ cd video_window_flutter
 flutter pub get
 flutter run
 ```
+
+> 📖 **Detailed Setup Guide**: See [Local Development Setup](docs/runbooks/local-development-setup.md) for troubleshooting and advanced configuration.
 
 ---
 

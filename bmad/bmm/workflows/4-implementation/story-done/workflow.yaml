@@ -18,6 +18,8 @@ instructions: "{installed_path}/instructions.md"
 variables:
   story_path: "" # Explicit path to story file
   story_dir: "{config_source}:dev_story_location" # Directory where stories are stored
+  auto_commit: true # Automatically commit changes when story is marked done
+  commit_and_push: true # If true, also pushes to remote after commit
 
 # Output configuration - no output file, just status updates
 default_output_file: ""
