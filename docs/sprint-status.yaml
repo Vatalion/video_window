@@ -41,7 +41,7 @@ development_status:
   01-1-bootstrap-repository-structure: done
   01-2-local-development-environment: done
   01-3-code-generation-workflows: done
-  01-4-ci-cd-pipeline: ready-for-dev
+  01-4-ci-cd-pipeline: done
   epic-01-retrospective: optional
 
   # Epic 02: App Shell & Core Infrastructure

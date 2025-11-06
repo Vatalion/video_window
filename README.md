@@ -273,6 +273,7 @@ UI Widget → BLoC Event → Use Case → Repository → Serverpod Client → Ba
 ### Getting Started
 - **[Development Guide](docs/development.md)** - Setup, workflows, and common tasks ⭐
 - **[AI Agent Instructions](.github/copilot-instructions.md)** - Guardrails for AI-assisted development
+- **[CI/CD Pipeline](docs/runbooks/ci-cd-pipeline.md)** - Quality gates and deployment ⭐
 
 ### Architecture & Standards
 - **[PRD](docs/prd.md)** - Product Requirements Document

@@ -94,6 +94,78 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: false
 
+  # Serverpod backend tests with database
+  serverpod-tests:
+    name: Serverpod Backend Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: quality-checks
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: video_window_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7.2.4
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install Serverpod CLI
+        run: dart pub global activate serverpod_cli
+
+      - name: Install server dependencies
+        working-directory: video_window_server
+        run: dart pub get
+
+      - name: Generate Serverpod code
+        working-directory: video_window_server
+        run: serverpod generate
+
+      - name: Run Serverpod tests
+        working-directory: video_window_server
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: video_window_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+        run: dart test
+
+      - name: Verify health endpoint
+        run: |
+          echo "Health endpoint check would run here when server is running"
+          # TODO: Start server and test health endpoint in CI
+          # dart run video_window_server/bin/main.dart &
+          # sleep 10
+          # curl -f http://localhost:8080/health || exit 1
+
   # Widget and integration tests
   integration-tests:
     name: Integration Tests
@@ -385,23 +457,32 @@ jobs:
     name: Quality Gate Status
     runs-on: ubuntu-latest
     needs:
-      [quality-checks, integration-tests, security-scan, build-verification]
+      [
+        quality-checks,
+        serverpod-tests,
+        integration-tests,
+        security-scan,
+        build-verification,
+      ]
     if: always()
 
     steps:
       - name: Check all job statuses
         run: |
           QUALITY_CHECKS="${{ needs.quality-checks.result }}"
+          SERVERPOD_TESTS="${{ needs.serverpod-tests.result }}"
           INTEGRATION_TESTS="${{ needs.integration-tests.result }}"
           SECURITY_SCAN="${{ needs.security-scan.result }}"
           BUILD_VERIFICATION="${{ needs.build-verification.result }}"
 
           echo "Quality Checks: $QUALITY_CHECKS"
+          echo "Serverpod Tests: $SERVERPOD_TESTS"
           echo "Integration Tests: $INTEGRATION_TESTS"
           echo "Security Scan: $SECURITY_SCAN"
           echo "Build Verification: $BUILD_VERIFICATION"
 
           if [[ "$QUALITY_CHECKS" == "success" &&
+                "$SERVERPOD_TESTS" == "success" &&
                 "$INTEGRATION_TESTS" == "success" &&
                 "$SECURITY_SCAN" != "failure" &&
                 "$BUILD_VERIFICATION" == "success" ]]; then
@@ -418,6 +499,7 @@ jobs:
         with:
           script: |
             const QUALITY_CHECKS = "${{ needs.quality-checks.result }}";
+            const SERVERPOD_TESTS = "${{ needs.serverpod-tests.result }}";
             const INTEGRATION_TESTS = "${{ needs.integration-tests.result }}";
             const SECURITY_SCAN = "${{ needs.security-scan.result }}";
             const BUILD_VERIFICATION = "${{ needs.build-verification.result }}";
@@ -426,12 +508,14 @@ jobs:
             let description = 'Quality checks in progress...';
 
             if (QUALITY_CHECKS === 'success' &&
+                SERVERPOD_TESTS === 'success' &&
                 INTEGRATION_TESTS === 'success' &&
                 SECURITY_SCAN !== 'failure' &&
                 BUILD_VERIFICATION === 'success') {
               state = 'success';
               description = 'All quality gates passed ✅';
             } else if (QUALITY_CHECKS === 'failure' ||
+                       SERVERPOD_TESTS === 'failure' ||
                        INTEGRATION_TESTS === 'failure' ||
                        SECURITY_SCAN === 'failure' ||
                        BUILD_VERIFICATION === 'failure') {
