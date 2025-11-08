@@ -4,13 +4,18 @@ description: Starting point for a Serverpod server.
 # homepage: https://www.example.com
 
 environment:
-  sdk: '>=3.5.0 <4.0.0'
+  sdk: ">=3.5.0 <4.0.0"
 
 dependencies:
   serverpod: 2.9.1
+  logging: ^1.2.0
+  uuid: ^4.5.1
+  # OpenTelemetry for distributed tracing (experimental - Dart support is limited)
+  # opentelemetry: ^0.18.0  # Commented until full integration needed
+  # AWS SDK for CloudWatch Logs (production logging)
+  # aws_cloudwatch_logs_api: ^2.0.0  # Commented until AWS credentials configured
 
 dev_dependencies:
-  lints: '>=3.0.0 <7.0.0'
-  test: '^1.24.2'
+  lints: ">=3.0.0 <7.0.0"
+  test: "^1.24.2"
   serverpod_test: 2.9.1
-

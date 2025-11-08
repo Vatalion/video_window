@@ -1,8 +1,12 @@
-# generated: 2025-11-04
+# generated: 2025-11-08
 # project: video_window
 # project_key: video_window
 # tracking_system: file-system
 # story_location: {project-root}/docs/stories
+# current_sprint: 3
+# sprint_3_start: 2025-11-08
+# sprint_3_end: 2025-11-22
+# sprint_3_goal: "Enable observability and deliver core authentication flows"
 
 # STATUS DEFINITIONS:
 # ==================
@@ -54,15 +58,15 @@ development_status:
 
   # Epic 03: Operational Foundation
   epic-03: contexted
-  03-1-logging-metrics-implementation: ready-for-dev
+  03-1-logging-metrics-implementation: done # ✅ Complete with all review feedback addressed
   03-2-privacy-legal-disclosures: ready-for-dev
   03-3-data-retention-backup-procedures: ready-for-dev
   epic-03-retrospective: optional
 
   # Epic 1: Authentication & Identity
   epic-1: contexted
-  1-1-email-otp-authentication: ready-for-dev
-  1-2-social-login-integration: ready-for-dev
+  1-1-email-otp-authentication: in-progress # SPRINT 3 - Amelia
+  1-2-social-login-integration: in-progress # SPRINT 3 - Amelia
   1-3-session-management-refresh: ready-for-dev
   1-4-account-recovery-email-only: ready-for-dev
   epic-1-retrospective: optional

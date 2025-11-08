@@ -1,0 +1,101 @@
+{
+  "dashboard": {
+    "title": "Video Window - Service Health",
+    "timezone": "UTC",
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "API Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(api_requests_total[5m])",
+            "legendFormat": "{{method}} {{endpoint}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Requests/sec"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "API Latency (p95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(api_request_duration_ms_bucket[5m]))",
+            "legendFormat": "{{endpoint}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Latency (ms)"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(api_errors_total[5m])",
+            "legendFormat": "{{error_type}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Errors/sec"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Database Query Latency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(db_query_duration_ms_bucket[5m]))",
+            "legendFormat": "{{query_type}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Latency (ms)"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Active Sessions",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "active_sessions",
+            "legendFormat": "Sessions"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "process_resident_memory_bytes",
+            "legendFormat": "RSS"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Bytes",
+            "format": "bytes"
+          }
+        ]
+      }
+    ]
+  }
+}
