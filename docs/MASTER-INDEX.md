@@ -1,7 +1,7 @@
 # Master Documentation Index
 
-**Last Updated:** 2025-11-03 (Infrastructure epics completed)
-**Status:** ✅ COMPREHENSIVE - All Documentation Indexed + 23 Tech Specs + 21 Framework Guides Complete
+**Last Updated:** 2025-11-08
+**Status:** ✅ COMPREHENSIVE - Complete Documentation Catalog
 
 ---
 
@@ -9,6 +9,17 @@
 - [PRD](prd.md) - Product Requirements Document
 - [Technical Spec](tech-spec.md) - System Architecture Overview
 - [Brief](brief.md) - Project Overview & Business Context
+- [Configuration Management](configuration-management.md) - Configuration strategy
+- [Design System](design-system.md) - Design system overview
+- [Development](development.md) - Development guidelines
+- [Analytics](analytics.md) - Analytics overview
+- [BMM Workflow Status](bmm-workflow-status.md) - BMAD Method Module workflow tracking
+- [Process Alignment Verification](process-alignment-verification.md) - Process compliance verification
+- [Epic Validation Pipeline Plan](epic-validation-pipeline-plan.md) - Epic validation strategy
+- [Missing Stories Analysis](missing-stories-analysis.md) - Story gap analysis
+- [Story 2025-11-01](story-2025-11-01.md) - Story activity log
+- [Agent Handoff: Bob to Next](agent-handoff-bob-to-next.md) - Agent transition notes
+- [Sprint Status](sprint-status.yaml) - Current sprint tracking
 
 ---
 
@@ -43,6 +54,7 @@
 - [System Integration Maps](architecture/system-integration-maps.md)
 - [Offers-Auction-Orders Model](architecture/offers-auction-orders-model.md)
 - [API Gateway Routing Design](architecture/api-gateway-routing-design.md)
+- [OpenAPI Specification](architecture/openapi-spec.yaml) - API contract
 - [Message Queue Architecture](architecture/message-queue-architecture.md)
 - [Package Dependency Governance](architecture/package-dependency-governance.md)
 - [Melos Configuration](architecture/melos-configuration.md)
@@ -76,6 +88,36 @@
 - [ADR-0010: Observability Strategy](architecture/adr/ADR-0010-observability-strategy.md)
 - [ADR-0011: API Gateway](architecture/adr/ADR-0011-api-gateway.md)
 - [ADR-0012: Event-Driven Architecture](architecture/adr/ADR-0012-event-driven-architecture.md)
+
+---
+
+## 📝 Epic Context Documents
+
+### Infrastructure Epics (01-03)
+- [Epic 01 Context](epic-01-context.md) - Environment & CI/CD Setup
+- [Epic 02 Context](epic-02-context.md) - Core Platform Services
+- [Epic 03 Context](epic-03-context.md) - Observability & Compliance
+
+### Foundational Epics (1-3)
+- [Epic 1 Context](epic-1-context.md) - Viewer Authentication
+- [Epic 2 Context](epic-2-context.md) - Maker Authentication
+- [Epic 3 Context](epic-3-context.md) - Content Management
+
+### Feature Epics (4-17)
+- [Epic 4 Context](epic-4-context.md) - Timeline Feed
+- [Epic 5 Context](epic-5-context.md) - Listing Management
+- [Epic 6 Context](epic-6-context.md) - Story Pages
+- [Epic 7 Context](epic-7-context.md) - Offers
+- [Epic 8 Context](epic-8-context.md) - Auctions
+- [Epic 9 Context](epic-9-context.md) - Publishing Workflow
+- [Epic 10 Context](epic-10-context.md) - Auction Timer
+- [Epic 11 Context](epic-11-context.md) - Notifications
+- [Epic 12 Context](epic-12-context.md) - Payments
+- [Epic 13 Context](epic-13-context.md) - Shipping
+- [Epic 14 Context](epic-14-context.md) - Issue Resolution
+- [Epic 15 Context](epic-15-context.md) - Admin Moderation
+- [Epic 16 Context](epic-16-context.md) - Security & Compliance
+- [Epic 17 Context](epic-17-context.md) - Analytics & Reporting
 
 ---
 
@@ -113,6 +155,22 @@
 
 ## 📝 User Stories (77 Total)
 
+### Infrastructure Epic 01: Environment & CI/CD Setup (3 stories)
+- [01-2: Local Development Environment](stories/01-2-local-development-environment.md)
+- [01-3: Code Generation Workflows](stories/01-3-code-generation-workflows.md)
+- [01-4: CI/CD Pipeline](stories/01-4-ci-cd-pipeline.md)
+
+### Infrastructure Epic 02: Core Platform Services (4 stories)
+- [02-1: Design System & Theme Foundation](stories/02-1-design-system-theme-foundation.md)
+- [02-2: Navigation Infrastructure & Routing](stories/02-2-navigation-infrastructure-routing.md)
+- [02-3: Configuration Management & Feature Flags](stories/02-3-configuration-management-feature-flags.md)
+- [02-4: Analytics Service Foundation](stories/02-4-analytics-service-foundation.md)
+
+### Infrastructure Epic 03: Observability & Compliance (3 stories)
+- [03-1: Logging & Metrics Implementation](stories/03-1-logging-metrics-implementation.md)
+- [03-2: Privacy & Legal Disclosures](stories/03-2-privacy-legal-disclosures.md)
+- [03-3: Data Retention & Backup Procedures](stories/03-3-data-retention-backup-procedures.md)
+
 ### Epic 1: Viewer Authentication (5 stories)
 - [1.1: Email/SMS Sign-In](stories/1.1.implement-email-sms-sign-in.md)
 - [1.2: Social Sign-In Options](stories/1.2.add-social-sign-in-options.md)
@@ -128,11 +186,8 @@
 
 ### Epic 3: Content Management (5 stories)
 - [3.1: Viewer Profile Management](stories/3.1.viewer-profile-management.md)
-- [3.1: Logging & Metrics Implementation](stories/3.1-logging-metrics-implementation.md)
 - [3.2: Avatar Media Upload](stories/3.2.avatar-media-upload-system.md)
-- [3.2: Privacy & Legal Disclosures](stories/3.2-privacy-legal-disclosures.md)
 - [3.3: Privacy Settings & Controls](stories/3.3.privacy-settings-and-controls.md)
-- [3.3: Data Retention & Backups](stories/3.3-data-retention-backups.md)
 - [3.4: Notification Preferences](stories/3.4.notification-preferences-matrix.md)
 - [3.5: Account Settings Management](stories/3.5.account-settings-management.md)
 
@@ -217,17 +272,28 @@
 
 ---
 
+## 🧪 Testing Documentation
+- [Master Test Strategy](testing/master-test-strategy.md) ⭐ Comprehensive testing approach
+- [Testing Strategy](testing/testing-strategy.md)
+- [Acceptance Criteria Framework](testing/acceptance-criteria-framework.md)
+- [Test Strategy Checklist](testing/test-strategy-checklist.md)
+
+---
+
 ## ✅ Validation Reports
 
+### Master Summary
+- [Master Validation Summary Report](validation-reports/MASTER-VALIDATION-SUMMARY-REPORT.md) ⭐ Complete overview
+
 ### Epic Validation Reports
-- [Master Validation Summary](validation-reports/MASTER-VALIDATION-SUMMARY-REPORT.md) ⭐
-- [Epic 1 Validation](validation-reports/epic-1-validation-report.md)
-- [Epic 01 Validation](validation-reports/epic-01-validation-report.md)
-- [Epic 2 Validation](validation-reports/epic-2-validation-report.md)
-- [Epic 3 Validation](validation-reports/epic-3-validation-report.md)
-- [Epic 4 Validation](validation-reports/epic-4-validation-report.md)
-- [Epic 5 Validation](validation-reports/epic-5-validation-report.md)
+- [Epic 01 Validation](validation-reports/epic-01-validation-report.md) - Infrastructure: Environment & CI/CD
+- [Epic 1 Validation](validation-reports/epic-1-validation-report.md) - Viewer Authentication
+- [Epic 2 Validation](validation-reports/epic-2-validation-report.md) - Maker Authentication
+- [Epic 3 Validation](validation-reports/epic-3-validation-report.md) - Content Management
+- [Epic 4 Validation](validation-reports/epic-4-validation-report.md) - Timeline Feed
+- [Epic 5 Validation](validation-reports/epic-5-validation-report.md) - Listing Management
 - [Epics 6-17 Consolidated Validation](validation-reports/epics-6-17-consolidated-validation-report.md)
+- [Epic Story Context Verification 2025-11-05](validation-reports/epic-story-context-verification-2025-11-05.md)
 
 ### Story Validation Reports
 - [Consolidated MVP Stories Validation](validation-reports/consolidated-mvp-stories-validation-report.md)
@@ -239,16 +305,11 @@
 - [Story 2.2 Validation](validation-reports/story-2.2-validation-report.md)
 - [Story 2.3-2.4 Validation](validation-reports/story-2.3-2.4-validation-report.md)
 
-### Technical Validation
+### Technical & Process Validation
 - [Tech Spec Master Index Validation](validation-reports/tech-spec-master-index-validation-report.md)
+- [Remediation Completion 2025-11-05](validation-reports/remediation-completion-2025-11-05.md)
 
 ---
-
-## 🧪 Testing Documentation
-- [Master Test Strategy](testing/master-test-strategy.md) ⭐ Comprehensive testing approach
-- [Testing Strategy](testing/testing-strategy.md)
-- [Acceptance Criteria Framework](testing/acceptance-criteria-framework.md)
-- [Test Strategy Checklist](testing/test-strategy-checklist.md)
 
 ---
 
@@ -258,11 +319,14 @@
 - ⭐ [Framework Documentation README](frameworks/README.md) - **21/21 guides complete (100%)**
 
 ### Core Development (Priority 1) ✅
-- [equatable Integration Guide](frameworks/equatable-integration-guide.md) - Value equality for BLoC
-- [dartz Integration Guide](frameworks/dartz-integration-guide.md) - Functional error handling
+- [BLoC Integration Guide](frameworks/bloc-integration-guide.md) - State management with BLoC
+- [Equatable Integration Guide](frameworks/equatable-integration-guide.md) - Value equality for BLoC
+- [Dartz Integration Guide](frameworks/dartz-integration-guide.md) - Functional error handling
 - [go_router Integration Guide](frameworks/go-router-integration-guide.md) - Declarative navigation
-- [freezed Integration Guide](frameworks/freezed-integration-guide.md) - Immutable models
+- [Freezed Integration Guide](frameworks/freezed-integration-guide.md) - Immutable models
 - [json_serializable Guide](frameworks/json-serializable-guide.md) - JSON serialization
+- [Melos Integration Guide](frameworks/melos-integration-guide.md) - Monorepo management
+- [Flutter Monorepo Guide](frameworks/flutter-monorepo-guide.md) - Monorepo structure
 
 ### Payment Integration (Priority 2) ✅
 - [Stripe Integration Guide](frameworks/stripe-integration-guide.md) - Connect Express, checkout, webhooks
@@ -284,7 +348,7 @@
 ### Analytics (Priority 5) ✅
 - [BigQuery Analytics Guide](frameworks/bigquery-analytics-guide.md) - Data warehouse (post-MVP)
 
-### Serverpod (Backend Framework)
+### Serverpod (Backend Framework) - 7 Guides
 - [Serverpod README](frameworks/serverpod/README.md) - Overview
 - [01: Setup & Installation](frameworks/serverpod/01-setup-installation.md)
 - [02: Project Structure](frameworks/serverpod/02-project-structure.md)
@@ -292,6 +356,34 @@
 - [04: Database Migrations](frameworks/serverpod/04-database-migrations.md)
 - [05: Authentication & Sessions](frameworks/serverpod/05-authentication-sessions.md)
 - [06: Deployment](frameworks/serverpod/06-deployment.md)
+
+---
+
+## � Security Documentation
+- [Story 1.1 Authentication Security Research](security/story-1.1-authentication-security-research.md)
+- [Story 1.1 Implementation Summary](security/story-1.1-implementation-summary.md)
+
+---
+
+## 📋 Compliance
+- [Compliance Guide](compliance/compliance-guide.md)
+- [Privacy Policy](compliance/privacy-policy.md)
+
+---
+
+## 📖 Runbooks (Operational Guides)
+- [Local Development Setup](runbooks/local-development-setup.md)
+- [Code Generation Workflow](runbooks/code-generation-workflow.md)
+- [CI/CD Pipeline](runbooks/ci-cd-pipeline.md)
+- [Authentication Runbook](runbooks/authentication.md)
+- [Maker Access Runbook](runbooks/maker-access.md)
+- [Offers Submission Runbook](runbooks/offers-submission.md)
+- [Auction Timer Runbook](runbooks/auction-timer.md)
+- [Stripe Payments Runbook](runbooks/stripe-payments.md)
+- [Log Analysis](runbooks/log-analysis.md)
+- [Metric Interpretation](runbooks/metric-interpretation.md)
+- [Performance Degradation](runbooks/performance-degradation.md)
+- [High Error Rates](runbooks/high-error-rates.md)
 
 ---
 
@@ -304,69 +396,52 @@
 
 ---
 
-## 📖 Runbooks (Operational Guides)
-- [Authentication Runbook](runbooks/authentication.md)
-- [Maker Access Runbook](runbooks/maker-access.md)
-- [Offers Submission Runbook](runbooks/offers-submission.md)
-- [Auction Timer Runbook](runbooks/auction-timer.md)
-- [Stripe Payments Runbook](runbooks/stripe-payments.md)
-
----
-
-## 🔒 Security Documentation
-- [Story 1.1 Authentication Security Research](security/story-1.1-authentication-security-research.md)
-- [Story 1.1 Implementation Summary](security/story-1.1-implementation-summary.md)
-
----
-
-## 📋 Compliance
-- [Compliance Guide](compliance/compliance-guide.md)
-- [Privacy Policy](compliance/privacy-policy.md)
-
----
-
 ## 🚀 Sprint Planning
-- [Sprint 01 Plan](sprints/sprint-01/sprint-plan.md)
+- [Sprint 01 Plan](sprints/sprint-01-plan.md)
+- [Sprint 02 Plan](sprints/sprint-02-plan.md)
+- [Sprint 03 Plan](sprints/sprint-03-plan.md)
 
 ---
 
-## 📊 Status & Analysis Reports
-- [Documentation Maintenance Report](documentation-maintenance-implementation-report.md)
-- [Documentation Readiness Final Report](documentation-readiness-final-report.md)
-- [Process Alignment Verification](process-alignment-verification.md)
-- [Architecture Consolidation Report](architecture-consolidation-report.md)
-- [Stories Validation Report](stories-validation-report.md)
-- [Epic Validation Pipeline Plan](epic-validation-pipeline-plan.md)
-- [Missing Stories Analysis](missing-stories-analysis.md)
-- [Master Index Update Report](master-index-update-report.md)
-- [BMM Workflow Status](bmm-workflow-status.md)
-- [Unified Account Correction Plan](unified-account-correction-plan.md)
-- [Unified Account Final Report](unified-account-final-report.md)
-- [Story 2025-11-01](story-2025-11-01.md)
+## 🔧 Technical Documentation
+- [Development Environment Setup](technical/development-environment-setup.md)
+- [Testing Strategy](technical/testing-strategy.md)
 
 ---
 
-## 🗄️ Archive
-- [Archive README](archive/README.md)
-- [Course Correction Change Log](archive/course-correction-change-log.md)
-- [Final Documentation Audit Summary](archive/final-documentation-audit-summary.md)
-- [Tech Spec Audit Report](archive/TECH-SPEC-AUDIT-REPORT.md)
+## 🗺️ Workflow Paths (YAML)
+- [Epic 1 Workflow](workflow-paths/epic-1.yaml)
+- [Epic 2 Workflow](workflow-paths/epic-2.yaml)
+- [Epic 3 Workflow](workflow-paths/epic-3.yaml)
+- [Epic 4 Workflow](workflow-paths/epic-4.yaml)
+- [Epic 5 Workflow](workflow-paths/epic-5.yaml)
+- [Epic 6 Workflow](workflow-paths/epic-6.yaml)
+- [Epic 7 Workflow](workflow-paths/epic-7.yaml)
+- [Epic 9 Workflow](workflow-paths/epic-9.yaml)
+- [Epic 10 Workflow](workflow-paths/epic-10.yaml)
+- [Epic 12 Workflow](workflow-paths/epic-12.yaml)
 
 ---
 
 ## 📈 Project Metrics
 
 ### Documentation Coverage
-- **Core Documents:** 3/3 (100%) ✅
+- **Core Documents:** 14 files ✅
 - **Process Docs:** 8/8 (100%) ✅
 - **Architecture Docs:** 35+ files ✅
 - **Tech Specs:** 23/23 (100%) ✅
-- **User Stories:** 77 total ✅
-- **Validation Reports:** 17 reports ✅
+- **Epic Context Docs:** 20/20 (100%) ✅
+- **User Stories:** 80 total (77 feature + 3 infrastructure) ✅
+- **Validation Reports:** 18 reports ✅
 - **Testing Docs:** 4/4 (100%) ✅
-- **Framework Guides:** 21/21 (100%) ✅ **NEW - Sprint 1 Ready**
-- **Runbooks:** 5 operational guides ✅
+- **Framework Guides:** 21+ guides (100%) ✅
+- **Runbooks:** 12 operational guides ✅
 - **Analytics Dashboards:** 5 dashboards ✅
+- **Security Docs:** 2 files ✅
+- **Compliance Docs:** 2 files ✅
+- **Sprint Plans:** 3 sprints ✅
+- **Technical Docs:** 2 files ✅
+- **Workflow Paths:** 10 YAML workflows ✅
 
 ### Development Readiness
 - **Epic Validation:** 20/20 (100%) ✅
@@ -375,4 +450,6 @@
 - **Architecture:** Fully documented ✅
 
 ---
+
+**📌 Note:** This index represents the complete state of documentation as of 2025-11-08. All links verified and categorized by function.
 
