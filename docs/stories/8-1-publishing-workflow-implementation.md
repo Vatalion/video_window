@@ -1,0 +1,131 @@
+# Story 8-1: Publishing Workflow Implementation
+
+## Status
+Ready for Dev
+
+## Story
+**As a** maker,
+**I want** to publish my completed stories to the marketplace,
+**so that** viewers can discover and make offers on my work
+
+## Acceptance Criteria
+1. **BUSINESS CRITICAL**: Maker can review completed story with all required sections (overview, process timeline, materials, notes) before publishing, with validation preventing incomplete story publication.
+2. Maker can set minimum offer price (≥ $1.00) before publishing, with client-side validation and server-side enforcement of pricing rules.
+3. Maker can preview how story will appear in feed before publishing, showing exact layout, video thumbnail, and metadata as viewers will see it.
+4. Maker can publish story with single "Publish" action after validation passes, triggering status change and feed indexing within 5 minutes.
+5. **PERFORMANCE CRITICAL**: Published story appears in main feed within 5 minutes with proper discovery algorithm integration and real-time feed updates.
+6. Maker receives confirmation notification when story is live with feed placement details and initial visibility metrics.
+
+## Prerequisites
+1. Story 7.1 – Maker Story Capture & Editing Tools (draft creation and editing workflow)
+2. Story 7.3 – Draft Autosave & Sync System (draft storage and retrieval)
+3. Story 4.1 – Home Feed Implementation (feed discovery and rendering)
+4. Story 6.1 – Media Pipeline Content Protection (video content processing)
+
+## Tasks / Subtasks
+
+### Phase 1 – Publishing Validation & API Integration
+
+- [ ] **BUSINESS CRITICAL**: Implement story completeness validation service (AC: 1) [Source: docs/tech-spec-epic-8.md – Publishing States & Workflow]
+  - [ ] Create `story_validation_service.dart` in core package to check required sections
+  - [ ] Validate video content exists and is processed (not pending)
+  - [ ] Validate overview, process timeline, materials sections are populated
+  - [ ] Validate notes section if required by maker settings
+  - [ ] Return structured validation results with specific missing elements
+- [ ] Build publish story API endpoint with validation (AC: 1, 2, 4) [Source: docs/tech-spec-epic-8.md – Publishing Workflow]
+  - [ ] Implement `POST /stories/{id}/publish` endpoint in Serverpod
+  - [ ] Validate minimum price is set and >= $1.00 with currency validation
+  - [ ] Update story status to "published" with published_at timestamp
+  - [ ] Add database fields: `published_at`, `min_offer_price`, `publishing_status`
+  - [ ] Trigger feed index update via Redis queue for async processing
+- [ ] Implement minimum price setting interface (AC: 2) [Source: docs/tech-spec-epic-8.md – Publishing Workflow]
+  - [ ] Create `MinimumPriceSelector` widget with currency formatting
+  - [ ] Add client-side validation for minimum $1.00 requirement
+  - [ ] Persist price setting with draft autosave
+  - [ ] Display pricing guidelines and marketplace fee structure
+
+### Phase 2 – Preview & Publishing UI
+
+- [ ] Build story review screen with all sections (AC: 1) [Source: docs/tech-spec-epic-8.md – Publishing Workflow]
+  - [ ] Create `StoryReviewPage` in publishing feature package
+  - [ ] Display all story sections with edit capability
+  - [ ] Show validation status indicators for each required section
+  - [ ] Implement "Edit Section" navigation back to editing mode
+- [ ] Implement feed preview mode (AC: 3) [Source: docs/tech-spec-epic-8.md – Publishing Workflow]
+  - [ ] Create `StoryFeedPreview` widget matching exact feed layout
+  - [ ] Render video thumbnail, title, maker profile, and metadata
+  - [ ] Apply same styling and dimensions as feed items
+  - [ ] Show preview in modal overlay with "Back to Edit" option
+- [ ] Create publish confirmation dialog (AC: 4) [Source: docs/tech-spec-epic-8.md – Publishing Workflow]
+  - [ ] Build `PublishConfirmationDialog` with terms and conditions
+  - [ ] Display minimum price and marketplace fee breakdown
+  - [ ] Require explicit confirmation checkbox before publishing
+  - [ ] Show loading state during publish API call
+  - [ ] Handle publish success/failure states with appropriate messaging
+
+### Phase 3 – Feed Integration & Notifications
+
+- [ ] **PERFORMANCE CRITICAL**: Integrate with feed discovery algorithm (AC: 5) [Source: docs/tech-spec-epic-8.md – Publishing Workflow & docs/tech-spec-epic-4.md – Content Recommendation]
+  - [ ] Add published stories to feed index via Redis queue
+  - [ ] Update recommendation engine weights for new content
+  - [ ] Implement cache invalidation for affected feed queries
+  - [ ] Monitor feed appearance latency with target < 5 minutes
+- [ ] Implement real-time feed updates (AC: 5) [Source: docs/tech-spec-epic-8.md – Publishing Workflow]
+  - [ ] Use WebSocket connection for live feed refresh notifications
+  - [ ] Push published story to connected viewers' feeds
+  - [ ] Implement optimistic UI updates for maker's own feed
+  - [ ] Handle feed position and ranking updates
+- [ ] Build publication confirmation notification system (AC: 6) [Source: docs/tech-spec-epic-8.md – Publishing Workflow]
+  - [ ] Create `StoryPublishedNotification` event in notification system
+  - [ ] Include feed placement details and initial view count
+  - [ ] Add deep link to published story in notification
+  - [ ] Trigger maker dashboard update with publication metrics
+
+## Dev Notes
+
+### Previous Story Insights
+- This is the first story in Epic 8. It depends on Epic 7 (Story Capture & Editing) for draft workflow and Epic 4 (Feed Browsing) for discovery integration. Story 8.2 will add moderation checks before publication.
+
+### Data Models
+- `Story` entity adds `published_at` timestamp, `min_offer_price` (Money type), and `publishing_status` enum field. [Source: docs/tech-spec-epic-8.md – Publishing States]
+- `PublishingStatus` enum includes: draft, pending_review, approved, published, rejected, taken_down, archived. [Source: docs/tech-spec-epic-8.md – Publishing States]
+- Minimum offer price stored as `Money` value object with currency code for international support. [Source: docs/tech-spec-epic-8.md – Publishing Workflow]
+
+### API Specifications
+- `POST /stories/{id}/publish` requires story ownership validation, completeness checks, and minimum price validation before status transition. [Source: docs/tech-spec-epic-8.md – Publishing Workflow]
+- Returns published story entity with feed placement metadata and estimated visibility timeline.
+- Feed indexing occurs asynchronously via Redis queue with 5-minute SLA for appearance.
+
+### Component Specifications
+- Publishing feature package `video_window_flutter/packages/features/publishing/` hosts presentation layer (pages, widgets, BLoCs) and publishing use cases. [Source: docs/tech-spec-epic-8.md – Source Tree]
+- Core module repositories/services in `video_window_flutter/packages/core/` expose story validation and publishing APIs.
+- Server endpoints for publishing workflow in `video_window_server/lib/src/endpoints/story/` handle status transitions and feed integration.
+- Feed integration leverages existing recommendation engine from Epic 4 implementation.
+
+## Dev Agent Record
+
+### Context Reference
+
+- `docs/stories/8-1-publishing-workflow-implementation.context.xml`
+
+### Agent Model Used
+
+<!-- Will be populated during dev-story execution -->
+
+### Debug Log References
+
+<!-- Will be populated during dev-story execution -->
+
+### Completion Notes List
+
+<!-- Will be populated during dev-story execution -->
+
+### File List
+
+<!-- Will be populated during dev-story execution -->
+
+## Change Log
+
+| Date | Version | Description | Author |
+|------|---------|-------------|--------|
+| 2025-11-06 | v0.1 | Initial story creation | Bob (SM) |

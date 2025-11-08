@@ -3,9 +3,9 @@
 **Epic Goal:** Provide comprehensive story viewing experience with video playback, section navigation, accessibility compliance, content protection, and social sharing capabilities.
 
 **Stories:**
-- 5.1: Story Detail Page Implementation
-- 5.2: Accessible Playback & Transcripts
-- 5.3: Share & Save Functionality
+- 5-1: Story Detail Page Implementation
+- 5-2: Accessible Playback & Transcripts
+- 5-3: Share & Save Functionality
 
 ## Architecture Overview
 

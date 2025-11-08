@@ -3,11 +3,11 @@
 **Epic Goal:** Provide comprehensive profile management with secure avatar/media handling, granular privacy controls, and notification preferences while maintaining PII protection and regulatory compliance.
 
 **Stories:**
-- 3.1: Viewer Profile Management
-- 3.2: Avatar & Media Upload System
-- 3.3: Privacy Settings & Controls
-- 3.4: Notification Preferences
-- 3.5: Account Settings Management
+- 3-1: Viewer Profile Management
+- 3-2: Avatar & Media Upload System
+- 3-3: Privacy Settings & Controls
+- 3-4: Notification Preferences
+- 3-5: Account Settings Management
 
 ## Architecture Overview
 

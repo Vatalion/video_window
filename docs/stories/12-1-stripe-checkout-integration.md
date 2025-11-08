@@ -1,0 +1,80 @@
+# Story 12-1: Stripe Checkout Integration
+
+## Status
+Ready for Dev
+
+## Story
+**As a** winning bidder,
+**I want** to finish paying through Stripe Checkout with Craft’s branded flow,
+**so that** my purchase stays secure and within the mandated 24-hour window.
+
+## Acceptance Criteria
+1. **PAYMENTS CRITICAL**: `payment_checkout_endpoint.dart` creates Stripe Checkout Sessions with idempotency key `auctionId:buyerId`, embeds metadata (`auction_id`, `buyer_id`, `payment_session_id`), and persists expiry in `payment_session_repository.dart`. (Implementation Guide §1)
+2. **WEBHOOK CRITICAL**: `stripe_checkout_webhook.dart` validates signatures via `webhook_signature_validator.dart`, updates payment session + transaction status, and logs Datadog metric `payments.checkout.session_completed`. (Implementation Guide §1, Monitoring & Analytics)
+3. **CLIENT EXPERIENCE**: `payment_checkout_page.dart` launches hosted checkout using `flutter_stripe`, handles return/cancel URLs via `uni_links`, and renders countdown + security copy driven by `payment_bloc.dart`. (Implementation Guide §1)
+4. **ANALYTICS & AUDIT**: Segment events `payments.checkout.started` / `completed` include `payment_session_id`, `auction_id`, `amount_usd`; audit trail entries `checkout_created` & `checkout_completed` stored per session. (Implementation Guide §1, Monitoring & Analytics)
+
+## Prerequisites
+1. Story 9.4 – Offer State Management supplies winning-offer payloads.
+2. Story 10.3 – Auction State Transitions marks auction `accepted` before payment.
+3. Stripe Connect account + webhook endpoint provisioned in `infrastructure/terraform/payments.tf`.
+
+## Tasks / Subtasks
+
+### Phase 1 – Server Checkout Flow
+- [ ] Update `payment_checkout_endpoint.dart` to call `stripe_service.dart`, enforce idempotency, persist session, and return checkout URL + expiry. (AC: 1) [Source: docs/tech-spec-epic-12.md – Source Tree & Implementation Guide §1]
+- [ ] Expand `payment_session_repository.dart` with metadata upsert + expiry helpers; store Stripe checkout ID and timestamps. (AC: 1)
+- [ ] Harden `stripe_checkout_webhook.dart` using `webhook_signature_validator.dart` for `checkout.session.completed` and `payment_intent.payment_failed`; create transaction records. (AC: 2)
+
+### Phase 2 – Client Launch & UX
+- [ ] Implement `create_checkout_session_use_case.dart` to hit checkout API, cache `payment_session_id`, and emit analytics via `payments_metrics.dart`. (AC: 1,4) [Source: Implementation Guide §1]
+- [ ] Update `payment_bloc.dart` and `payment_checkout_page.dart` to launch `flutter_stripe`, render countdown banner, and handle cancel/return flows with toast copy. (AC: 3)
+- [ ] Add Sentry breadcrumbs for checkout launch, completion, and cancellation events. (AC: 3)
+
+### Phase 3 – Observability & QA
+- [ ] Emit Datadog events `payments.checkout.session_completed` / `failed` and wire to dashboard in `docs/analytics/stripe-payments-dashboard.md`. (AC: 2,4)
+- [ ] Record audit entries `checkout_created` + `checkout_completed` for every session. (AC: 4)
+- [ ] Add tests: `payment_checkout_endpoint_test.dart`, `stripe_service_test.dart`, `stripe_checkout_webhook_test.dart`, `payment_checkout_page_test.dart`. (AC: 1-4) [Source: Test Traceability]
+
+## Dev Notes
+- Reuse auction acceptance metadata (Story 9.4) to populate Stripe session `metadata` block.
+- Return/cancel routes must match Environment Configuration to avoid redirect mismatch.
+- Stripe idempotency keys should be deterministic to survive client retry/resume flows.
+
+## Data Models
+- `payment_sessions` stores Stripe checkout ID, expiry, metadata for audit. [Source: docs/tech-spec-epic-12.md – Data Models]
+- `transactions` captures Payment Intent state & fees for receipts. [Source: docs/tech-spec-epic-12.md – Data Models]
+
+## API Specifications
+- `POST /payments/checkout/create` returns session + payment window payload. [Source: docs/tech-spec-epic-12.md – API Endpoints]
+- `POST /payments/webhooks/stripe` processes `checkout.session.completed` / `payment_intent.payment_failed`. [Source: docs/tech-spec-epic-12.md – API Endpoints]
+
+## Component Specifications
+- Server: `payment_checkout_endpoint.dart`, `stripe_service.dart`, `stripe_checkout_webhook.dart`. [Source: docs/tech-spec-epic-12.md – Source Tree]
+- Client: `payment_checkout_page.dart`, `payment_bloc.dart`, `create_checkout_session_use_case.dart`. [Source: docs/tech-spec-epic-12.md – Source Tree]
+- Telemetry: `payments_metrics.dart` handles Datadog + Segment emissions. [Source: docs/tech-spec-epic-12.md – Source Tree]
+
+## Testing Requirements
+- ≥80% coverage for `stripe_service.dart` & `payment_bloc.dart`; webhook tests must validate duplicate-event dedupe + bad signatures. [Source: docs/tech-spec-epic-12.md – Test Traceability]
+- Integration test ensures checkout creation → webhook completion updates transaction + emits analytics. [Source: docs/tech-spec-epic-12.md – Implementation Guide §1]
+
+## Change Log
+| Date       | Version | Description | Author |
+| ---------- | ------- | ----------- | ------ |
+| 2025-10-29 | v1.0    | Definitive scope aligned to Implementation Guide §1 | GitHub Copilot AI |
+
+## Dev Agent Record
+### Agent Model Used
+_(To be completed by Dev Agent)_
+
+### Debug Log References
+_(To be completed by Dev Agent)_
+
+### Completion Notes List
+_(To be completed by Dev Agent)_
+
+### File List
+_(To be completed by Dev Agent)_
+
+## QA Results
+_(To be completed by QA Agent)_

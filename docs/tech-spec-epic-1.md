@@ -3,10 +3,10 @@
 **Epic Goal:** Provide secure authentication and session management for viewers and makers using email OTP and social login with robust session refresh and account recovery capabilities.
 
 **Stories:**
-- 1.1: Email OTP Authentication
-- 1.2: Social Login Integration (Google, Apple)
-- 1.3: Session Management & Refresh
-- 1.4: Account Recovery (Email only)
+- 1-1: Email OTP Authentication
+- 1-2: Social Login Integration (Google, Apple)
+- 1-3: Session Management & Refresh
+- 1-4: Account Recovery (Email only)
 
 ## Architecture Overview
 

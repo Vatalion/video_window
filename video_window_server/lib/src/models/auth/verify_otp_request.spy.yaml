@@ -1,0 +1,10 @@
+# OTP verification request model
+class: VerifyOtpRequest
+
+fields:
+  # Email address
+  email: String
+  # OTP code entered by user
+  code: String
+  # Device identifier for token binding
+  deviceId: String

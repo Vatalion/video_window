@@ -3,10 +3,10 @@
 **Epic Goal:** Integrate Stripe Checkout for secure payment processing with 24-hour payment window enforcement, retry mechanisms, and comprehensive receipt generation.
 
 **Stories:**
-- 12.1: Stripe Checkout Integration
-- 12.2: Payment Window Enforcement
-- 12.3: Payment Retry Mechanisms
-- 12.4: Receipt Generation and Storage
+- 12-1: Stripe Checkout Integration
+- 12-2: Payment Window Enforcement
+- 12-3: Payment Retry Mechanisms
+- 12-4: Receipt Generation and Storage
 
 ## Architecture Overview
 

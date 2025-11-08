@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<story-context id="10-2-soft-close-extension-logic" generated="2025-11-05">
+<story-context id="10.2.soft-close-extension-logic" generated="2025-11-05">
   <metadata>
     <epic>10</epic>
     <story>2</story>
-    <title>Soft Close Extension Logic</title>
+    <title>Soft-Close Extension Logic</title>
     <status>ready-for-dev</status>
     <story-file>docs/stories/10.2.soft-close-extension-logic.md</story-file>
     <epic-context>docs/epic-10-context.md</epic-context>
   </metadata>
   <user-story>
     <as-a>user</as-a>
-    <i-want>to soft close extension logic</i-want>
-    <so-that>the system meets requirements</so-that>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
   </user-story>
   <acceptance-criteria>
     <criterion id="ac1">See story file for complete acceptance criteria</criterion>

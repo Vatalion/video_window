@@ -1,0 +1,6 @@
+# OTP request model for email authentication
+class: OtpRequest
+
+fields:
+  # Email address to send OTP to
+  email: String

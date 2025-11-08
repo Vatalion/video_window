@@ -3,10 +3,10 @@
 **Epic Goal:** Establish foundational platform services including design system, navigation infrastructure, configuration management, and analytics foundation to enable consistent and scalable feature development.
 
 **Stories:**
-- 02.1: Design System & Theme Foundation
-- 02.2: Navigation Infrastructure & Routing
-- 02.3: Configuration Management & Feature Flags
-- 02.4: Analytics Service Foundation
+- 02-1: Design System & Theme Foundation
+- 02-2: Navigation Infrastructure & Routing
+- 02-3: Configuration Management & Feature Flags
+- 02-4: Analytics Service Foundation
 
 ---
 

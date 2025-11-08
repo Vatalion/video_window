@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<story-context id="1-4-account-recovery-email-only" generated="2025-11-05">
+<story-context id="1.4.account-recovery-email-only" generated="2025-11-05">
   <metadata>
     <epic>1</epic>
     <story>4</story>
-    <title>Account Recovery Email Only</title>
+    <title>Account Recovery (Email Only)</title>
     <status>ready-for-dev</status>
     <story-file>docs/stories/1.4.account-recovery-email-only.md</story-file>
     <epic-context>docs/epic-1-context.md</epic-context>
   </metadata>
   <user-story>
     <as-a>user</as-a>
-    <i-want>to account recovery email only</i-want>
-    <so-that>the system meets requirements</so-that>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
   </user-story>
   <acceptance-criteria>
     <criterion id="ac1">See story file for complete acceptance criteria</criterion>

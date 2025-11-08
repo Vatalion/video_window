@@ -1,0 +1,10 @@
+# OTP response model
+class: OtpResponse
+
+fields:
+  # Indicates if OTP was sent successfully
+  success: bool
+  # Optional message (rate limit info, errors, etc)
+  message: String?
+  # Unix timestamp when user can retry (for rate limiting)
+  retryAfter: int?

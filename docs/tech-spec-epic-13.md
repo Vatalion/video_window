@@ -3,10 +3,10 @@
 **Epic Goal:** Collect shipping addresses, manage tracking updates, enforce SLA timers, and provide status visibility for buyers and makers throughout the fulfillment lifecycle.
 
 **Stories:**
-- 13.1: Shipping Address Collection & Validation
-- 13.2: Tracking Number Management & Carrier Integration
-- 13.3: Shipping SLA Timers & Reminders
-- 13.4: Order Status Visibility & Notifications
+- 13-1: Shipping Address Collection & Validation
+- 13-2: Tracking Number Management & Carrier Integration
+- 13-3: Shipping SLA Timers & Reminders
+- 13-4: Order Status Visibility & Notifications
 
 ## Architecture Overview
 

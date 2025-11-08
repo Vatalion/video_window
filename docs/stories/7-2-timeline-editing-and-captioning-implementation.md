@@ -1,0 +1,81 @@
+# Story 7-2: Timeline Editing & Captioning Implementation
+
+## Status
+Ready for Dev
+
+## Story
+**As a** maker-focused experience engineer,
+**I want** a performant timeline editor with frame-accurate trimming plus a rich captioning surface,
+**so that** makers can assemble multi-clip stories with accessible, polished narration on mobile devices.
+
+## Acceptance Criteria
+1. Timeline editor provides drag-to-reorder, trim, split, and merge operations with 60fps scrubbing and p95 operation latency ≤ 100ms. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §2, Monitoring & Analytics)*
+2. Caption editor supports rich styling (font, size, color, background), positional presets, and time-synchronized preview with waveform guidance. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §2)*
+3. Timeline processing offloads heavy operations (trim, frame extraction, transitions) to isolates via `timeline_processing_service.dart`, emitting metrics `maker.timeline.frame_time_ms` and `maker.timeline.trim_duration_ms`. *(Ref: docs/tech-spec-epic-7.md – Source Tree & Monitoring)*
+4. Analytics events `maker_timeline_trimmed`, `maker_caption_added`, and `maker_caption_style_changed` fire with payloads defined in `packages/shared/lib/analytics/analytics_events.dart`. *(Ref: docs/tech-spec-epic-7.md – Monitoring & Analytics)*
+5. Widget, unit, and integration tests cover edit flows, caption styling, and analytics instrumentation with ≥85% coverage for new modules. *(Ref: docs/tech-spec-epic-7.md – Test Traceability)*
+6. UI adapts across device orientations/sizes with accessible touch targets (≥44px) and keyboard shortcuts on tablets. *(Ref: docs/tech-spec-epic-7.md – Source Tree & File Directives, Design System)*
+
+## Prerequisites
+1. Story 7.1 – Maker Story Capture & Editing Tools (capture pipeline and secure storage in place).
+2. Shared design tokens updated via `packages/shared` (Epic 5) for typography/color parity. *(Ref: docs/pattern-library.md)*
+3. Performance monitoring baselines configured in Datadog per Epic 7 spec.
+
+## Tasks / Subtasks
+
+### Phase 1 – Timeline Engine & UI Shell
+- [ ] Create `timeline_editor_page.dart` shell loading capture drafts and binding blocs. *(Ref: docs/tech-spec-epic-7.md – Source Tree & File Directives)*
+- [ ] Implement `timeline_scrubber.dart` with 60fps custom painter, gesture throttling via `rxdart`. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §2)*
+- [ ] Extend `timeline_editor_bloc.dart` for trim, split, reorder, merge events and performance states. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §2)*
+- [ ] Build `timeline_processing_service.dart` isolates for trim/split/extract frame with ffmpeg-kit 4.5.1. *(Ref: docs/tech-spec-epic-7.md – Technology Stack)*
+- [ ] Record metrics using `PerformanceMonitor.recordMetric` for every edit operation and publish to Datadog. *(Ref: docs/tech-spec-epic-7.md – Monitoring & Analytics)*
+
+### Phase 2 – Captioning Workflows
+- [ ] Implement `caption_editor_sheet.dart` with styling controls and design token integration. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §2)*
+- [ ] Enhance `caption_editor_bloc.dart` to manage timing, positioning, style overrides, and analytics events. *(Ref: docs/tech-spec-epic-7.md – Source Tree & Monitoring)*
+- [ ] Add waveform visualization using isolate-generated audio peaks cached via `timeline_processing_service.dart`. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §2)*
+- [ ] Ensure captions auto-save with draft sync hooks (emits `draft_sync_bloc` events). *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §3)*
+
+### Phase 3 – Accessibility, Responsiveness & QA
+- [ ] Implement responsive layouts for portrait/landscape, tablet split-view, and external keyboard shortcuts. *(Ref: docs/tech-spec-epic-7.md – Source Tree & File Directives)*
+- [ ] Add accessibility semantics, focus order, and caption contrast validation. *(Ref: docs/architecture/coding-standards.md#accessibility, docs/tech-spec-epic-7.md – Technology Stack)*
+- [ ] Create widget tests for timeline gestures and caption controls; golden tests for caption rendering. *(Ref: docs/tech-spec-epic-7.md – Test Traceability)*
+- [ ] Update `maker_studio_checks.yaml` to run performance benchmarks and fail if p95 metrics regress. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §4)*
+
+## Dev Notes
+- `timeline_processing_service.dart` should support GPU offload when available; ensure fallback paths for CPU-only devices. *(Ref: docs/tech-spec-epic-7.md – Technology Stack)*
+- Persist timeline edits via `apply_timeline_edit_use_case.dart` to centralize analytics and autosave triggers. *(Ref: docs/tech-spec-epic-7.md – Source Tree & File Directives)*
+- Use design tokens from `packages/shared` to enforce typography and spacing; no hardcoded colors. *(Ref: docs/tech-spec-epic-7.md – Technology Stack)*
+- Performance data should be viewable in Grafana dashboard `maker-studio-runtime` after instrumentation. *(Ref: docs/tech-spec-epic-7.md – Monitoring & Analytics)*
+
+## Testing
+- Run `melos run test -- --tags maker-timeline` for unit/widget coverage. *(Ref: docs/tech-spec-epic-7.md – Test Traceability)*
+- Execute `melos run benchmark -- --suite maker-studio` to validate frame time and trim latency budgets. *(Ref: docs/tech-spec-epic-7.md – Test Traceability)*
+- Verify analytics payloads using `maker_studio_observability_test.dart` and Segment inspector. *(Ref: docs/tech-spec-epic-7.md – Monitoring & Analytics)*
+
+## Change Log
+| Date       | Version | Description                  | Author            |
+| ---------- | ------- | ---------------------------- | ----------------- |
+| 2025-10-29 | v0.1    | Initial story definition     | GitHub Copilot AI |
+
+## Dev Agent Record
+
+### Context Reference
+
+- `docs/stories/7-2-timeline-editing-and-captioning-implementation.context.xml`
+
+### Agent Model Used
+
+<!-- Will be populated during dev-story execution -->
+
+### Debug Log References
+
+<!-- Will be populated during dev-story execution -->
+
+### Completion Notes List
+
+<!-- Will be populated during dev-story execution -->
+
+### File List
+
+<!-- Will be populated during dev-story execution -->

@@ -3,10 +3,10 @@
 **Epic Goal:** Enable makers to review drafts, submit for moderation, publish approved content, and manage versioning with rollback capabilities.
 
 **Stories:**
-- 8.1: Draft Review & Publishing UI
-- 8.2: Moderation Queue & Admin Tools
-- 8.3: Publishing Workflow & Scheduling
-- 8.4: Content Versioning & Rollback
+- 8-1: Draft Review & Publishing UI
+- 8-2: Moderation Queue & Admin Tools
+- 8-3: Publishing Workflow & Scheduling
+- 8-4: Content Versioning & Rollback
 
 ## Architecture Overview
 

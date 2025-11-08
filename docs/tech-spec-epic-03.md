@@ -3,9 +3,9 @@
 **Epic Goal:** Establish logging, monitoring, compliance, and operational excellence foundations to enable production-ready deployments with proper observability and regulatory compliance.
 
 **Stories:**
-- 03.1: Logging & Metrics Implementation
-- 03.2: Privacy & Legal Disclosures
-- 03.3: Data Retention & Backup Procedures
+- 03-1: Logging & Metrics Implementation
+- 03-2: Privacy & Legal Disclosures
+- 03-3: Data Retention & Backup Procedures
 
 ---
 

@@ -1,4 +1,4 @@
-# User Story: Privacy & Legal Disclosures
+# Story 03-2: Privacy & Legal Disclosures
 
 **Epic:** 03 - Observability & Compliance  
 **Story ID:** 03-2  
@@ -31,7 +31,7 @@
 
 ### Context Reference
 
-<!-- Path(s) to story context XML will be added here by context workflow -->
+- `docs/stories/03-2-privacy-legal-disclosures.context.xml`
 
 ### Agent Model Used
 

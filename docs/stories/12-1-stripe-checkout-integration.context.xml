@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<story-context id="12-1-stripe-checkout-integration" generated="2025-11-05">
+<story-context id="12.1.stripe-checkout-integration" generated="2025-11-05">
   <metadata>
     <epic>12</epic>
     <story>1</story>
@@ -10,8 +10,8 @@
   </metadata>
   <user-story>
     <as-a>user</as-a>
-    <i-want>to stripe checkout integration</i-want>
-    <so-that>the system meets requirements</so-that>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
   </user-story>
   <acceptance-criteria>
     <criterion id="ac1">See story file for complete acceptance criteria</criterion>

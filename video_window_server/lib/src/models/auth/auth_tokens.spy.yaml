@@ -1,0 +1,12 @@
+# Authentication tokens response
+class: AuthTokens
+
+fields:
+  # JWT access token (15min expiry)
+  accessToken: String
+  # Refresh token (longer expiry)
+  refreshToken: String
+  # Token expiry in seconds
+  expiresIn: int
+  # Token type (always "Bearer")
+  tokenType: String

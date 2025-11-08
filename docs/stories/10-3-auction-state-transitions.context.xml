@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<story-context id="10-3-auction-state-transitions" generated="2025-11-05">
+<story-context id="10.3.auction-state-transitions" generated="2025-11-05">
   <metadata>
     <epic>10</epic>
     <story>3</story>
@@ -10,8 +10,8 @@
   </metadata>
   <user-story>
     <as-a>user</as-a>
-    <i-want>to auction state transitions</i-want>
-    <so-that>the system meets requirements</so-that>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
   </user-story>
   <acceptance-criteria>
     <criterion id="ac1">See story file for complete acceptance criteria</criterion>

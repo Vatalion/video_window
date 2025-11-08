@@ -1,4 +1,4 @@
-# Story 01.4: CI/CD Pipeline
+# Story 01-4: CI/CD Pipeline
 
 ## Status
 Done

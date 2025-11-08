@@ -3,10 +3,10 @@
 **Epic Goal:** Establish the complete development environment, repository structure, tooling, and CI/CD pipeline to enable flawless development of the Craft Video Marketplace.
 
 **Stories:**
-- 01.1: Bootstrap Repository Structure (Serverpod + Melos monorepo)
-- 01.2: Local Development Environment (Docker, PostgreSQL, Redis)
-- 01.3: Code Generation Workflows (Serverpod + build_runner)
-- 01.4: CI/CD Pipeline (GitHub Actions quality gates)
+- 01-1: Bootstrap Repository Structure (Serverpod + Melos monorepo)
+- 01-2: Local Development Environment (Docker, PostgreSQL, Redis)
+- 01-3: Code Generation Workflows (Serverpod + build_runner)
+- 01-4: CI/CD Pipeline (GitHub Actions quality gates)
 
 ---
 

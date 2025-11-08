@@ -2,7 +2,11 @@
 
 **Epic:** 02 - Core Platform Services  
 **Story ID:** 02-4  
-**Status:** done
+# Story 02-4: Analytics Service Foundation
+
+**Epic:** 02 - Core Platform Services  
+**Story ID:** 02-4  
+**Status:** review
 
 ## User Story
 **As a** product team  

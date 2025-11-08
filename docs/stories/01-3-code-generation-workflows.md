@@ -1,4 +1,4 @@
-# User Story: Code Generation Workflows
+# Story 01-3: Code Generation Workflows
 
 **Epic:** 01 - Environment & CI/CD Setup  
 **Story ID:** 01-3  

@@ -1,0 +1,83 @@
+# Story 3-2: Avatar & Media Upload System
+
+## Status
+Ready for Dev
+
+## Story
+**As a** viewer,
+**I want** to upload and manage secure profile avatars,
+**so that** my identity is represented while keeping the platform safe from malicious files.
+
+## Acceptance Criteria
+1. Presigned upload flow with chunked transfer, max 5 MB enforcement, and allowed MIME validation using `SecureMediaUploadService`. [Source: docs/tech-spec-epic-3.md#secure-media-upload-pipeline]
+2. Virus scanning pipeline dispatches uploads to AWS Lambda and blocks profile updates until `is_virus_scanned=true`. [Source: docs/tech-spec-epic-3.md#source-tree--file-directives]
+3. Image processing generates square 512x512 WebP derivative and stores S3 object under `profile-media/{userId}/avatar.webp`; CloudFront URL returned to client. [Source: docs/tech-spec-epic-3.md#media-processing]
+4. Upload UI provides progress indicator, drag-and-drop selector, cropping, retry, and analytics event `avatar_uploaded`. [Source: docs/tech-spec-epic-3.md#implementation-guide]
+5. **SECURITY CRITICAL**: All uploads require authenticated requests, signed URLs expire after 5 minutes, and failure states purge temporary S3 objects. [Source: docs/tech-spec-epic-3.md#security--compliance]
+
+## Prerequisites
+1. Story 3.1 – Viewer Profile Management
+2. Story 1.3 – Session Management & Refresh (for authenticated presigned URL requests)
+
+## Tasks / Subtasks
+
+### Backend
+- [ ] Create `video_window_server/lib/src/endpoints/profile/media_endpoint.dart` with `createAvatarUploadUrl` and `handleVirusScanCallback`. [Source: docs/tech-spec-epic-3.md#source-tree--file-directives]
+- [ ] Implement `media_processing_service.dart` to queue resizing, WebP conversion, and KMS encryption context tagging. [Source: docs/tech-spec-epic-3.md#implementation-guide]
+- [ ] Configure `virus_scan_dispatcher.dart` and SNS topic for Lambda callbacks; persist scan status in `media_files`. [Source: docs/tech-spec-epic-3.md#security--compliance-hardening]
+
+### Flutter
+- [ ] Add `avatar_upload_sheet.dart` widget with cropping (`crop_your_image`) and chunked upload via `dio` presigned session. [Source: docs/tech-spec-epic-3.md#source-tree--file-directives]
+- [ ] Extend `ProfileBloc` with `AvatarUploadRequested`/`AvatarUploadProgressed` events and progress states. [Source: docs/tech-spec-epic-3.md#implementation-guide]
+- [ ] Fire analytics `avatar_uploaded` with metadata (size, mime, processing_time). [Source: docs/tech-spec-epic-3.md#analytics-events]
+
+### Infrastructure
+- [ ] Provision Terraform `profile_media.tf` ensuring bucket encryption SSE-KMS, block public access, lifecycle rules to purge temp uploads after 24h. [Source: docs/tech-spec-epic-3.md#source-tree--file-directives]
+- [ ] Deploy `serverless/virus_scan_lambda.ts` with ClamAV, S3 event trigger, and SNS publish to Serverpod callback. [Source: docs/tech-spec-epic-3.md#security--compliance-hardening]
+
+## Data Models
+- `media_files` table must persist virus scan status and CDN URL; ensure migration applied. [Source: docs/tech-spec-epic-3.md#database-migrations]
+
+## API Specifications
+- `POST /users/me/avatar/upload` returns presigned URL + media_id. [Source: docs/tech-spec-epic-3.md#profile-management-endpoints]
+- `POST /media/virus-scan-callback` ingests Lambda results and updates media status. [Source: docs/tech-spec-epic-3.md#implementation-guide]
+
+## Component Specifications
+- Flutter upload flow resides in `video_window_flutter/packages/features/profile/lib/presentation/widgets/`. [Source: docs/tech-spec-epic-3.md#source-tree--file-directives]
+- Server-side processing lives in `video_window_server/lib/src/services/media_processing_service.dart`. [Source: docs/tech-spec-epic-3.md#source-tree--file-directives]
+
+## File Locations
+- `upload_avatar_use_case.dart` orchestrates repository calls; tests in `packages/features/profile/test/use_cases/`. [Source: docs/tech-spec-epic-3.md#source-tree--file-directives]
+- Presigned URL client methods inside `profile_media_repository.dart`. [Source: docs/tech-spec-epic-3.md#implementation-guide]
+
+## Testing Requirements
+- Unit: presigned URL generation, retry on 5xx, virus scan state transitions.
+- Widget: cropping UI, progress modal, retry flows.
+- Integration: upload → scan callback → profile update end-to-end.
+- Security: attempt unauthorized upload to confirm RBAC + signed URL scope enforcement.
+
+## Technical Constraints
+- Maximum avatar size 5 MB and 2048px dimension. [Source: docs/tech-spec-epic-3.md#secure-media-upload-pipeline]
+- Signed URLs expire after 5 minutes; clients must refresh on failure. [Source: docs/tech-spec-epic-3.md#implementation-guide]
+- Upload throughput >= 95th percentile 8 MB/s on Wi-Fi; degrade gracefully on mobile networks.
+
+## Change Log
+| Date       | Version | Description                     | Author            |
+| ---------- | ------- | ------------------------------- | ----------------- |
+| 2025-10-29 | v1.0    | Initial avatar upload story set | GitHub Copilot AI |
+
+## Dev Agent Record
+### Agent Model Used
+_(To be completed by Dev Agent)_
+
+### Debug Log References
+_(To be completed by Dev Agent)_
+
+### Completion Notes List
+_(To be completed by Dev Agent)_
+
+### File List
+_(To be completed by Dev Agent)_
+
+## QA Results
+_(To be completed by QA Agent)_

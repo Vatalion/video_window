@@ -1,0 +1,80 @@
+# Story 12-3: Payment Retry Mechanisms
+
+## Status
+Ready for Dev
+
+## Story
+**As a** buyer who encountered a payment failure,
+**I want** to retry payment safely within the original 24-hour window,
+**so that** I still have a fair chance to complete my purchase.
+
+## Acceptance Criteria
+1. **RETRY FLOW**: `payment_retry_service.dart` enqueues retries to SQS `payments-retry-${ENV}` with exponential backoff (1, 5, 15 minutes) and caps attempts at 3 per session. (Implementation Guide §3)
+2. **WORKER EXECUTION**: `payment_retry_worker.dart` processes queue messages, recreates checkout sessions with preserved metadata, and marks attempts in `payment_session_repository.dart`. (Implementation Guide §3)
+3. **CLIENT UX**: `payment_retry_bloc.dart` exposes retry availability, surfaces failure reasons, and triggers `schedule_payment_retry_use_case.dart`; UI disables retry when limit reached. (Implementation Guide §3)
+4. **TELEMETRY**: Metrics `payments.retry.attempt_count`, `payments.retry.success_rate`, and Segment event `payments.retry.initiated` capture attempt metadata and outcomes. (Implementation Guide §3, Monitoring & Analytics)
+
+## Prerequisites
+1. Story 12.1 – Stripe Checkout Integration.
+2. Story 12.2 – Payment Window Enforcement for session expiry boundaries.
+3. SQS queue + IAM policies applied via `infrastructure/terraform/payments.tf`.
+
+## Tasks / Subtasks
+
+### Phase 1 – Retry Orchestration
+- [ ] Implement `payment_retry_service.dart` to check eligibility, increment attempt counters, and enqueue retry payload with delay strategy. (AC: 1) [Source: docs/tech-spec-epic-12.md – Implementation Guide §3]
+- [ ] Extend `payment_session_repository.dart` with retry metadata (`attempts`, `lastRetryAt`). (AC: 1)
+- [ ] Add `payment_retry_endpoint.dart` to expose retry initiation API with RBAC + idempotency token. (AC: 1)
+
+### Phase 2 – Worker & Client Experience
+- [ ] Build `payment_retry_worker.dart` to consume SQS, recreate checkout via `stripe_service.dart`, and update audit log `retry_initiated`. (AC: 2)
+- [ ] Update `payment_bloc.dart` / `payment_status_page.dart` to reflect retry progress, final outcomes, and disable CTA when attempts exhausted. (AC: 3)
+- [ ] Implement `payment_retry_bloc.dart` + `schedule_payment_retry_use_case.dart` bridging UI and server endpoint. (AC: 3)
+
+### Phase 3 – Monitoring & QA
+- [ ] Emit Datadog metrics `payments.retry.attempt_count`, `payments.retry.success_rate`, `payments.retry.failure_count` with tags `failure_reason`, `retry_attempt`. (AC: 4)
+- [ ] Track Segment event `payments.retry.initiated` + `payments.retry.completed` with `success` boolean. (AC: 4)
+- [ ] Tests: `payment_retry_service_test.dart`, `payment_retry_worker_test.dart`, `payment_retry_endpoint_test.dart`, `payment_retry_bloc_test.dart`. (AC: 1-4) [Source: Test Traceability]
+
+## Dev Notes
+- Preserve the original payment session ID when creating new checkout; only metadata indicating retry attempt should change.
+- Worker must respect payment window; drop retries beyond `expiresAt` and emit analytics for `retry_abandoned`.
+- Ensure SQS dead-letter queue captures repeated failures for manual review.
+
+## Data Models
+- `payment_sessions` extended with `retry_attempts`, `last_retry_at`, and `retry_reason`. [Source: docs/tech-spec-epic-12.md – Implementation Guide §3]
+- SQS payload structure includes `paymentSessionId`, `attemptNumber`, `delayMinutes`. [Source: docs/tech-spec-epic-12.md – Implementation Guide §3]
+
+## API Specifications
+- `POST /payments/retry/{sessionId}` triggers retry scheduling. [Source: docs/tech-spec-epic-12.md – API Endpoints]
+- `GET /payments/checkout/{sessionId}/status` reflects `retryAttemptsRemaining`. [Source: docs/tech-spec-epic-12.md – Implementation Guide §3]
+
+## Component Specifications
+- Server: `payment_retry_service.dart`, `payment_retry_worker.dart`, `payment_retry_endpoint.dart`. [Source: docs/tech-spec-epic-12.md – Source Tree]
+- Client: `payment_retry_bloc.dart`, `payment_status_page.dart`, `schedule_payment_retry_use_case.dart`. [Source: docs/tech-spec-epic-12.md – Source Tree]
+- Telemetry: `payments_metrics.dart` updates metrics + Segment events. [Source: docs/tech-spec-epic-12.md – Source Tree]
+
+## Testing Requirements
+- Unit tests must validate attempt throttling, queue payload structure, and idempotency. [Source: docs/tech-spec-epic-12.md – Test Traceability]
+- Worker integration test ensures retries stop once payment succeeds or attempts exhausted. [Source: docs/tech-spec-epic-12.md – Implementation Guide §3]
+
+## Change Log
+| Date       | Version | Description | Author |
+| ---------- | ------- | ----------- | ------ |
+| 2025-10-29 | v1.0    | Definitive retry scope aligned to Implementation Guide §3 | GitHub Copilot AI |
+
+## Dev Agent Record
+### Agent Model Used
+_(To be completed by Dev Agent)_
+
+### Debug Log References
+_(To be completed by Dev Agent)_
+
+### Completion Notes List
+_(To be completed by Dev Agent)_
+
+### File List
+_(To be completed by Dev Agent)_
+
+## QA Results
+_(To be completed by QA Agent)_

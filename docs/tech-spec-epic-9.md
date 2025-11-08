@@ -3,10 +3,10 @@
 **Epic Goal:** Implement secure, validated offer submission with real-time business rule enforcement, comprehensive qualification checks, and seamless auction system integration.
 
 **Stories:**
-- 9.1: Offer Entry UI & Real-time Validation
-- 9.2: Server Validation & Auction Trigger
-- 9.3: Offer Withdrawal & Cancellation
-- 9.4: Offer State Management & Audit Trail
+- 9-1: Offer Entry UI & Real-time Validation
+- 9-2: Server Validation & Auction Trigger
+- 9-3: Offer Withdrawal & Cancellation
+- 9-4: Offer State Management & Audit Trail
 
 ## Architecture Overview
 

@@ -1,4 +1,4 @@
-# User Story: Logging & Metrics Implementation
+# Story 03-1: Logging & Metrics Implementation
 
 **Epic:** 03 - Observability & Compliance  
 **Story ID:** 03-1  

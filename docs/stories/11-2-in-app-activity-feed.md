@@ -1,0 +1,192 @@
+# Story 11-2: In-App Activity Feed & Notification Center
+
+## Status
+Ready for Dev
+
+## Story
+**As a** user (viewer or maker),
+**I want** to view all my notifications in an activity feed,
+**so that** I can catch up on missed events and access notification details
+
+## Acceptance Criteria
+1. Activity feed displays all notifications in reverse chronological order with read/unread visual distinction (bold text, blue indicator).
+2. **PERFORMANCE CRITICAL**: Feed loads first 50 notifications within 500ms with infinite scroll pagination for older notifications.
+3. Notification tiles show icon, title, body preview, timestamp, and tap to view full details or navigate to related content.
+4. Unread badge count displayed on tab bar icon, updating in real-time when new notifications arrive.
+5. "Mark all as read" action available in activity feed header, updating all unread notifications in single operation.
+6. Individual notification tap marks as read, updates badge count, and navigates to relevant screen (story, auction, order).
+7. **ACCESSIBILITY**: Activity feed meets WCAG 2.1 AA with semantic labels, proper focus order, and screen reader announcements for new notifications.
+
+## Prerequisites
+1. Story 11.1 – Push Notification Infrastructure (notification delivery system)
+2. Story 1.1 – Implement Email OTP Sign-In (authenticated user context)
+3. Story 4.1 – Home Feed Implementation (navigation structure with tabs)
+
+## Tasks / Subtasks
+
+### Phase 1 – Data Layer & API
+
+- [ ] Create notification data models (AC: 1, 3) [Source: docs/tech-spec-epic-11.md – Data Models]
+  - [ ] Define `Notification` entity in core package with id, userId, type, title, body, data, priority, createdAt, readAt, deliveredAt, actionUrl, isRead
+  - [ ] Create `NotificationType` enum for offer_received, bid_placed, auction_won, etc.
+  - [ ] Define `NotificationPriority` enum for critical, high, normal, low
+  - [ ] Add JSON serialization for Serverpod protocol
+- [ ] Implement notification repository (AC: 1, 2) [Source: docs/tech-spec-epic-11.md – Implementation Guide]
+  - [ ] Create `NotificationRepository` in core package
+  - [ ] Implement `getNotifications(userId, limit, offset)` method
+  - [ ] Implement `markAsRead(notificationId)` method
+  - [ ] Implement `markAllAsRead(userId)` method
+  - [ ] Implement `getUnreadCount(userId)` method
+  - [ ] Add caching layer for recent notifications
+- [ ] Build Serverpod notification endpoints (AC: 1, 2, 5, 6) [Source: docs/tech-spec-epic-11.md – Implementation Guide]
+  - [ ] Implement `GET /notifications` endpoint with pagination
+  - [ ] Implement `PATCH /notifications/{id}/read` endpoint
+  - [ ] Implement `POST /notifications/mark-all-read` endpoint
+  - [ ] Implement `GET /notifications/unread-count` endpoint
+  - [ ] Add database indexes on userId, createdAt, isRead for query performance
+  - [ ] Return notifications with type-specific metadata in data field
+
+### Phase 2 – BLoC State Management
+
+- [ ] Create NotificationBloc for state management (AC: 1, 2, 4, 5, 6) [Source: docs/architecture/bloc-implementation-guide.md]
+  - [ ] Create `NotificationBloc` extending BaseListBloc in features/notifications/presentation/bloc
+  - [ ] Define events: LoadNotifications, RefreshNotifications, MarkAsRead, MarkAllAsRead, NewNotificationReceived
+  - [ ] Define states: NotificationsInitial, NotificationsLoading, NotificationsLoaded, NotificationError
+  - [ ] Implement pagination logic for infinite scroll
+  - [ ] Implement optimistic updates for mark as read
+  - [ ] Listen to FCM foreground messages and emit NewNotificationReceived
+- [ ] Implement unread badge counter logic (AC: 4) [Source: docs/tech-spec-epic-11.md – Implementation Guide]
+  - [ ] Create `UnreadBadgeBloc` for global badge count state
+  - [ ] Poll unread count on app resume and after notification interactions
+  - [ ] Subscribe to real-time updates from NotificationBloc
+  - [ ] Emit badge count changes to UI layer
+  - [ ] Reset badge count when user opens activity feed
+
+### Phase 3 – UI Implementation
+
+- [ ] Build Activity Feed page (AC: 1, 2, 3) [Source: docs/tech-spec-epic-11.md – Implementation Guide]
+  - [ ] Create `ActivityFeedPage` in features/notifications/presentation/pages
+  - [ ] Implement ListView with infinite scroll using ScrollController
+  - [ ] Show loading shimmer for initial load
+  - [ ] Display empty state with illustration when no notifications
+  - [ ] Implement pull-to-refresh for manual refresh
+  - [ ] Show error state with retry button on failures
+- [ ] Create notification tile widget (AC: 1, 3, 6) [Source: docs/tech-spec-epic-11.md – Implementation Guide]
+  - [ ] Create `NotificationTile` widget with icon, title, body, timestamp
+  - [ ] Use different icon for each NotificationType
+  - [ ] Apply visual distinction for unread (bold text, blue background tint)
+  - [ ] Format timestamp as relative time (e.g., "2 hours ago", "yesterday")
+  - [ ] Add tap gesture to mark as read and navigate
+  - [ ] Implement slide-to-delete action (optional)
+- [ ] Implement "Mark all as read" action (AC: 5) [Source: docs/tech-spec-epic-11.md – Implementation Guide]
+  - [ ] Add IconButton in AppBar with done_all icon
+  - [ ] Dispatch MarkAllAsRead event on tap
+  - [ ] Show loading indicator during operation
+  - [ ] Show confirmation snackbar on success
+  - [ ] Update all notification tiles to read state optimistically
+- [ ] Build unread badge indicator (AC: 4) [Source: docs/tech-spec-epic-11.md – Implementation Guide]
+  - [ ] Add Badge widget to navigation tab bar icon
+  - [ ] Subscribe to UnreadBadgeBloc state
+  - [ ] Display count up to 99, show "99+" for higher counts
+  - [ ] Hide badge when count is zero
+  - [ ] Animate badge appearance/disappearance
+
+### Phase 4 – Navigation & Deep Linking
+
+- [ ] Implement notification tap navigation (AC: 6) [Source: docs/tech-spec-epic-11.md – Implementation Guide]
+  - [ ] Create `NotificationRouter` utility class
+  - [ ] Map notification types to app routes (story detail, auction, order, profile)
+  - [ ] Extract route parameters from notification data field
+  - [ ] Use GoRouter for navigation with deep link support
+  - [ ] Mark notification as read before navigation
+  - [ ] Handle navigation errors gracefully (e.g., deleted content)
+- [ ] Test deep linking from push notifications (AC: 6) [Source: docs/tech-spec-epic-11.md – Testing Requirements]
+  - [ ] Test navigation from notification tap in foreground
+  - [ ] Test navigation from notification tap when app backgrounded
+  - [ ] Test navigation from notification tap when app terminated
+  - [ ] Verify correct screen opens with proper context
+  - [ ] Test back navigation from deep-linked screens
+
+### Phase 5 – Accessibility & Polish
+
+- [ ] **ACCESSIBILITY**: Implement WCAG 2.1 AA compliance (AC: 7) [Source: docs/process/definition-of-ready.md – Accessibility Requirements]
+  - [ ] Add semantic labels to all interactive elements
+  - [ ] Ensure 44x44 minimum tap targets for all buttons
+  - [ ] Implement proper focus order for keyboard navigation
+  - [ ] Add screen reader announcements for new notifications
+  - [ ] Test with VoiceOver (iOS) and TalkBack (Android)
+  - [ ] Verify contrast ratio ≥4.5:1 for all text
+  - [ ] Support reduced motion preferences for animations
+- [ ] Implement performance optimizations (AC: 2) [Source: docs/architecture/performance-optimization-guide.md]
+  - [ ] Use ListView.builder for efficient rendering
+  - [ ] Implement pagination with 50-item page size
+  - [ ] Cache notification icons and avoid rebuilds
+  - [ ] Debounce scroll events for pagination triggers
+  - [ ] Measure p50/p95 load times, ensure p50 < 500ms
+- [ ] Add real-time update handling (AC: 4) [Source: docs/tech-spec-epic-11.md – Implementation Guide]
+  - [ ] Listen to foreground notification stream in NotificationBloc
+  - [ ] Insert new notification at top of list
+  - [ ] Increment unread badge count
+  - [ ] Show toast notification for high-priority events
+  - [ ] Auto-scroll to top if user is near top of feed
+
+### Phase 6 – Testing
+
+- [ ] Unit tests for NotificationBloc (AC: 1, 2, 4, 5, 6) [Source: docs/testing/master-test-strategy.md]
+  - [ ] Test LoadNotifications event with pagination
+  - [ ] Test MarkAsRead with optimistic updates
+  - [ ] Test MarkAllAsRead bulk operation
+  - [ ] Test NewNotificationReceived event handling
+  - [ ] Test unread count calculations
+  - [ ] Verify error handling for network failures
+- [ ] Widget tests for Activity Feed UI (AC: 1, 3, 7) [Source: docs/testing/master-test-strategy.md]
+  - [ ] Test notification list rendering
+  - [ ] Test read/unread visual distinction
+  - [ ] Test empty state display
+  - [ ] Test infinite scroll pagination
+  - [ ] Test mark all as read action
+  - [ ] Test notification tile tap navigation
+  - [ ] Test accessibility labels and semantics
+- [ ] Integration tests for complete flow (AC: 6) [Source: docs/testing/master-test-strategy.md]
+  - [ ] Test end-to-end notification delivery to activity feed
+  - [ ] Test notification tap navigation to correct screens
+  - [ ] Test badge count updates across app lifecycle
+  - [ ] Test real-time updates when receiving foreground notifications
+  - [ ] Test offline behavior and sync on reconnect
+
+## Dev Notes
+- Use `flutter_local_notifications` for foreground notification display
+- Consider implementing notification grouping by type for better UX
+- Add analytics events for notification engagement (view, tap, dismiss)
+- Implement notification expiry (e.g., remove notifications older than 90 days)
+- Consider adding notification filters (all, unread, by type)
+- Monitor notification load performance with timeline devtools
+- Test with large notification counts (100+) to verify performance
+- Implement proper error boundaries for notification rendering failures
+
+## Change Log
+| Date | Author | Changes |
+|------|--------|---------|
+| 2025-10-30 | Mary (Analyst) | Initial story creation from tech spec |
+
+## Dev Agent Record
+
+### Context Reference
+
+- `docs/stories/11-2-in-app-activity-feed.context.xml`
+
+### Agent Model Used
+
+<!-- Will be populated during dev-story execution -->
+
+### Debug Log References
+
+<!-- Will be populated during dev-story execution -->
+
+### Completion Notes List
+
+<!-- Will be populated during dev-story execution -->
+
+### File List
+
+<!-- Will be populated during dev-story execution -->

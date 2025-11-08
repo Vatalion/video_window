@@ -1,0 +1,141 @@
+# Story 13-2: Tracking Integration System
+
+## Status
+Ready for Dev
+
+## Story
+**As a** maker,
+**I want** to easily add tracking information for shipped orders,
+**so that** buyers can monitor delivery progress and I can prove shipment
+
+## Acceptance Criteria
+1. **BUSINESS CRITICAL**: Maker can add tracking number and carrier within 72 hours of sale with validation preventing invalid/duplicate tracking numbers and proof-of-shipment capture.
+2. Tracking information is automatically validated with carrier APIs (USPS, FedEx, UPS) ensuring tracking number exists and is linked to correct destination address.
+3. Buyer receives notification with tracking details immediately upon maker submission with deep link to tracking page and estimated delivery date.
+4. **PERFORMANCE CRITICAL**: Order status updates automatically based on tracking events (in_transit, out_for_delivery, delivered) with real-time webhook processing and sub-minute latency.
+5. Maker dashboard shows all pending shipments requiring tracking with SLA indicators and prioritized list of overdue shipments.
+6. **BUSINESS CRITICAL**: System sends reminders if tracking not added within 48 hours with escalating urgency (email at 48h, SMS at 60h, account warning at 72h).
+
+## Prerequisites
+1. Story 13.1 – Shipping Address Management (order entity with shipping address)
+2. Story 12.4 – Receipt Generation & Storage (order completion and payment confirmation)
+3. Story 11.1 – Notification System (notification infrastructure for tracking alerts)
+4. Carrier API accounts configured (USPS, FedEx, UPS) with tracking API access
+
+## Tasks / Subtasks
+
+### Phase 1 – Tracking Input Interface
+
+- [ ] **BUSINESS CRITICAL**: Build tracking number input form (AC: 1) [Source: docs/tech-spec-epic-13.md – Tracking Integration]
+  - [ ] Create `AddTrackingPage` in maker order management section
+  - [ ] Display order details with shipping address and item summary
+  - [ ] Provide carrier dropdown selection (USPS, FedEx, UPS, Other)
+  - [ ] Implement tracking number input with format validation per carrier
+  - [ ] Prevent duplicate tracking numbers across orders
+- [ ] Implement carrier API validation (AC: 2) [Source: docs/tech-spec-epic-13.md – Tracking Integration]
+  - [ ] Integrate USPS Tracking API for tracking number validation
+  - [ ] Integrate FedEx Tracking API for shipment verification
+  - [ ] Integrate UPS Tracking API for package status lookup
+  - [ ] Validate tracking number format before API call (regex per carrier)
+  - [ ] Verify destination address matches order shipping address
+  - [ ] Display validation errors with specific correction guidance
+- [ ] Add proof-of-shipment capture (AC: 1) [Source: docs/tech-spec-epic-13.md – Tracking Integration]
+  - [ ] Enable photo upload of shipping receipt or label
+  - [ ] Store receipt image in S3 with order reference
+  - [ ] Display uploaded receipt in maker order history
+  - [ ] Allow receipt reupload if initial image unclear
+  - [ ] Use receipt timestamp as shipment date if tracking not yet active
+
+### Phase 2 – Automated Tracking Updates
+
+- [ ] **PERFORMANCE CRITICAL**: Integrate carrier webhooks for real-time updates (AC: 4) [Source: docs/tech-spec-epic-13.md – Tracking Integration]
+  - [ ] Register webhook endpoints with USPS, FedEx, UPS for tracking events
+  - [ ] Implement `POST /webhooks/tracking/{carrier}` to receive event notifications
+  - [ ] Process tracking events: in_transit, out_for_delivery, delivered, exception, returned
+  - [ ] Update order status based on tracking event with timestamp logging
+  - [ ] Handle webhook retry logic and duplicate event deduplication
+- [ ] Implement periodic polling fallback (AC: 4) [Source: docs/tech-spec-epic-13.md – Tracking Integration]
+  - [ ] Create scheduled job polling carrier APIs every 4 hours for active shipments
+  - [ ] Query tracking status for orders without recent updates
+  - [ ] Update order tracking history with latest status and location
+  - [ ] Handle API rate limits with exponential backoff
+  - [ ] Alert on tracking anomalies (stuck in transit >7 days, returned to sender)
+- [ ] Build order status mapping logic (AC: 4) [Source: docs/tech-spec-epic-13.md – Tracking Integration]
+  - [ ] Map carrier tracking events to order status enum
+  - [ ] Transition order from pending_shipment → in_transit → delivered
+  - [ ] Update estimated_delivery_date based on carrier predictions
+  - [ ] Store tracking event history with timestamps and location details
+  - [ ] Trigger delivery confirmation workflow upon delivered event (Story 13.3)
+
+### Phase 3 – Notification & Reminder System
+
+- [ ] Implement buyer tracking notifications (AC: 3) [Source: docs/tech-spec-epic-13.md – Tracking Integration]
+  - [ ] Create `OrderShippedNotification` when tracking added by maker
+  - [ ] Include tracking number, carrier, and estimated delivery date
+  - [ ] Provide deep link to in-app tracking page with real-time updates
+  - [ ] Send email with tracking details and carrier website link
+  - [ ] Notify on key tracking events (out_for_delivery, delivered, exception)
+- [ ] **BUSINESS CRITICAL**: Build maker reminder system (AC: 6) [Source: docs/tech-spec-epic-13.md – Tracking Integration]
+  - [ ] Create scheduled job checking orders without tracking after payment
+  - [ ] Send reminder at 48h: email with "Add Tracking" CTA
+  - [ ] Send escalated reminder at 60h: SMS with urgency messaging
+  - [ ] Send final warning at 72h: account flag and potential policy violation notice
+  - [ ] Display overdue shipment count in maker dashboard header
+- [ ] Create pending shipments dashboard (AC: 5) [Source: docs/tech-spec-epic-13.md – Tracking Integration]
+  - [ ] Build `PendingShipmentsPage` showing all orders requiring tracking
+  - [ ] Prioritize list by time since order completion (oldest first)
+  - [ ] Display SLA indicators: green (<24h), yellow (24-48h), red (>48h)
+  - [ ] Provide bulk tracking entry for multiple orders
+  - [ ] Show shipment statistics (total pending, avg time to ship, on-time rate)
+
+## Dev Notes
+
+### Previous Story Insights
+- This is the second story in Epic 13, building on Story 13.1's order and shipping address foundation. It enables buyer visibility and accountability for maker fulfillment, critical for marketplace trust.
+
+### Data Models
+- `OrderTracking` entity: id, order_id, tracking_number, carrier, status, shipped_at, estimated_delivery, delivered_at, receipt_image_url. [Source: docs/tech-spec-epic-13.md – Data Models]
+- `TrackingEvent` history: tracking_id, event_type, event_time, location, carrier_message, created_at for audit trail. [Source: docs/tech-spec-epic-13.md – Tracking Integration]
+- Order status enum adds: pending_shipment, in_transit, out_for_delivery, delivered, delivery_exception, returned. [Source: docs/tech-spec-epic-13.md – Data Models]
+
+### API Specifications
+- `POST /orders/{id}/tracking` accepts tracking_number, carrier, receipt_image with validation and tracking event subscription. [Source: docs/tech-spec-epic-13.md – Tracking Integration]
+- `GET /orders/{id}/tracking` returns tracking history with events, current status, and estimated delivery.
+- `POST /webhooks/tracking/{carrier}` receives carrier webhook events and processes tracking updates.
+- USPS Tracking API: Track & Confirm service for real-time status and delivery confirmation.
+- FedEx/UPS Tracking APIs: Webhook subscriptions for push-based event notifications.
+
+### Component Specifications
+- Tracking input UI in `video_window_flutter/packages/features/commerce/lib/presentation/pages/add_tracking_page.dart`. [Source: docs/tech-spec-epic-13.md – Source Tree]
+- Pending shipments dashboard in `video_window_flutter/packages/features/commerce/lib/presentation/pages/pending_shipments_page.dart`.
+- Tracking service in `video_window_flutter/packages/core/lib/services/shipping/tracking_service.dart` handles carrier API integrations.
+- Server tracking endpoints in `video_window_server/lib/src/endpoints/orders/tracking.dart` manage tracking submission and webhook processing.
+- Scheduled jobs in `video_window_server/lib/src/jobs/` for tracking polling and reminder notifications with cron-based execution.
+
+## Dev Agent Record
+
+### Context Reference
+
+- `docs/stories/13-2-tracking-integration-system.context.xml`
+
+### Agent Model Used
+
+<!-- Will be populated during dev-story execution -->
+
+### Debug Log References
+
+<!-- Will be populated during dev-story execution -->
+
+### Completion Notes List
+
+<!-- Will be populated during dev-story execution -->
+
+### File List
+
+<!-- Will be populated during dev-story execution -->
+
+## Change Log
+
+| Date | Version | Description | Author |
+|------|---------|-------------|--------|
+| 2025-11-06 | v0.1 | Initial story creation | Bob (SM) |

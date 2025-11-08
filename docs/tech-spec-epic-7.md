@@ -3,9 +3,9 @@
 **Epic Goal:** Provide comprehensive in-app video capture, timeline editing, captioning, and draft management capabilities for makers to create compelling product stories without leaving the app.
 
 **Stories:**
-- 7.1: Video Capture & Import with Security Controls
-- 7.2: Timeline Editing & Captioning Implementation
-- 7.3: Draft Autosave & Sync System
+- 7-1: Video Capture & Import with Security Controls
+- 7-2: Timeline Editing & Captioning Implementation
+- 7-3: Draft Autosave & Sync System
 
 ## Architecture Overview
 

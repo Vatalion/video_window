@@ -1,4 +1,4 @@
-# User Story: Data Retention & Backup Procedures
+# Story 03-3: Data Retention & Backup Procedures
 
 **Epic:** 03 - Observability & Compliance  
 **Story ID:** 03-3  
@@ -31,7 +31,7 @@
 
 ### Context Reference
 
-<!-- Path(s) to story context XML will be added here by context workflow -->
+- `docs/stories/03-3-data-retention-backup-procedures.context.xml`
 
 ### Agent Model Used
 

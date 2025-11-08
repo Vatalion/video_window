@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<story-context id="2-4-device-trust-and-risk-monitoring" generated="2025-11-05">
+<story-context id="2.4.device-trust-and-risk-monitoring" generated="2025-11-05">
   <metadata>
     <epic>2</epic>
     <story>4</story>
-    <title>Device Trust And Risk Monitoring</title>
+    <title>Device Trust & Risk Monitoring</title>
     <status>ready-for-dev</status>
     <story-file>docs/stories/2.4.device-trust-and-risk-monitoring.md</story-file>
     <epic-context>docs/epic-2-context.md</epic-context>
   </metadata>
   <user-story>
     <as-a>user</as-a>
-    <i-want>to device trust and risk monitoring</i-want>
-    <so-that>the system meets requirements</so-that>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
   </user-story>
   <acceptance-criteria>
     <criterion id="ac1">See story file for complete acceptance criteria</criterion>

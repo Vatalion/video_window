@@ -3,12 +3,12 @@
 **Epic Goal:** Deliver a TikTok-style, high-performance video feed that enables smooth browsing, infinite scroll, and engaging content discovery while maintaining 60fps performance and minimal jank.
 
 **Stories:**
-- 4.1: TikTok-Style Video Feed Implementation
-- 4.2: Infinite Scroll & Pagination
-- 4.3: Video Preloading & Caching Strategy
-- 4.4: Feed Performance Optimization (60fps, <2% jank)
-- 4.5: Content Recommendation Engine Integration
-- 4.6: Feed Personalization & User Preferences
+- 4-1: TikTok-Style Video Feed Implementation
+- 4-2: Infinite Scroll & Pagination
+- 4-3: Video Preloading & Caching Strategy
+- 4-4: Feed Performance Optimization (60fps, <2% jank)
+- 4-5: Content Recommendation Engine Integration
+- 4-6: Feed Personalization & User Preferences
 
 ## Architecture Overview
 

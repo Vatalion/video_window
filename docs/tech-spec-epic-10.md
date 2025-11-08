@@ -3,10 +3,10 @@
 **Epic Goal:** Implement reliable 72-hour auction lifecycle with soft-close extensions, precise timer management, and comprehensive state transitions with audit logging.
 
 **Stories:**
-- 10.1: Auction Timer Creation and Management
-- 10.2: Soft-Close Extension Logic
-- 10.3: Auction State Transitions
-- 10.4: Timer Precision and Synchronization
+- 10-1: Auction Timer Creation and Management
+- 10-2: Soft-Close Extension Logic
+- 10-3: Auction State Transitions
+- 10-4: Timer Precision and Synchronization
 
 ## Architecture Overview
 

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<story-context id="11-4-maker-specific-alerts-sla-notifications" generated="2025-11-05">
+<story-context id="11.4.maker-specific-alerts-sla-notifications" generated="2025-11-05">
   <metadata>
     <epic>11</epic>
     <story>4</story>
-    <title>Maker Specific Alerts Sla Notifications</title>
+    <title>Maker-Specific Alerts & SLA Notifications</title>
     <status>ready-for-dev</status>
     <story-file>docs/stories/11.4.maker-specific-alerts-sla-notifications.md</story-file>
     <epic-context>docs/epic-11-context.md</epic-context>
   </metadata>
   <user-story>
     <as-a>user</as-a>
-    <i-want>to maker specific alerts sla notifications</i-want>
-    <so-that>the system meets requirements</so-that>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
   </user-story>
   <acceptance-criteria>
     <criterion id="ac1">See story file for complete acceptance criteria</criterion>

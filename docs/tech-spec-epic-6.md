@@ -3,9 +3,9 @@
 **Epic Goal:** Implement a secure, scalable media pipeline for video ingestion, transcoding, storage, and delivery with comprehensive content protection including DRM, watermarking, and anti-piracy measures.
 
 **Stories:**
-- 6.1: Media Pipeline & Content Protection Implementation
-- 6.2: Advanced Video Processing & Optimization
-- 6.3: Content Security & Anti-Piracy System
+- 6-1: Media Pipeline & Content Protection Implementation
+- 6-2: Advanced Video Processing & Optimization
+- 6-3: Content Security & Anti-Piracy System
 
 ## Architecture Overview
 

@@ -1,0 +1,58 @@
+# Story 17-3: Automated Reporting
+**Epic:** 17
+**Points:** 5
+**Status:** Ready
+## User Story
+As an executive stakeholder, I want scheduled growth reports delivered to my inbox so that I can track business momentum without logging into dashboards daily.
+## Acceptance Criteria
+- Weekly reports
+- Email distribution
+- Trend analysis
+- Export functionality
+## Tasks / Subtasks
+
+<!-- Tasks will be defined based on acceptance criteria -->
+- [ ] Task 1: Define implementation tasks
+  - [ ] Subtask 1.1: Break down acceptance criteria into actionable items
+
+## Tasks
+- Assemble scheduled report generation that compiles weekly KPI trends and insights from the analytics warehouse.
+- Configure email delivery with role-based distribution lists and a secure portal for historical exports.
+- Provide export options (CSV/PDF) and archive sent reports for auditability and reference.
+# Story 17-3: Automated Reporting
+**Epic:** 17
+**Points:** 5
+**Status:** Ready
+## Acceptance Criteria
+- Weekly reports
+- Email distribution
+- Trend analysis
+- Export functionality
+
+## Dev Agent Record
+
+### Context Reference
+
+- `docs/stories/17-3-reporting.context.xml`
+
+### Agent Model Used
+
+<!-- Will be populated during dev-story execution -->
+
+### Debug Log References
+
+<!-- Will be populated during dev-story execution -->
+
+### Completion Notes List
+
+<!-- Will be populated during dev-story execution -->
+
+### File List
+
+<!-- Will be populated during dev-story execution -->
+
+## Change Log
+
+| Date | Version | Description | Author |
+|------|---------|-------------|--------|
+| 2025-11-06 | v0.1 | Initial story creation | Bob (SM) |

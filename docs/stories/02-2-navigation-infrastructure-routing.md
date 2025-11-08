@@ -1,8 +1,8 @@
-# User Story: Navigation Infrastructure & Routing
+# Story 02-2: Navigation Infrastructure & Routing
 
 **Epic:** 02 - Core Platform Services  
 **Story ID:** 02-2  
-**Status:** done
+**Status:** review
 
 ## User Story
 **As a** user  

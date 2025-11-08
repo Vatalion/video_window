@@ -1,0 +1,224 @@
+# Story 5-1: Story Detail Page with Video Carousel Implementation
+
+## Status
+Ready for Dev
+
+## Story
+**As a** viewer,
+**I want** to view a comprehensive story page with video carousel (3-7 clips), Process Timeline development journal, narrative sections, and clear call-to-action,
+**so that** I can explore the artifact from multiple perspectives, understand its creation journey, and make offers or participate in auctions
+
+## Acceptance Criteria
+1. Complete story page layout with video carousel (3-7 clips with dot navigation), section navigation (Overview, Process Timeline as vertical-scroll development journal, Materials, Notes, Location), and sticky "I want this" CTA with smooth scroll-to-offers functionality.
+2. HLS video playback with adaptive streaming, watermark protection, customizable controls (play/pause, volume, fullscreen, captions), and mobile-optimized gesture controls.
+3. WCAG 2.1 AA compliant accessibility including semantic HTML structure, keyboard navigation, screen reader support, captions for video content, and high contrast mode support.
+4. Content protection with signed URLs, watermarking enforcement, and secure media delivery preventing unauthorized downloads and screen capture attempts.
+5. Share functionality with expiring deep links, social media integration, and analytics tracking for share events and user engagement metrics.
+6. Performance optimization with video preloading strategies, adaptive bitrate streaming, lazy loading for non-critical content, and efficient state management.
+7. Comprehensive error handling for video playback failures, network issues, content protection violations, and graceful degradation with user-friendly error messages.
+8. Analytics instrumentation for story views, video engagement metrics, section interactions, CTA clicks, and share events with proper parameter tracking.
+
+## Prerequisites
+1. Story 01.1 – Bootstrap Repository and Flutter App
+2. Story 4.1 – Home Feed Implementation (navigational entry and shared video playback primitives)
+3. Story 6.1 – Media Pipeline Content Protection (signed URLs, watermarking)
+4. Story 9.1 – Offer Submission Flow (CTA destination contracts)
+
+## Tasks / Subtasks
+
+### Phase 1 Core Story Layout & Navigation
+
+- [ ] Implement story page scaffold with app shell integration and navigation parameters (story_id, source tracking) using Go Router type-safe navigation (AC: 1) [Source: architecture/story-component-mapping.md#epic-5--story-detail-playback--consumption] [Source: docs/tech-spec-epic-5.md#source-tree--file-directives]
+  - [ ] Create responsive layout structure with header, hero video section, content sections, and sticky CTA footer
+  - [ ] Implement section navigation with smooth scrolling and active section indicators
+  - [ ] Add maker profile header with avatar, handle, follow button, and share functionality
+- [ ] Design and implement section components for Overview, Process Timeline (development journal), Materials & Tools, Notes, and Location using shared design tokens and component library (AC: 1) [Source: architecture/front-end-architecture.md#module-overview] [Source: architecture/design-tokens.md]
+  - [ ] Create Overview section with title, category, description, and metadata display
+  - [ ] Build Process Timeline component as vertical-scroll development journal with chronological entries: maker's sketches, photos of early stages, thoughts/notes, and creation milestones (not a structured workflow, but a freeform creative log)
+  - [ ] Implement Materials & Tools section with name, notes, links, and expandable item details
+  - [ ] Create Notes section with freeform text display and formatting support
+  - [ ] Add Location section with optional city/country display and map integration placeholder
+- [ ] Implement sticky CTA section with "I want this" button that scrolls to Offers & Auction section with smooth animation and visual feedback (AC: 1) [Source: wireframes/mvp-feed-and-story.md#story-page]
+  - [ ] Add scroll position tracking and active section highlighting
+  - [ ] Implement smooth scroll behavior with proper offset for sticky headers
+  - [ ] Add visual feedback and animations for CTA interactions
+
+### Phase 2 Video Playback & Media Integration
+
+- [ ] **SECURITY CRITICAL**: Implement HLS video player with secure streaming and content protection (AC: 2, 4) [Source: architecture/story-component-mapping.md#epic-6--media-pipeline--content-protection] [Source: docs/tech-spec-epic-5.md#implementation-guide]
+  - [ ] Integrate HLS streaming with adaptive bitrate selection and network-aware quality adjustment
+  - [ ] Implement signed URL validation and token refresh mechanisms for secure media access
+  - [ ] Add watermark overlay enforcement with position and opacity controls
+  - [ ] Implement capture deterrence mechanisms and screen detection
+- [ ] Build comprehensive video player controls with custom styling and accessibility support (AC: 2, 3) [Source: accessibility/accessibility-guide.md#video-content-accessibility]
+  - [ ] Create custom play/pause button with proper ARIA labels and keyboard shortcuts
+  - [ ] Implement volume controls with mute toggle and keyboard accessibility
+  - [ ] Add fullscreen mode with proper orientation handling and escape mechanisms
+  - [ ] Build video progress bar with seek functionality and time display
+  - [ ] Implement caption toggles with multiple track support and styling options
+- [ ] Add mobile-optimized gesture controls for video playback (AC: 2) [Source: architecture/front-end-architecture.md#mobile-performance-optimization]
+  - [ ] Implement tap-to-play/pause functionality with visual feedback
+  - [ ] Add swipe gestures for seeking and volume adjustment
+  - [ ] Create pinch-to-zoom functionality for video content (optional feature)
+  - [ ] Add haptic feedback for video control interactions
+
+### Phase 3 Accessibility & User Experience
+
+- [ ] **ACCESSIBILITY CRITICAL**: Implement WCAG 2.1 AA compliance throughout the story page (AC: 3) [Source: accessibility/accessibility-guide.md#wcag-21-aa-compliance] [Source: docs/tech-spec-epic-5.md#accessibility-implementation]
+  - [ ] Add semantic HTML structure with proper heading hierarchy and landmark elements
+  - [ ] Implement keyboard navigation with visible focus indicators and logical tab order
+  - [ ] Add comprehensive ARIA labels, descriptions, and live regions for dynamic content
+  - [ ] Ensure minimum 4.5:1 color contrast ratios for all text and interactive elements
+  - [ ] Add screen reader announcements for video state changes and section navigation
+- [ ] Implement video accessibility features including captions, transcripts, and audio descriptions (AC: 3) [Source: accessibility/accessibility-guide.md#video-content-accessibility]
+  - [ ] Add closed caption support with multiple language tracks and styling options
+  - [ ] Create transcript panel with synchronized scrolling and navigation
+  - [ ] Implement audio description tracks for visually impaired users
+  - [ ] Add sign language picture-in-picture support for embedded content
+- [ ] Create responsive design that works across all device sizes and orientations (AC: 3)
+  - [ ] Implement adaptive layout for mobile, tablet, and desktop viewports
+  - [ ] Add orientation change handling with layout preservation
+  - [ ] Ensure touch targets meet minimum 44px requirement for mobile accessibility
+  - [ ] Test and optimize for various screen densities and pixel ratios
+
+### Phase 4 Content Protection & Security
+
+- [ ] **SECURITY CRITICAL**: Implement comprehensive content protection for video and story assets (AC: 4) [Source: architecture/architecture.md#security] [Source: architecture/story-component-mapping.md#epic-6--media-pipeline--content-protection]
+  - [ ] Integrate signed URL generation with short-lived tokens and automatic refresh
+  - [ ] Add watermark overlay system with user-specific identifiers and positioning
+  - [ ] Implement client-side protection against screen recording and screenshot attempts
+  - [ ] Add content encryption and secure key management for sensitive assets
+- [ ] Build secure media pipeline integration with CDN and storage backend (AC: 4) [Source: architecture/story-component-mapping.md#media-pipeline]
+  - [ ] Connect to media pipeline for secure video delivery and quality optimization
+  - [ ] Implement adaptive streaming with fallback mechanisms for network issues
+  - [ ] Add media caching strategies with security considerations and cache invalidation
+  - [ ] Monitor and log security events and potential content protection violations
+
+### Phase 5 Share & Social Features
+
+- [ ] Implement comprehensive share functionality with deep link generation and social media integration (AC: 5) [Source: analytics/mvp-analytics-events.md#story]
+  - [ ] Create share sheet with platform-specific sharing options (iOS Share Sheet, Android Intent)
+  - [ ] Generate expiring deep links with proper analytics parameters and user attribution
+  - [ ] Add social media previews with OG tags and optimized metadata
+  - [ ] Implement clipboard copying with user feedback and success notifications
+- [ ] Add social engagement features and user interaction tracking (AC: 5)
+  - [ ] Implement maker follow functionality with real-time status updates
+  - [ ] Add story like/save functionality with optimistic UI updates
+  - [ ] Create user engagement tracking for shares, likes, and follows
+  - [ ] Build social proof indicators with follower counts and engagement metrics
+
+### Phase 6 Performance & Optimization
+
+- [ ] Optimize video loading and playback performance with adaptive strategies (AC: 6) [Source: architecture/front-end-architecture.md#performance-optimization]
+  - [ ] Implement video preloading with bandwidth detection and quality adjustment
+  - [ ] Add background downloading for story content and media assets
+  - [ ] Create intelligent caching strategies for frequently accessed content
+  - [ ] Optimize video startup time with proper buffering and loading indicators
+- [ ] Implement efficient state management and data loading patterns (AC: 6) [Source: architecture/front-end-architecture.md#state-management]
+  - [ ] Create BLoC-based state management for story data and video player state
+  - [ ] Add optimistic updates and rollback mechanisms for user actions
+  - [ ] Implement data synchronization with conflict resolution and offline support
+  - [ ] Add performance monitoring and error tracking for production optimization
+
+### Phase 7 Analytics & Instrumentation
+
+- [ ] Implement comprehensive analytics tracking for story interactions and user behavior (AC: 8) [Source: analytics/mvp-analytics-events.md#story]
+  - [ ] Add story_viewed event tracking with source attribution and session context
+  - [ ] Implement video engagement metrics including play time, completion rate, and quality changes
+  - [ ] Track section navigation and content interaction patterns
+  - [ ] Add CTA click tracking with funnel analysis and conversion metrics
+- [ ] Create analytics for share functionality and social engagement (AC: 8)
+  - [ ] Track story_share events with channel attribution and conversion data
+  - [ ] Monitor social engagement patterns and viral coefficient analysis
+  - [ ] Add user journey tracking from discovery to conversion
+  - [ ] Implement A/B testing framework for UI/UX optimization
+
+### Phase 8 Error Handling & Edge Cases
+
+- [ ] Implement comprehensive error handling for all story page scenarios (AC: 7)
+  - [ ] Add graceful fallbacks for video playback failures with retry mechanisms
+  - [ ] Handle network connectivity issues with offline support and sync strategies
+  - [ ] Create user-friendly error messages with actionable next steps
+  - [ ] Implement error recovery mechanisms and state restoration
+- [ ] Add edge case handling and boundary condition management (AC: 7)
+  - [ ] Handle story not found scenarios with helpful navigation suggestions
+  - [ ] Manage content access restrictions with proper messaging and alternatives
+  - [ ] Add device capability detection and feature fallbacks
+  - [ ] Implement browser compatibility handling and progressive enhancement
+
+## Dev Notes
+### Previous Story Insights
+- Story 5.1 is the foundational story consumption experience for Epic 5, establishing the core patterns for all story-related interactions and content presentation. [Source: architecture/story-component-mapping.md#epic-5--story-detail-playback--consumption]
+- Follow sequencing and file operations defined in `docs/tech-spec-epic-5.md#implementation-guide` to keep layout, accessibility, and sharing deliverables aligned.
+
+### Data Models
+- `ArtifactStory` model contains structured sections (overview, process, materials, notes, location) and content references with status management for published stories. [Source: architecture.md#data-models]
+- Story sections are stored as JSONB data with flexible schema to support various content types and future enhancements.
+- Maker profile integration requires user relationship with roles and authentication state management.
+
+### API Specifications
+- `GET /stories/{id}` returns complete story metadata including sections, media references, and maker information with proper authorization checks.
+- `POST /media/signed-url` generates short-lived URLs for secure video access with user-specific watermarking parameters.
+- `POST /stories/{id}/share` creates expiring deep links with analytics tracking and social media metadata.
+
+### Component Specifications
+- Flutter story feature package (`video_window_flutter/packages/features/story/`) owns story detail UI, section navigation, and video player integration with BLoC-based state management. [Source: architecture/story-component-mapping.md#epic-5--story-detail-playback--consumption]
+- Video player component integrates with HLS streaming and content protection mechanisms from the media pipeline service exposed through `packages/core/` services.
+- Section navigation uses shared scroll controller utilities in `packages/shared/` with position tracking and active section highlighting.
+- Share functionality leverages platform-specific sharing APIs orchestrated via `packages/core/lib/data/services/sharing/`.
+
+### File Locations
+- Story presentation layer lives under `video_window_flutter/packages/features/story/lib/presentation/` (pages, widgets, BLoCs). [Source: architecture/source-tree.md]
+- Feature use cases belong in `video_window_flutter/packages/features/story/lib/use_cases/` to coordinate with repositories.
+- Video playback, content protection, and analytics services remain in `video_window_flutter/packages/core/lib/data/services/`.
+- Serverpod integrations reside in `video_window_server/lib/src/endpoints/stories/` and associated business modules.
+- Tests mirror the structure under `video_window_flutter/packages/features/story/test/` and server-side tests in `video_window_server/test/endpoints/stories/`.
+
+### Testing Requirements
+- Maintain ≥80% coverage with comprehensive integration tests for story loading, video playback, and section navigation. [Source: architecture/testing-strategy.md]
+- Story BLoCs and widgets should use bloc_test package with detailed widget tests for all user interactions and edge cases. [Source: architecture/front-end-architecture.md#testing-strategy-client]
+- Video player testing requires integration with media pipeline simulation and mock streaming services.
+- Accessibility testing should include screen reader validation and keyboard navigation verification.
+
+### Technical Constraints
+- Video streaming requires HLS support with adaptive bitrate streaming and secure token-based authentication. [Source: architecture/story-component-mapping.md#media-pipeline]
+- Content protection mandates signed URLs, watermarking, and client-side capture deterrence mechanisms. [Source: architecture/story-component-mapping.md#epic-6--media-pipeline--content-protection]
+- Accessibility compliance requires WCAG 2.1 AA standards with proper semantic structure, keyboard navigation, and screen reader support. [Source: accessibility/accessibility-guide.md]
+- Performance optimization requires video startup time under 2 seconds and smooth playback on 3G networks. [Source: architecture/front-end-architecture.md#performance-optimization]
+- Memory usage optimization is critical for video playback with proper resource cleanup and cache management.
+- Network resilience requires graceful degradation and offline support for story content viewing.
+
+### Project Structure Notes
+- Story feature aligns with the melos-managed package architecture using presentation/use-case layers only, delegating data access to `packages/core/`. [Source: architecture/package-architecture-requirements.md]
+- No deviations identified from the monorepo structure and existing patterns established in other features.
+
+### Scope Notes
+- The current acceptance criteria span multiple vertical slices (layout, media playback, accessibility, content protection, social sharing). Break into incremental stories (e.g., Core Layout, Video Playback + Security, Accessibility Enhancements, Share & Analytics) to de-risk delivery.
+
+## Testing
+- Follow the project testing pipeline by running `dart format`, `flutter analyze`, and `flutter test --no-pub` before submission. [Source: architecture/testing-strategy.md]
+- Add comprehensive BLoC and widget tests for story detail page including video player state, section navigation, and CTA interactions. [Source: architecture/front-end-architecture.md#testing-strategy-client]
+- Include integration tests for video streaming with mock media pipeline and network simulation.
+- Perform accessibility testing with screen readers and keyboard navigation validation.
+- Test content protection mechanisms and verify secure URL handling and watermark enforcement.
+
+## Change Log
+| Date       | Version | Description        | Author             |
+| ---------- | ------- | ------------------ | ------------------ |
+| 2025-10-09 | v0.1    | Initial draft created | Claude Code Assistant |
+
+## Dev Agent Record
+### Agent Model Used
+_(To be completed by Dev Agent)_
+
+### Debug Log References
+_(To be completed by Dev Agent)_
+
+### Completion Notes List
+_(To be completed by Dev Agent)_
+
+### File List
+_(To be completed by Dev Agent)_
+
+## QA Results
+_(To be completed by QA Agent)_

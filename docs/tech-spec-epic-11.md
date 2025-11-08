@@ -3,10 +3,10 @@
 **Epic Goal:** Implement real-time push notifications and in-app activity feeds for critical marketplace events (offers, bids, wins, maker alerts) with user preference controls and delivery guarantees.
 
 **Stories:**
-- 11.1: Push Notification Infrastructure & Device Registration
-- 11.2: In-App Activity Feed & Notification Center
-- 11.3: Notification Preferences & Channel Management
-- 11.4: Maker-Specific Alerts & SLA Notifications
+- 11-1: Push Notification Infrastructure & Device Registration
+- 11-2: In-App Activity Feed & Notification Center
+- 11-3: Notification Preferences & Channel Management
+- 11-4: Maker-Specific Alerts & SLA Notifications
 
 ## Architecture Overview
 
