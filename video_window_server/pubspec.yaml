@@ -10,6 +10,12 @@ dependencies:
   serverpod: 2.9.1
   logging: ^1.2.0
   uuid: ^4.5.1
+  crypto: ^3.0.3
+  redis: ^4.0.0
+  dart_jsonwebtoken: ^3.3.1
+  jose: ^0.3.5
+  pointycastle: ^4.0.0
+  asn1lib: ^1.6.5
   # OpenTelemetry for distributed tracing (experimental - Dart support is limited)
   # opentelemetry: ^0.18.0  # Commented until full integration needed
   # AWS SDK for CloudWatch Logs (production logging)

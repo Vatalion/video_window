@@ -1,32 +1,139 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="5-1-story-detail-page-implementation" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="5-1-story-detail-page-implementation" generated="2025-11-10">
   <metadata>
     <epic>5</epic>
     <story>1</story>
-    <title>Story Detail Page Implementation</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/5.1.story-detail-page-implementation.md</story-file>
+    <title>Story 5-1: Story Detail Page with Video Carousel Implementation</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/5-1-story-detail-page-implementation.md</story-file>
     <epic-context>docs/epic-5-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-5.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to story detail page implementation</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>viewer</as-a>
+    <i-want>to view a comprehensive story page with video carousel (3-7 clips)</i-want>
+    <so-that>I can explore the artifact from multiple perspectives, understand its creation journey, and make offers or participate in auctions</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Complete story page layout with video carousel (3-7 clips with dot navigation), section navigation (Overview, Process Timeline as vertical-scroll development journal, Materials, Notes, Location), and sticky "I want this" CTA with smooth scroll-to-offers functionality.</criterion>
+    <criterion id="ac2">HLS video playback with adaptive streaming, watermark protection, customizable controls (play/pause, volume, fullscreen, captions), and mobile-optimized gesture controls.</criterion>
+    <criterion id="ac3">WCAG 2.1 AA compliant accessibility including semantic HTML structure, keyboard navigation, screen reader support, captions for video content, and high contrast mode support.</criterion>
+    <criterion id="ac4">Content protection with signed URLs, watermarking enforcement, and secure media delivery preventing unauthorized downloads and screen capture attempts.</criterion>
+    <criterion id="ac5">Share functionality with expiring deep links, social media integration, and analytics tracking for share events and user engagement metrics.</criterion>
+    <criterion id="ac6">Performance optimization with video preloading strategies, adaptive bitrate streaming, lazy loading for non-critical content, and efficient state management.</criterion>
+    <criterion id="ac7">Comprehensive error handling for video playback failures, network issues, content protection violations, and graceful degradation with user-friendly error messages.</criterion>
+    <criterion id="ac8">Analytics instrumentation for story views, video engagement metrics, section interactions, CTA clicks, and share events with proper parameter tracking.</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement story page scaffold with app shell integration and navigation parameters (story_id, source tracking) using Go Router type-safe navigation</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Design and implement section components for Overview, Process Timeline (development journal), Materials &amp; Tools, Notes, and Location using shared design tokens and component library</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Implement sticky CTA section with "I want this" button that scrolls to Offers &amp; Auction section with smooth animation and visual feedback</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>SECURITY CRITICAL: Implement HLS video player with secure streaming and content protection</description>
+      <acceptance-criteria>ac2,ac4</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Build comprehensive video player controls with custom styling and accessibility support</description>
+      <acceptance-criteria>ac2,ac3</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Add mobile-optimized gesture controls for video playback</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>ACCESSIBILITY CRITICAL: Implement WCAG 2.1 AA compliance throughout the story page</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Implement video accessibility features including captions, transcripts, and audio descriptions</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Create responsive design that works across all device sizes and orientations</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task10">
+      <description>SECURITY CRITICAL: Implement comprehensive content protection for video and story assets</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task11">
+      <description>Build secure media pipeline integration with CDN and storage backend</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task12">
+      <description>Implement comprehensive share functionality with deep link generation and social media integration</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
+    <task id="task13">
+      <description>Add social engagement features and user interaction tracking</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
+    <task id="task14">
+      <description>Optimize video loading and playback performance with adaptive strategies</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task15">
+      <description>Implement efficient state management and data loading patterns</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task16">
+      <description>Implement comprehensive analytics tracking for story interactions and user behavior</description>
+      <acceptance-criteria>ac8</acceptance-criteria>
+    </task>
+    <task id="task17">
+      <description>Create analytics for share functionality and social engagement</description>
+      <acceptance-criteria>ac8</acceptance-criteria>
+    </task>
+    <task id="task18">
+      <description>Implement comprehensive error handling for all story page scenarios</description>
+      <acceptance-criteria>ac7</acceptance-criteria>
+    </task>
+    <task id="task19">
+      <description>Add edge case handling and boundary condition management</description>
+      <acceptance-criteria>ac7</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 01.1 – Bootstrap Repository and Flutter App</prerequisite>
+    <prerequisite>Story 4.1 – Home Feed Implementation (navigational entry and shared video playback primitives)</prerequisite>
+    <prerequisite>Story 6.1 – Media Pipeline Content Protection (signed URLs, watermarking)</prerequisite>
+    <prerequisite>Story 9.1 – Offer Submission Flow (CTA destination contracts)</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-5.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-5-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-5-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +141,69 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test Complete story page layout with video carousel (3-...</test-case>
+      <test-case ac="ac2">Test HLS video playback with adaptive streaming, waterm...</test-case>
+      <test-case ac="ac3">Test WCAG 2.1 AA compliant accessibility including sema...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Video Pipeline, Content Security</section>
+        <reason>Video and content processing patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/incident-response.md</path>
+        <section>ALL</section>
+        <reason>Incident response procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including content security</decision>
+        <reason>Security requirements for content processing.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Content Security, Access Controls</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

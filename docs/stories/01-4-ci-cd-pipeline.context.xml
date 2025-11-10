@@ -1,32 +1,57 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="01-4-ci-cd-pipeline" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="01-4-ci-cd-pipeline" generated="2025-11-10">
   <metadata>
     <epic>01</epic>
     <story>4</story>
-    <title>CI/CD Pipeline</title>
-    <status>ready-for-dev</status>
+    <title>Story 01-4: CI/CD Pipeline</title>
+    <status>Done</status>
     <story-file>docs/stories/01-4-ci-cd-pipeline.md</story-file>
     <epic-context>docs/epic-01-context.md</epic-context>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to ci cd pipeline</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>development team</as-a>
+    <i-want>automated CI/CD pipelines with quality gates</i-want>
+    <so-that>code quality is enforced, tests run automatically, and deployments are streamlined.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">**AC1:** GitHub Actions workflow runs on every PR and push to main/develop branches</criterion>
+    <criterion id="ac2">**AC2:** Quality gates (format, analyze, test) all pass before merge allowed</criterion>
+    <criterion id="ac3">**AC3:** Test coverage reported and enforced (≥80% threshold)</criterion>
+    <criterion id="ac4">**AC4:** Failed checks block PR merge via branch protection rules</criterion>
+    <criterion id="ac5">**AC5:** Deployment pipeline documented with runbook</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement core functionality</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-1.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-1-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-01.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-01-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +59,74 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test **AC1:** GitHub Actions workflow runs on every PR ...</test-case>
+      <test-case ac="ac2">Test **AC2:** Quality gates (format, analyze, test) all...</test-case>
+      <test-case ac="ac3">Test **AC3:** Test coverage reported and enforced (≥80%...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>Quality Gates, Testing Standards</section>
+        <reason>Code quality and testing requirements enforced by CI/CD.</reason>
+        <applies-to>task1</applies-to>
+      </doc>
+      <doc priority="MEDIUM">
+        <path>docs/testing/testing-strategy.md</path>
+        <section>ALL</section>
+        <reason>Testing strategy and coverage requirements.</reason>
+        <applies-to>task1</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>CI/CD Patterns, Quality Gate Patterns</section>
+        <reason>Standard CI/CD and quality gate implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="HIGH">
+        <name>Melos</name>
+        <path>docs/frameworks/melos-integration-guide.md</path>
+        <section>CI/CD Integration</section>
+        <reason>Melos command integration in CI/CD pipelines.</reason>
+        <applies-to>task1</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/ci-cd-pipeline.md</path>
+        <section>ALL</section>
+        <reason>Complete CI/CD pipeline configuration and procedures. Primary reference.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+      <runbook priority="MEDIUM">
+        <path>docs/runbooks/code-generation-workflow.md</path>
+        <section>CI Integration</section>
+        <reason>Code generation validation in CI pipeline.</reason>
+        <applies-to>task1</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="HIGH">
+        <number>ADR-0010</number>
+        <path>docs/architecture/adr/ADR-0010-observability-strategy.md</path>
+        <decision>Observability and testing strategy</decision>
+        <reason>Testing and quality monitoring requirements.</reason>
+        <applies-to>task1</applies-to>
+      </adr>
+    </adrs>
+  </implementation-guidance>
 </story-context>

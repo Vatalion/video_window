@@ -1,5 +1,8 @@
 # Story 14-2: Dispute Workflow Management
 
+## Status
+ready-for-dev
+
 **Epic:** 14 - Issue Resolution & Refund Handling  
 **Story Points:** 8  
 **Priority:** HIGH  

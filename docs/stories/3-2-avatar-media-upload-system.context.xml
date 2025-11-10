@@ -1,32 +1,90 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="3-2-avatar-media-upload-system" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="3-2-avatar-media-upload-system" generated="2025-11-10">
   <metadata>
     <epic>3</epic>
     <story>2</story>
-    <title>Avatar Media Upload System</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/3.2.avatar-media-upload-system.md</story-file>
+    <title>Story 3-2: Avatar &amp; Media Upload System</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/3-2-avatar-media-upload-system.md</story-file>
     <epic-context>docs/epic-3-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-3.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to avatar media upload system</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>viewer</as-a>
+    <i-want>to upload and manage secure profile avatars</i-want>
+    <so-that>my identity is represented while keeping the platform safe from malicious files.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Presigned upload flow with chunked transfer, max 5 MB enforcement, and allowed MIME validation using `SecureMediaUploadService`. [Source: docs/tech-spec-epic-3.md#secure-media-upload-pipeline]</criterion>
+    <criterion id="ac2">Virus scanning pipeline dispatches uploads to AWS Lambda and blocks profile updates until `is_virus_scanned=true`. [Source: docs/tech-spec-epic-3.md#source-tree--file-directives]</criterion>
+    <criterion id="ac3">Image processing generates square 512x512 WebP derivative and stores S3 object under `profile-media/{userId}/avatar.webp`; CloudFront URL returned to client. [Source: docs/tech-spec-epic-3.md#media-processing]</criterion>
+    <criterion id="ac4">Upload UI provides progress indicator, drag-and-drop selector, cropping, retry, and analytics event `avatar_uploaded`. [Source: docs/tech-spec-epic-3.md#implementation-guide]</criterion>
+    <criterion id="ac5">**SECURITY CRITICAL**: All uploads require authenticated requests, signed URLs expire after 5 minutes, and failure states purge temporary S3 objects. [Source: docs/tech-spec-epic-3.md#security--compliance]</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Create `video_window_server/lib/src/endpoints/profile/media_endpoint.dart` with `createAvatarUploadUrl` and `handleVirusScanCallback`.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Implement `media_processing_service.dart` to queue resizing, WebP conversion, and KMS encryption context tagging.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Configure `virus_scan_dispatcher.dart` and SNS topic for Lambda callbacks; persist scan status in `media_files`.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Add `avatar_upload_sheet.dart` widget with cropping (`crop_your_image`) and chunked upload via `dio` presigned session.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Extend `ProfileBloc` with `AvatarUploadRequested`/`AvatarUploadProgressed` events and progress states.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Fire analytics `avatar_uploaded` with metadata (size, mime, processing_time).</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Provision Terraform `profile_media.tf` ensuring bucket encryption SSE-KMS, block public access, lifecycle rules to purge temp uploads after 24h.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Deploy `serverless/virus_scan_lambda.ts` with ClamAV, S3 event trigger, and SNS publish to Serverpod callback.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 3.1 – Viewer Profile Management</prerequisite>
+    <prerequisite>Story 1.3 – Session Management &amp; Refresh (for authenticated presigned URL requests)</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-3.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-3-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-3.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-3-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +92,81 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test Presigned upload flow with chunked transfer, max 5...</test-case>
+      <test-case ac="ac2">Test Virus scanning pipeline dispatches uploads to AWS ...</test-case>
+      <test-case ac="ac3">Test Image processing generates square 512x512 WebP der...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for media upload implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="CRITICAL">
+        <path>docs/architecture/backend-architecture.md</path>
+        <section>Media Pipeline, S3 Integration</section>
+        <reason>Media pipeline architecture and S3 patterns.</reason>
+        <applies-to>task1,task2,task3,task7</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Secure Upload, Media Processing</section>
+        <reason>Secure upload patterns with presigned URLs and virus scanning.</reason>
+        <applies-to>task1,task2,task3</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>File Upload, S3 Integration</section>
+        <reason>Serverpod file upload and S3 integration patterns.</reason>
+        <applies-to>task1,task2</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/media-pipeline.md</path>
+        <section>ALL</section>
+        <reason>Media processing pipeline operations. MUST READ.</reason>
+        <applies-to>task2,task3,task8</applies-to>
+      </runbook>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/incident-response.md</path>
+        <section>Media Upload Failures</section>
+        <reason>Media upload failure handling.</reason>
+        <applies-to>task1,task3</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including media upload security</decision>
+        <reason>Security requirements for media uploads.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Media Security, Virus Scanning</section>
+        <applies-to>task1,task2,task3,task8</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

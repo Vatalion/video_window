@@ -1,32 +1,109 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="4-1-tiktok-style-video-feed-implementation" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="4-1-home-feed-implementation" generated="2025-11-10">
   <metadata>
     <epic>4</epic>
     <story>1</story>
-    <title>Tiktok Style Video Feed Implementation</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/4.1.home-feed-implementation.md</story-file>
+    <title>Story 4-1: Home Feed Implementation</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/4-1-home-feed-implementation.md</story-file>
     <epic-context>docs/epic-4-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-4.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to tiktok style video feed implementation</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>viewer</as-a>
+    <i-want>to browse an infinite vertical video feed with smooth auto-play and performance-optimized scrolling</i-want>
+    <so-that>I can discover and engage with content seamlessly</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">TikTok-style vertical video feed with infinite scroll, auto-play functionality, and smooth 60fps scrolling performance with &lt;=2% jank.</criterion>
+    <criterion id="ac2">Video pagination system with 3-item prefetching, crash-safe resume functionality, and intelligent caching for optimal performance.</criterion>
+    <criterion id="ac3">Feed algorithm implementation with content personalization, performance monitoring, and real-time analytics integration.</criterion>
+    <criterion id="ac4">**PERFORMANCE CRITICAL**: Maintain 60fps scroll performance with &lt;=2% jank on mid-range devices using optimized list views and proper widget lifecycle management.</criterion>
+    <criterion id="ac5">**PERFORMANCE CRITICAL**: Implement video auto-play with proper resource management, memory optimization, and battery efficiency considerations.</criterion>
+    <criterion id="ac6">**PERFORMANCE CRITICAL**: Crash-safe resume functionality with state persistence, offline queue support, and robust error recovery mechanisms.</criterion>
+    <criterion id="ac7">**UX CRITICAL**: Smooth video transitions with loading states, error handling, and accessibility compliance for screen readers and reduced motion preferences.</criterion>
+    <criterion id="ac8">**ANALYTICS CRITICAL**: Comprehensive feed interaction tracking with impression events, engagement metrics, and performance monitoring integration.</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>PERFORMANCE CRITICAL - PERF-001: Implement optimized vertical list view with 60fps scrolling performance</description>
+      <acceptance-criteria>ac1,ac4</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>PERFORMANCE CRITICAL - PERF-002: Implement video auto-play with proper resource management</description>
+      <acceptance-criteria>ac2,ac5</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>PERFORMANCE CRITICAL - PERF-003: Implement intelligent prefetching and caching system</description>
+      <acceptance-criteria>ac2,ac4</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>PERFORMANCE CRITICAL - PERF-004: Implement crash-safe resume functionality</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>PERFORMANCE CRITICAL - PERF-005: Implement memory optimization and leak prevention</description>
+      <acceptance-criteria>ac4,ac5</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Implement feed BLoC with state management, pagination logic, and video caching using shared design tokens</description>
+      <acceptance-criteria>ac1,ac2</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Connect feed to Story service `GET /stories/feed` with pagination parameters, handling 200, 401, and 429 responses with proper retry logic</description>
+      <acceptance-criteria>ac1,ac2</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Implement feed algorithm integration with personalization, engagement tracking, and content ordering optimization</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Implement accessibility features with semantic labels, screen reader support, and reduced motion compliance</description>
+      <acceptance-criteria>ac7</acceptance-criteria>
+    </task>
+    <task id="task10">
+      <description>Implement TikTok-style vertical feed layout with full-screen video items and gesture-based navigation</description>
+      <acceptance-criteria>ac1,ac7</acceptance-criteria>
+    </task>
+    <task id="task11">
+      <description>Implement video overlay controls with like button, view story CTA, and long-press action menu</description>
+      <acceptance-criteria>ac7</acceptance-criteria>
+    </task>
+    <task id="task12">
+      <description>Implement engagement features with reactions, wishlist toggle, and share functionality</description>
+      <acceptance-criteria>ac7,ac8</acceptance-criteria>
+    </task>
+    <task id="task13">
+      <description>Cover feed performance scenarios with comprehensive testing including scroll performance, memory usage, and crash recovery</description>
+      <acceptance-criteria>ac4,ac5,ac6</acceptance-criteria>
+    </task>
   </story-tasks>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-4.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-4-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-4.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-4-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +111,68 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test TikTok-style vertical video feed with infinite scr...</test-case>
+      <test-case ac="ac2">Test Video pagination system with 3-item prefetching, c...</test-case>
+      <test-case ac="ac3">Test Feed algorithm implementation with content persona...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for feed implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/frontend-architecture.md</path>
+        <section>Performance, State Management</section>
+        <reason>Feed performance and state management patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Pagination, Caching, Video Playback</section>
+        <reason>Feed pagination, caching, and video playback patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>Pagination, Caching</section>
+        <reason>Serverpod pagination and caching implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/performance-degradation.md</path>
+        <section>ALL</section>
+        <reason>Performance monitoring and optimization procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="HIGH">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including content security</decision>
+        <reason>Content security and access control requirements.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+  </implementation-guidance>
 </story-context>

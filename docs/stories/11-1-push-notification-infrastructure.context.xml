@@ -1,32 +1,109 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="11.1.push-notification-infrastructure" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="11-1-push-notification-infrastructure" generated="2025-11-10">
   <metadata>
     <epic>11</epic>
     <story>1</story>
-    <title>Push Notification Infrastructure & Device Registration</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/11.1.push-notification-infrastructure.md</story-file>
+    <title>Story 11-1: Push Notification Infrastructure &amp; Device Registration</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/11-1-push-notification-infrastructure.md</story-file>
     <epic-context>docs/epic-11-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-11.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>functionality described in story</i-want>
-    <so-that>requirements are met</so-that>
+    <as-a>user (viewer or maker)</as-a>
+    <i-want>to receive push notifications for important marketplace events</i-want>
+    <so-that>I stay informed about offers, bids, auctions, and order updates</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">**SECURITY CRITICAL**: App requests push notification permission on first launch with clear value proposition, respecting user choice without aggressive re-prompting.</criterion>
+    <criterion id="ac2">Device token registration with Firebase Cloud Messaging (FCM) for both iOS and Android, with automatic token refresh handling and server synchronization.</criterion>
+    <criterion id="ac3">Device token stored securely on Serverpod with user association, platform identification, and token expiry tracking.</criterion>
+    <criterion id="ac4">**RELIABILITY CRITICAL**: Automatic token refresh and re-registration on app launch, token invalidation, or platform updates within 60 seconds.</criterion>
+    <criterion id="ac5">Multiple device support per user with independent token management and delivery tracking across devices.</criterion>
+    <criterion id="ac6">Background notification handling when app is closed or backgrounded with proper deep linking to relevant screens.</criterion>
+    <criterion id="ac7">Foreground notification handling with custom in-app display and immediate activity feed updates.</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>DEPENDENCY: Set up Firebase project and configure FCM for iOS/Android</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Implement notification permission request flow</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Build FCM token management service</description>
+      <acceptance-criteria>ac2,ac4</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Create device token registration endpoint</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Implement token synchronization logic</description>
+      <acceptance-criteria>ac4,ac5</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Build token cleanup and expiry management</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Implement background notification handler</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Implement foreground notification handler</description>
+      <acceptance-criteria>ac7</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Build deep linking navigation system</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task10">
+      <description>RELIABILITY CRITICAL: Implement comprehensive notification delivery testing</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task11">
+      <description>Test notification permissions and user flows</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task12">
+      <description>Test background and foreground message handling</description>
+      <acceptance-criteria>ac6,ac7</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 1.1 – Implement Email OTP Sign-In (user authentication and session management)</prerequisite>
+    <prerequisite>Story 3.4 – Notification Preferences Matrix (user preference storage)</prerequisite>
+    <prerequisite>Firebase project setup with FCM enabled for iOS and Android</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-11.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-11-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-11.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-11-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +111,74 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test **SECURITY CRITICAL**: App requests push notificat...</test-case>
+      <test-case ac="ac2">Test Device token registration with Firebase Cloud Mess...</test-case>
+      <test-case ac="ac3">Test Device token stored securely on Serverpod with use...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Payment Processing, Transaction Management</section>
+        <reason>Payment and transaction patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/payment-processing.md</path>
+        <section>ALL</section>
+        <reason>Payment processing and transaction procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including payment security</decision>
+        <reason>Payment security and PCI compliance requirements.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Payment Security, Transaction Security</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/compliance-guide.md</path>
+        <section>PCI DSS</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

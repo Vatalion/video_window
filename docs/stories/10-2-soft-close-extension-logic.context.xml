@@ -1,32 +1,86 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="10.2.soft-close-extension-logic" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="10-2-soft-close-extension-logic" generated="2025-11-10">
   <metadata>
     <epic>10</epic>
     <story>2</story>
-    <title>Soft-Close Extension Logic</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/10.2.soft-close-extension-logic.md</story-file>
+    <title>Story 10-2: Soft-Close Extension Logic</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/10-2-soft-close-extension-logic.md</story-file>
     <epic-context>docs/epic-10-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-10.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>functionality described in story</i-want>
-    <so-that>requirements are met</so-that>
+    <as-a>bidder</as-a>
+    <i-want>soft-close extensions to trigger whenever late bids arrive</i-want>
+    <so-that>auctions stay fair and give everyone a chance to respond</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">**BUSINESS CRITICAL**: `soft_close_service.dart` extends auctions by `SOFT_CLOSE_EXTENSION_MINUTES` when a bid arrives inside the final 15 minutes, capped by `SOFT_CLOSE_MAX_EXTENSION_MINUTES`, and records an immutable audit entry (Implementation Guide §2).</criterion>
+    <criterion id="ac2">**REAL-TIME CRITICAL**: WebSocket payloads broadcast soft-close events within 1s of extension, and `soft_close_indicator.dart` reflects the new end time with animation + accessibility text (Implementation Guide §2).</criterion>
+    <criterion id="ac3">**OPERATIONS CRITICAL**: Manual override endpoint (`auction_soft_close_endpoint.dart`) lets admins extend or lock auction end times with RBAC checks and audit trail, emitting EventBridge event `auctions.soft_close.overridden` (Implementation Guide §2).</criterion>
+    <criterion id="ac4">**OBSERVABILITY CRITICAL**: Metrics `auctions.soft_close.trigger_count`, `auctions.soft_close.cap_hits`, and Segment event `auction_soft_close_extended` are emitted with cause metadata (Monitoring &amp; Analytics §2).</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement extension eligibility in `soft_close_service.dart`</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Update `auction_timer_scheduler.dart` to consume extension metadata</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Build `auction_soft_close_bloc.dart` and `soft_close_indicator.dart`</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Update `auction_timer_page.dart` to surface extension history</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Create `auction_soft_close_endpoint.dart`</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Instrument analytics + monitoring</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Expand tests: `soft_close_service_test.dart`, `auction_soft_close_endpoint_test.dart`, bloc/widget coverage</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 10.1 – Auction Timer &amp; State Management (baseline timer + drift handling)</prerequisite>
+    <prerequisite>Story 9.2 – Server Validation &amp; Auction Trigger (bid events + auction activation)</prerequisite>
+    <prerequisite>Maker policy configuration contains soft-close parameters (see docs/tech-spec-epic-9.md)</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-10.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-10-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-10.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-10-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +88,74 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test **BUSINESS CRITICAL**: `soft_close_service.dart` e...</test-case>
+      <test-case ac="ac2">Test **REAL-TIME CRITICAL**: WebSocket payloads broadca...</test-case>
+      <test-case ac="ac3">Test **OPERATIONS CRITICAL**: Manual override endpoint ...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Payment Processing, Transaction Management</section>
+        <reason>Payment and transaction patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/payment-processing.md</path>
+        <section>ALL</section>
+        <reason>Payment processing and transaction procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including payment security</decision>
+        <reason>Payment security and PCI compliance requirements.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Payment Security, Transaction Security</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/compliance-guide.md</path>
+        <section>PCI DSS</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

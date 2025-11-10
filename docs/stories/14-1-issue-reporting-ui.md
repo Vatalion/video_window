@@ -1,5 +1,8 @@
 # Story 14-1: Issue Reporting UI
 
+## Status
+ready-for-dev
+
 **Epic:** 14 - Issue Resolution & Refund Handling  
 **Story Points:** 5  
 **Priority:** HIGH  

@@ -1,32 +1,84 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="9-2-server-validation-auction-trigger" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="9-2-server-validation-and-auction-trigger" generated="2025-11-10">
   <metadata>
     <epic>9</epic>
     <story>2</story>
-    <title>Server Validation Auction Trigger</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/9.2.server-validation-and-auction-trigger.md</story-file>
+    <title>Story 9-2: Server Validation &amp; Auction Trigger</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/9-2-server-validation-and-auction-trigger.md</story-file>
     <epic-context>docs/epic-9-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-9.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to server validation auction trigger</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>commerce platform operator</as-a>
+    <i-want>the offers service to validate submissions and launch auctions atomically</i-want>
+    <so-that>every qualifying offer enforces business policy and starts bidding without inconsistency</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">**BUSINESS CRITICAL**: `offer_validation_endpoint` evaluates maker policies via OPA (`offer_rule_engine` bundle), applies maker/buyer eligibility, and returns deterministic rule codes within 400ms p95.</criterion>
+    <criterion id="ac2">**BUSINESS CRITICAL**: `offer_submit_endpoint` enforces idempotency, executes `OfferSubmissionSaga` (validation → payment pre-authorization → risk check → persistence) in a single transaction, and emits `OfferSubmitted` audit events.</criterion>
+    <criterion id="ac3">Auction trigger integration fires `auction_trigger_service.start()` on first accepted offer, publishes EventBridge event `offers.auction.started`, and records SNS notification payloads for makers.</criterion>
+    <criterion id="ac4">Stripe, Sift, and Plaid integrations surface decision context in logs and Datadog metrics (`offers.risk_check.duration_ms`, `offers.submission.success_rate`) with redaction of PII, and recover gracefully on partner outages.</criterion>
+    <criterion id="ac5">Contract, endpoint, and service tests cover positive/negative paths, including idempotent replay, rule denials, payment failures, and auction event verification.</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>BUSINESS CRITICAL - BUS-001: Implement `offer_validation_endpoint.dart` orchestrating policy checks</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Expand `offer_validation_service.dart` to translate OPA decisions into domain failures</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>BUSINESS CRITICAL - BUS-002: Build `OfferSubmissionSaga` inside `offer_submission_service.dart`</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Integrate `auction_trigger_service.dart` to start auction on first accepted offer</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Implement structured logging with `submission_trace_id`, partner decision payload hashes, and latency metrics</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Expand testing suite</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 9.1 – Offer Submission Flow (client validation handshake)</prerequisite>
+    <prerequisite>Story 1.1 – Implement Email OTP Sign-In (session/token validation)</prerequisite>
+    <prerequisite>Story 2.1 – Capability Enablement Request Flow (maker capability + policy snapshot)</prerequisite>
+    <prerequisite>Story 6.1 – Media Pipeline Content Protection (auction artifact contracts)</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-9.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-9-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-9.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-9-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +86,74 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test **BUSINESS CRITICAL**: `offer_validation_endpoint`...</test-case>
+      <test-case ac="ac2">Test **BUSINESS CRITICAL**: `offer_submit_endpoint` enf...</test-case>
+      <test-case ac="ac3">Test Auction trigger integration fires `auction_trigger...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Payment Processing, Transaction Management</section>
+        <reason>Payment and transaction patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/payment-processing.md</path>
+        <section>ALL</section>
+        <reason>Payment processing and transaction procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including payment security</decision>
+        <reason>Payment security and PCI compliance requirements.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Payment Security, Transaction Security</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/compliance-guide.md</path>
+        <section>PCI DSS</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

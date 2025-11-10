@@ -3,6 +3,9 @@ health:
 auth:
   - sendOtp:
   - verifyOtp:
+metrics:
+  - getMetrics:
+  - getHealth:
 offer:
   - submitOffer:
 order:

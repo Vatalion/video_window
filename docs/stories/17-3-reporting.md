@@ -1,4 +1,7 @@
 # Story 17-3: Automated Reporting
+
+## Status
+ready-for-dev
 **Epic:** 17
 **Points:** 5
 **Status:** Ready

@@ -105,6 +105,8 @@ class TestEndpoints {
 
   late final _AuthEndpoint auth;
 
+  late final _MetricsEndpoint metrics;
+
   late final _OfferEndpoint offer;
 
   late final _OrderEndpoint order;
@@ -128,6 +130,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     auth = _AuthEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    metrics = _MetricsEndpoint(
       endpoints,
       serializationManager,
     );
@@ -251,6 +257,70 @@ class _AuthEndpoint {
             'email': email,
             'code': code,
           }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<Map<String, dynamic>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _MetricsEndpoint {
+  _MetricsEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<String> getMetrics(_i1.TestSessionBuilder sessionBuilder) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'metrics',
+        method: 'getMetrics',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'metrics',
+          methodName: 'getMetrics',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<Map<String, dynamic>> getHealth(
+      _i1.TestSessionBuilder sessionBuilder) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'metrics',
+        method: 'getHealth',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'metrics',
+          methodName: 'getHealth',
+          parameters: _i1.testObjectToJson({}),
           serializationManager: _serializationManager,
         );
         var _localReturnValue = await (_localCallContext.method.call(

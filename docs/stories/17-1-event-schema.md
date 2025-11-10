@@ -1,4 +1,7 @@
 # Story 17-1: Event Schema
+
+## Status
+ready-for-dev
 **Epic:** 17
 **Points:** 5
 **Status:** Ready

@@ -1,0 +1,38 @@
+# Template Compliance Remediation Workflow
+name: "template-remediation"
+description: "Systematic remediation of stories, epics, and tech-specs to ensure full template compliance with progress tracking"
+author: "BMad Team"
+version: "1.0.0"
+date: system-generated
+
+# Configuration
+config_source: "{project-root}/bmad/core/config.yaml"
+output_folder: "{config_source:output_folder}"
+project_root: "{project-root}"
+
+# Workflow components
+template: false
+instructions: "{project-root}/bmad/bmm/workflows/4-implementation/template-remediation/instructions.md"
+validation: "{project-root}/bmad/bmm/workflows/4-implementation/template-remediation/validation.sh"
+checklist: "{project-root}/bmad/bmm/workflows/4-implementation/template-remediation/checklist.md"
+
+# Data sources
+stories_dir: "{output_folder}/stories"
+validation_script: "/tmp/validate_templates.sh"
+progress_tracker: "{output_folder}/remediation-progress.md"
+
+# Remediation targets (from validation)
+total_stories: 75
+non_compliant_stories: 35
+total_tech_specs: 20
+non_compliant_tech_specs: 10
+total_epic_contexts: 20
+non_compliant_epic_contexts: 0
+
+# Mode options
+mode: "interactive"  # interactive | batch | dry-run
+auto_commit: false
+create_backups: true
+
+standalone: false
+web_bundle: false

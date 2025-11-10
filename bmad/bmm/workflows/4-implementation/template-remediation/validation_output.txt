@@ -1,0 +1,85 @@
+=== STORY TEMPLATE COMPLIANCE ===
+
+Required Story Sections:
+- ## Status
+- ## Story
+- ## Acceptance Criteria
+- ## Tasks / Subtasks
+- ## Dev Notes
+
+❌ 01-2-local-development-environment.md: Missing [ Status, Story, DevNotes,]
+❌ 01-3-code-generation-workflows.md: Missing [ Status, Story, DevNotes,]
+❌ 02-1-design-system-theme-foundation.md: Missing [ Status, Story, DevNotes,]
+❌ 02-2-navigation-infrastructure-routing.md: Missing [ Status, Story, DevNotes,]
+❌ 02-3-configuration-management-feature-flags.md: Missing [ Status, Story, DevNotes,]
+❌ 02-4-analytics-service-foundation.md: Missing [ Status, Story, DevNotes,]
+❌ 03-1-logging-metrics-implementation.md: Missing [ Status, Story, DevNotes,]
+❌ 03-2-privacy-legal-disclosures.md: Missing [ Status, Story, DevNotes,]
+❌ 03-3-data-retention-backup-procedures.md: Missing [ Status, Story, DevNotes,]
+❌ 1-3-session-management-and-refresh.md: Missing [ DevNotes,]
+❌ 14-1-issue-reporting-ui.md: Missing [ Status, Story, DevNotes,]
+❌ 14-2-dispute-workflow.md: Missing [ Status, Story, DevNotes,]
+❌ 14-3-refund-processing.md: Missing [ Status, Story, DevNotes,]
+❌ 15-1-admin-dashboard.md: Missing [ Status, Story, DevNotes,]
+❌ 15-2-listing-takedown.md: Missing [ Status, Story, DevNotes,]
+❌ 15-3-policy-config.md: Missing [ Status, Story, DevNotes,]
+❌ 16-1-secrets-rbac.md: Missing [ Status, Story, DevNotes,]
+❌ 16-2-pentest.md: Missing [ Status, Story, DevNotes,]
+❌ 16-3-dsar.md: Missing [ Status, Story, DevNotes,]
+❌ 17-1-event-schema.md: Missing [ Status, Story, DevNotes,]
+❌ 17-2-dashboards.md: Missing [ Status, Story, DevNotes,]
+❌ 17-3-reporting.md: Missing [ Status, Story, DevNotes,]
+❌ 2-1-capability-enable-request-flow.md: Missing [ DevNotes,]
+❌ 2-2-verification-within-publish-flow.md: Missing [ DevNotes,]
+❌ 2-3-payout-and-compliance-activation.md: Missing [ DevNotes,]
+❌ 2-4-device-trust-and-risk-monitoring.md: Missing [ DevNotes,]
+❌ 3-2-avatar-media-upload-system.md: Missing [ DevNotes,]
+❌ 3-3-privacy-settings-and-controls.md: Missing [ DevNotes,]
+❌ 3-4-notification-preferences-matrix.md: Missing [ DevNotes,]
+❌ 3-5-account-settings-management.md: Missing [ DevNotes,]
+❌ 4-2-infinite-scroll-and-pagination.md: Missing [ DevNotes,]
+❌ 4-3-video-preloading-and-caching-strategy.md: Missing [ DevNotes,]
+❌ 4-4-feed-performance-optimization.md: Missing [ DevNotes,]
+❌ 4-5-content-recommendation-engine-integration.md: Missing [ DevNotes,]
+❌ 4-6-feed-personalization-and-user-preferences.md: Missing [ DevNotes,]
+
+Stories validated: 75
+Stories with missing sections: 35
+
+=== TECH SPEC TEMPLATE COMPLIANCE ===
+
+Required Tech Spec Sections:
+- ## Architecture Overview
+- ## Data Models
+- ## API Endpoints
+- ## Implementation Details
+
+❌ tech-spec-epic-01.md: Missing [ DataModels, API, Implementation,]
+❌ tech-spec-epic-02.md: Missing [ DataModels, API, Implementation,]
+❌ tech-spec-epic-03.md: Missing [ DataModels, API, Implementation,]
+❌ tech-spec-epic-13.md: Missing [ API, Implementation,]
+❌ tech-spec-epic-14.md: Missing [ Header, DataModels,]
+❌ tech-spec-epic-15.md: Missing [ Header, DataModels, API,]
+❌ tech-spec-epic-16.md: Missing [ Header, DataModels, API, Implementation,]
+❌ tech-spec-epic-17.md: Missing [ Header, DataModels, API, Implementation,]
+❌ tech-spec-epic-2.md: Missing [ DataModels, API, Implementation,]
+❌ tech-spec-epic-8.md: Missing [ DataModels, API, Implementation,]
+
+Tech Specs validated: 20
+Tech Specs with missing sections: 10
+
+=== EPIC CONTEXT TEMPLATE COMPLIANCE ===
+
+Required Epic Context Sections:
+- ## Technical Foundation
+- ## Key Integration Points
+- ## Story Dependencies
+
+
+Epic Contexts validated: 20
+Epic Contexts with missing sections: 0
+
+=== SUMMARY ===
+Total Stories: 75 (Missing sections: 35)
+Total Tech Specs: 20 (Missing sections: 10)
+Total Epic Contexts: 20 (Missing sections: 0)

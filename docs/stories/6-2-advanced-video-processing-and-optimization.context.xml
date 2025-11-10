@@ -1,32 +1,108 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="6-2-advanced-video-processing-optimization" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="6-2-advanced-video-processing-and-optimization" generated="2025-11-10">
   <metadata>
     <epic>6</epic>
     <story>2</story>
-    <title>Advanced Video Processing Optimization</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/6.2.advanced-video-processing-and-optimization.md</story-file>
+    <title>Story 6-2: Advanced Video Processing &amp; Optimization</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/6-2-advanced-video-processing-and-optimization.md</story-file>
     <epic-context>docs/epic-6-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-6.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to advanced video processing optimization</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>platform video pipeline owner</as-a>
+    <i-want>optimized</i-want>
+    <so-that>every uploaded asset delivers the best possible quality and startup latency across devices while staying cost efficient.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">MediaConvert jobs are orchestrated through Step Functions `media-transcode-orchestrator@2025-09` with automatic retries, DLQ routing, and job status reporting. *(Ref: docs/tech-spec-epic-6.md – Implementation Guide §2)*</criterion>
+    <criterion id="ac2">GPU-accelerated FFmpeg workers (EKS `g5-media-transcode`) produce HLS renditions at 360p, 720p, 1080p, and 2160p with bitrate ladders matching template `vw-media-hls-v3`. *(Ref: docs/tech-spec-epic-6.md – Technology Stack &amp; Transcode Service blueprint)*</criterion>
+    <criterion id="ac3">Shaka Packager outputs coordinated HLS + DASH manifests, stored under `s3://vw-media-origin-prod/manifests/`, with CloudFront cache invalidations issued on completion. *(Ref: docs/tech-spec-epic-6.md – Implementation Guide §3)*</criterion>
+    <criterion id="ac4">Rendition health metrics (per-rung transcode duration, error rates, p95 startup) are emitted via `media_pipeline_observer.dart` to Datadog (`media.transcode.duration_ms`) and Segment events (`media_transcode_completed`). *(Ref: docs/tech-spec-epic-6.md – Monitoring &amp; Analytics)*</criterion>
+    <criterion id="ac5">End-to-end integration tests cover upload → transcode → manifest availability, including fallback path when a rendition fails; failures surface actionable alerts in Slack via EventBridge rule `media-transcode-alerts`. *(Ref: docs/tech-spec-epic-6.md – Testing &amp; Compliance)*</criterion>
+    <criterion id="ac6">Terraform definitions in `infrastructure/terraform/media_pipeline.tf` capture MediaConvert roles, queues, and Step Functions resources with parameterized environment overlays. *(Ref: docs/tech-spec-epic-6.md – Environment Configuration &amp; Infrastructure Requirements)*</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement `transcode_service.dart` to assemble MediaConvert requests using template `vw-media-hls-v3`, injecting per-asset renditions and Speke key provider settings. *(Ref: docs/tech-spec-epic-6.m...</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Create `media_transcode_endpoint.dart` handling job submission, polling, and exponential backoff retries with DLQ fallback. *(Ref: docs/tech-spec-epic-6.md – Source Tree &amp; File Directives)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Wire AWS Step Functions client in `media_pipeline_step_function.dart`, defining state transitions (SubmitJob → WaitStatus → Success/Fail) with CloudWatch alarms for timeout. *(Ref: docs/tech-spec-e...</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Integrate Shaka Packager invocation post MediaConvert to emit DASH alongside HLS manifests; persist under `manifests/` prefix with versioned naming (`assetId/rendition.mpd`). *(Ref: docs/tech-spec-...</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Configure CloudFront invalidations via Terraform when manifests update (use Lambda@Edge or Step Functions task). *(Ref: docs/architecture/cdn-integration.md#cache-invalidation)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Extend `media_pipeline_observer.dart` to publish Segment `media_packaged` and Datadog gauge for manifest generation latency. *(Ref: docs/tech-spec-epic-6.md – Monitoring &amp; Analytics)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Add fallback routine that marks missing renditions as degraded but still serves available qualities with alerting. *(Ref: docs/tech-spec-epic-6.md – Resilience Considerations)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Build `transcode_service_test.dart` covering job assembly, rendition fallback, and template overrides. *(Ref: docs/tech-spec-epic-6.md – Testing &amp; Compliance)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Add integration tests under `video_window_server/test/endpoints/media/` validating end-to-end job lifecycle with mocked AWS clients. *(Ref: docs/tech-spec-epic-6.md – Source Tree)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task10">
+      <description>Update `media_pipeline_checks.yaml` CI workflow to run ffmpeg smoke tests (`ffprobe`, decode) and assert GPU nodes registered. *(Ref: docs/tech-spec-epic-6.md – Workflow Orchestration)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task11">
+      <description>Instrument Datadog synthetic `story-startup` to log pre/post optimization metrics and capture 2.5s p95 goal breaches. *(Ref: docs/tech-spec-epic-6.md – Success Metrics)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task12">
+      <description>Document runbooks in `docs/runbooks/media-transcode.md` for investigating job failures and scaling GPU node groups. *(Ref: docs/architecture/performance-optimization-guide.md)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 6.1 – Media Pipeline &amp; MVP Content Protection (ensures secure upload + KMS metadata handoff).</prerequisite>
+    <prerequisite>Terraform base networking/observability modules from Epic 2 infrastructure stories. *(Ref: docs/architecture/project-structure-implementation.md)*</prerequisite>
+    <prerequisite>Access to AWS accounts with MediaConvert, Elemental, and Step Functions quotas validated. *(Ref: docs/security/security-configuration.md#cloud-accounts)*</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-6.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-6-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-6.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-6-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +110,69 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test MediaConvert jobs are orchestrated through Step Fu...</test-case>
+      <test-case ac="ac2">Test GPU-accelerated FFmpeg workers (EKS `g5-media-tran...</test-case>
+      <test-case ac="ac3">Test Shaka Packager outputs coordinated HLS + DASH mani...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Video Pipeline, Content Security</section>
+        <reason>Video and content processing patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/incident-response.md</path>
+        <section>ALL</section>
+        <reason>Incident response procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including content security</decision>
+        <reason>Security requirements for content processing.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Content Security, Access Controls</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

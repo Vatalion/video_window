@@ -12,11 +12,12 @@
 import 'package:serverpod/serverpod.dart' as _i1;
 import '../endpoints/health_endpoint.dart' as _i2;
 import '../endpoints/identity/auth_endpoint.dart' as _i3;
-import '../endpoints/offers/offer_endpoint.dart' as _i4;
-import '../endpoints/orders/order_endpoint.dart' as _i5;
-import '../endpoints/payments/payment_endpoint.dart' as _i6;
-import '../endpoints/story/story_endpoint.dart' as _i7;
-import '../greeting_endpoint.dart' as _i8;
+import '../endpoints/metrics_endpoint.dart' as _i4;
+import '../endpoints/offers/offer_endpoint.dart' as _i5;
+import '../endpoints/orders/order_endpoint.dart' as _i6;
+import '../endpoints/payments/payment_endpoint.dart' as _i7;
+import '../endpoints/story/story_endpoint.dart' as _i8;
+import '../greeting_endpoint.dart' as _i9;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -34,31 +35,37 @@ class Endpoints extends _i1.EndpointDispatch {
           'auth',
           null,
         ),
-      'offer': _i4.OfferEndpoint()
+      'metrics': _i4.MetricsEndpoint()
+        ..initialize(
+          server,
+          'metrics',
+          null,
+        ),
+      'offer': _i5.OfferEndpoint()
         ..initialize(
           server,
           'offer',
           null,
         ),
-      'order': _i5.OrderEndpoint()
+      'order': _i6.OrderEndpoint()
         ..initialize(
           server,
           'order',
           null,
         ),
-      'payment': _i6.PaymentEndpoint()
+      'payment': _i7.PaymentEndpoint()
         ..initialize(
           server,
           'payment',
           null,
         ),
-      'story': _i7.StoryEndpoint()
+      'story': _i8.StoryEndpoint()
         ..initialize(
           server,
           'story',
           null,
         ),
-      'greeting': _i8.GreetingEndpoint()
+      'greeting': _i9.GreetingEndpoint()
         ..initialize(
           server,
           'greeting',
@@ -128,6 +135,30 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
+    connectors['metrics'] = _i1.EndpointConnector(
+      name: 'metrics',
+      endpoint: endpoints['metrics']!,
+      methodConnectors: {
+        'getMetrics': _i1.MethodConnector(
+          name: 'getMetrics',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['metrics'] as _i4.MetricsEndpoint).getMetrics(session),
+        ),
+        'getHealth': _i1.MethodConnector(
+          name: 'getHealth',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['metrics'] as _i4.MetricsEndpoint).getHealth(session),
+        ),
+      },
+    );
     connectors['offer'] = _i1.EndpointConnector(
       name: 'offer',
       endpoint: endpoints['offer']!,
@@ -150,7 +181,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['offer'] as _i4.OfferEndpoint).submitOffer(
+              (endpoints['offer'] as _i5.OfferEndpoint).submitOffer(
             session,
             params['storyId'],
             params['amount'],
@@ -175,7 +206,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['order'] as _i5.OrderEndpoint).getOrder(
+              (endpoints['order'] as _i6.OrderEndpoint).getOrder(
             session,
             params['orderId'],
           ),
@@ -198,7 +229,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['order'] as _i5.OrderEndpoint).updateShipping(
+              (endpoints['order'] as _i6.OrderEndpoint).updateShipping(
             session,
             params['orderId'],
             params['trackingNumber'],
@@ -223,7 +254,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['payment'] as _i6.PaymentEndpoint)
+              (endpoints['payment'] as _i7.PaymentEndpoint)
                   .createCheckoutSession(
             session,
             params['orderId'],
@@ -253,7 +284,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['story'] as _i7.StoryEndpoint).getFeed(
+              (endpoints['story'] as _i8.StoryEndpoint).getFeed(
             session,
             limit: params['limit'],
             offset: params['offset'],
@@ -272,7 +303,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['story'] as _i7.StoryEndpoint).getStory(
+              (endpoints['story'] as _i8.StoryEndpoint).getStory(
             session,
             params['storyId'],
           ),
@@ -296,7 +327,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['greeting'] as _i8.GreetingEndpoint).hello(
+              (endpoints['greeting'] as _i9.GreetingEndpoint).hello(
             session,
             params['name'],
           ),

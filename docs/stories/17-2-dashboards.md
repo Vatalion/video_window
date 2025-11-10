@@ -1,4 +1,7 @@
 # Story 17-2: KPI Dashboards
+
+## Status
+ready-for-dev
 **Epic:** 17
 **Points:** 8
 **Status:** Ready

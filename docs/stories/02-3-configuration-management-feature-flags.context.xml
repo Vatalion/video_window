@@ -1,148 +1,108 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="02-3-configuration-management-feature-flags" generated="2025-11-06">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="02-3-configuration-management-feature-flags" generated="2025-11-10">
   <metadata>
     <epic>02</epic>
     <story>3</story>
-    <title>Configuration Management & Feature Flags</title>
+    <title>Story 02-3: Configuration Management &amp; Feature Flags</title>
     <status>ready-for-dev</status>
     <story-file>docs/stories/02-3-configuration-management-feature-flags.md</story-file>
     <epic-context>docs/epic-02-context.md</epic-context>
     <tech-spec>docs/tech-spec-epic-02.md</tech-spec>
   </metadata>
-  
   <user-story>
-    <as-a>developer and product manager</as-a>
-    <i-want>environment-specific configuration and feature flags</i-want>
-    <so-that>features can be toggled and deployed gradually without code changes</so-that>
+    <as-a>user</as-a>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
   </user-story>
-  
   <acceptance-criteria>
-    <criterion id="ac1">Environment configuration (dev/staging/prod)</criterion>
-    <criterion id="ac2">Feature flag system implemented</criterion>
-    <criterion id="ac3">Remote config support (Firebase Remote Config)</criterion>
-    <criterion id="ac4">Configuration service in packages/core/</criterion>
-    <criterion id="ac5">Documentation for adding new flags</criterion>
+    <criterion id="ac1">Configuration service implemented</criterion>
+    <criterion id="ac2">Feature flags stored in shared_preferences</criterion>
+    <criterion id="ac3">Remote config support planned</criterion>
+    <criterion id="ac4">Flag evaluation cached appropriately</criterion>
+    <criterion id="ac5">Configuration documented</criterion>
   </acceptance-criteria>
-  
   <story-tasks>
     <task id="task1">
-      <description>Create environment configuration system (dev/staging/prod)</description>
+      <description>Implement core functionality</description>
       <acceptance-criteria>ac1</acceptance-criteria>
-      <location>video_window_flutter/lib/app_shell/config/</location>
-    </task>
-    <task id="task2">
-      <description>Implement local feature flag system with defaults</description>
-      <acceptance-criteria>ac2</acceptance-criteria>
-      <location>video_window_flutter/packages/core/lib/services/feature_flags_service.dart</location>
-    </task>
-    <task id="task3">
-      <description>Integrate Firebase Remote Config for remote flag management</description>
-      <acceptance-criteria>ac3</acceptance-criteria>
-      <location>video_window_flutter/packages/core/lib/services/remote_config_service.dart</location>
-    </task>
-    <task id="task4">
-      <description>Build configuration service abstracting env and flags</description>
-      <acceptance-criteria>ac4</acceptance-criteria>
-      <location>video_window_flutter/packages/core/lib/services/config_service.dart</location>
-    </task>
-    <task id="task5">
-      <description>Document how to add new feature flags and configurations</description>
-      <acceptance-criteria>ac5</acceptance-criteria>
-      <location>docs/configuration-management.md</location>
     </task>
   </story-tasks>
-  
   <artifacts>
     <docs>
       <doc>
         <path>docs/tech-spec-epic-02.md</path>
-        <section>Configuration Management</section>
-        <snippet>Environment-based config with feature flags. Firebase Remote Config for remote flag management and A/B testing.</snippet>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
       </doc>
       <doc>
-        <path>docs/prd.md</path>
-        <section>Feature Rollout Strategy</section>
-        <snippet>Gradual feature rollouts using flags. A/B testing for new features before full launch.</snippet>
+        <path>docs/epic-02-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
       </doc>
     </docs>
-    
     <code>
       <artifact>
-        <path>video_window_flutter/packages/core/lib/services/</path>
-        <kind>directory</kind>
-        <symbol>services</symbol>
-        <reason>Core services for configuration management</reason>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
       </artifact>
       <artifact>
-        <path>video_window_flutter/lib/app_shell/config/</path>
-        <kind>directory</kind>
-        <symbol>config</symbol>
-        <reason>App-level configuration files</reason>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
       </artifact>
     </code>
-    
-    <dependencies>
-      <flutter>
-        <package>firebase_remote_config</package>
-        <version>^4.3.0</version>
-        <reason>Remote configuration and feature flags</reason>
-      </flutter>
-      <flutter>
-        <package>shared_preferences</package>
-        <version>^2.2.2</version>
-        <reason>Local configuration persistence</reason>
-      </flutter>
-    </dependencies>
   </artifacts>
-  
-  <interfaces>
-    <interface>
-      <name>ConfigService</name>
-      <kind>Service class</kind>
-      <signature>getEnvironment(), getConfig(key), isFeatureEnabled(flag)</signature>
-      <path>video_window_flutter/packages/core/lib/services/config_service.dart</path>
-    </interface>
-    <interface>
-      <name>FeatureFlagsService</name>
-      <kind>Service class</kind>
-      <signature>isEnabled(flag), fetch(), setOverride(flag, value)</signature>
-      <path>video_window_flutter/packages/core/lib/services/feature_flags_service.dart</path>
-    </interface>
-  </interfaces>
-  
   <constraints>
-    <constraint priority="CRITICAL">Feature flags must have sensible defaults for offline scenarios</constraint>
-    <constraint priority="HIGH">Configuration must be immutable after app initialization</constraint>
-    <constraint priority="HIGH">Feature flags must support local overrides for testing</constraint>
-    <constraint priority="MEDIUM">Remote config fetch should not block app startup</constraint>
-    <constraint priority="MEDIUM">Document all flags with purpose and default values</constraint>
+    <constraint priority="HIGH">Follow architecture patterns and coding standards</constraint>
+    <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
-  
   <tests>
     <standards>
-      <standard>Unit tests for all configuration service methods</standard>
-      <standard>Integration tests for Firebase Remote Config fetch</standard>
-      <standard>Tests for offline behavior with default flag values</standard>
-      <standard>Tests for local override functionality</standard>
+      <standard>Unit and integration tests required</standard>
     </standards>
-    
     <locations>
-      <location>video_window_flutter/packages/core/test/services/</location>
+      <location>test/</location>
     </locations>
-    
     <ideas>
-      <test-case ac="ac1">Test correct environment loaded based on build flavor</test-case>
-      <test-case ac="ac2">Test feature flag defaults when remote config unavailable</test-case>
-      <test-case ac="ac3">Test remote config fetch updates local flags</test-case>
-      <test-case ac="ac3">Test remote config fetch failure falls back to defaults</test-case>
-      <test-case ac="ac4">Test config service returns correct values for each environment</test-case>
+      <test-case ac="ac1">Test See story file for complete acceptance criteria...</test-case>
     </ideas>
   </tests>
   
-  <technical-notes>
-    <note>Use build flavors (dev, staging, prod) for environment-specific configs</note>
-    <note>Firebase Remote Config should fetch on app start with background refresh</note>
-    <note>Consider using JSON files for environment configs (config/dev.json, etc.)</note>
-    <note>Feature flags naming convention: feature_name_enabled (snake_case)</note>
-  </technical-notes>
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="CRITICAL">
+        <path>docs/configuration-management.md</path>
+        <section>ALL</section>
+        <reason>Complete configuration management strategy. Primary reference.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for configuration service.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Configuration Patterns, Feature Flag Patterns</section>
+        <reason>Standard configuration and feature flag patterns.</reason>
+        <applies-to>task1</applies-to>
+      </pattern>
+    </patterns>
+    <adrs>
+      <adr priority="HIGH">
+        <number>ADR-0006</number>
+        <path>docs/architecture/adr/ADR-0006-modular-monolith.md</path>
+        <decision>Package organization</decision>
+        <reason>Shared configuration service placement.</reason>
+        <applies-to>task1</applies-to>
+      </adr>
+    </adrs>
+  </implementation-guidance>
 </story-context>

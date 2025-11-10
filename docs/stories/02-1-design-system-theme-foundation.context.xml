@@ -1,21 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="02-1-design-system-theme-foundation" generated="2025-11-06">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="02-1-design-system-theme-foundation" generated="2025-11-10">
   <metadata>
     <epic>02</epic>
     <story>1</story>
-    <title>Design System & Theme Foundation</title>
+    <title>Story 02-1: Design System &amp; Theme Foundation</title>
     <status>ready-for-dev</status>
     <story-file>docs/stories/02-1-design-system-theme-foundation.md</story-file>
     <epic-context>docs/epic-02-context.md</epic-context>
     <tech-spec>docs/tech-spec-epic-02.md</tech-spec>
   </metadata>
-  
   <user-story>
-    <as-a>developer</as-a>
-    <i-want>a centralized design system</i-want>
-    <so-that>UI is consistent across the application</so-that>
+    <as-a>user</as-a>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
   </user-story>
-  
   <acceptance-criteria>
     <criterion id="ac1">Design tokens (colors, typography, spacing) defined</criterion>
     <criterion id="ac2">Theme implementation in packages/shared/</criterion>
@@ -23,135 +21,110 @@
     <criterion id="ac4">Design system documentation complete</criterion>
     <criterion id="ac5">Example usage demonstrated</criterion>
   </acceptance-criteria>
-  
   <story-tasks>
     <task id="task1">
-      <description>Define design tokens (colors, typography, spacing, radius, elevation)</description>
+      <description>Implement core functionality</description>
       <acceptance-criteria>ac1</acceptance-criteria>
-      <location>video_window_flutter/packages/shared/lib/design_system/tokens.dart</location>
-    </task>
-    <task id="task2">
-      <description>Create theme configuration with light and dark mode support</description>
-      <acceptance-criteria>ac2</acceptance-criteria>
-      <location>video_window_flutter/packages/shared/lib/design_system/theme.dart</location>
-    </task>
-    <task id="task3">
-      <description>Build common widget library (buttons, inputs, cards, dialogs)</description>
-      <acceptance-criteria>ac3</acceptance-criteria>
-      <location>video_window_flutter/packages/shared/lib/widgets/</location>
-    </task>
-    <task id="task4">
-      <description>Create design system documentation with usage examples</description>
-      <acceptance-criteria>ac4</acceptance-criteria>
-      <location>docs/design-system.md</location>
-    </task>
-    <task id="task5">
-      <description>Build example screens demonstrating all components</description>
-      <acceptance-criteria>ac5</acceptance-criteria>
-      <location>video_window_flutter/lib/app_shell/design_catalog/</location>
     </task>
   </story-tasks>
-  
   <artifacts>
     <docs>
       <doc>
         <path>docs/tech-spec-epic-02.md</path>
-        <section>Design System Architecture</section>
-        <snippet>Complete design token structure with AppColors, AppTypography, AppSpacing, AppRadius, AppElevation classes. Material Design 3 inspired tokens.</snippet>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
       </doc>
       <doc>
         <path>docs/epic-02-context.md</path>
-        <section>Core Platform Services Context</section>
-        <snippet>Design system as foundation for all UI work. Centralized in shared package for consistency.</snippet>
-      </doc>
-      <doc>
-        <path>docs/architecture/coding-standards.md</path>
-        <section>Flutter UI Standards</section>
-        <snippet>Widget composition patterns, stateless vs stateful guidelines, accessibility requirements (WCAG 2.1 AA).</snippet>
-      </doc>
-      <doc>
-        <path>docs/architecture/project-structure-implementation.md</path>
-        <section>Package Structure</section>
-        <snippet>Shared package location: video_window_flutter/packages/shared/ contains design system and common widgets.</snippet>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
       </doc>
     </docs>
-    
     <code>
       <artifact>
-        <path>video_window_flutter/packages/shared/</path>
-        <kind>package</kind>
-        <symbol>shared</symbol>
-        <reason>Target package for design system implementation</reason>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
       </artifact>
       <artifact>
-        <path>video_window_flutter/lib/app_shell/</path>
-        <kind>directory</kind>
-        <symbol>app_shell</symbol>
-        <reason>App shell for theme integration and design catalog</reason>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
       </artifact>
     </code>
-    
-    <dependencies>
-      <flutter>
-        <package>flutter</package>
-        <version>>=3.19.6</version>
-        <reason>Core Flutter SDK</reason>
-      </flutter>
-    </dependencies>
   </artifacts>
-  
-  <interfaces>
-    <interface>
-      <name>ThemeData</name>
-      <kind>Flutter class</kind>
-      <signature>ThemeData lightTheme and ThemeData darkTheme</signature>
-      <path>video_window_flutter/packages/shared/lib/design_system/theme.dart</path>
-    </interface>
-    <interface>
-      <name>Design Tokens</name>
-      <kind>Dart constants</kind>
-      <signature>AppColors, AppTypography, AppSpacing, AppRadius, AppElevation</signature>
-      <path>video_window_flutter/packages/shared/lib/design_system/tokens.dart</path>
-    </interface>
-  </interfaces>
-  
   <constraints>
-    <constraint priority="CRITICAL">Follow Material Design 3 principles for token structure</constraint>
-    <constraint priority="CRITICAL">Support both light and dark themes from day one</constraint>
-    <constraint priority="HIGH">All widgets must meet WCAG 2.1 AA accessibility standards (44x44 touch targets, 4.5:1 contrast)</constraint>
-    <constraint priority="HIGH">Maintain ≥80% test coverage for all widgets</constraint>
-    <constraint priority="MEDIUM">Document all design tokens and widget APIs with examples</constraint>
-    <constraint priority="MEDIUM">Use semantic naming for colors (primary, success, error) not literal (blue, green, red)</constraint>
+    <constraint priority="HIGH">Follow architecture patterns and coding standards</constraint>
+    <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
-  
   <tests>
     <standards>
-      <standard>Widget tests required for all common widgets with golden file snapshots</standard>
-      <standard>Theme switching tests to verify light/dark mode parity</standard>
-      <standard>Accessibility tests for touch target sizes and contrast ratios</standard>
-      <standard>Example app demonstrating all components must render without errors</standard>
+      <standard>Unit and integration tests required</standard>
     </standards>
-    
     <locations>
-      <location>video_window_flutter/packages/shared/test/widgets/</location>
-      <location>video_window_flutter/packages/shared/test/design_system/</location>
+      <location>test/</location>
     </locations>
-    
     <ideas>
-      <test-case ac="ac1">Test design tokens are properly defined and accessible</test-case>
-      <test-case ac="ac2">Test theme switches between light and dark modes correctly</test-case>
-      <test-case ac="ac3">Test each common widget renders correctly with golden snapshots</test-case>
-      <test-case ac="ac3">Test widgets respond to theme changes</test-case>
-      <test-case ac="ac3">Test accessibility: touch targets ≥44x44, contrast ratios ≥4.5:1</test-case>
-      <test-case ac="ac5">Test design catalog app launches and displays all components</test-case>
+      <test-case ac="ac1">Test See story file for complete acceptance criteria...</test-case>
     </ideas>
   </tests>
   
-  <technical-notes>
-    <note>Use Material Design 3 color system as reference: https://m3.material.io/styles/color/overview</note>
-    <note>Inter font family recommended for consistency across platforms</note>
-    <note>Implement theme via ThemeData for automatic widget theming throughout app</note>
-    <note>Create widget catalog/storybook for visual regression testing</note>
-    <note>Consider using flutter_gen for design token generation from JSON in future iterations</note>
-  </technical-notes>
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="CRITICAL">
+        <path>docs/design-system.md</path>
+        <section>ALL</section>
+        <reason>Complete design system specification with tokens, components, and patterns. Foundation for all UI.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>Flutter/Dart Standards</section>
+        <reason>Code standards for Flutter widget development.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/front-end-architecture.md</path>
+        <section>UI Layer Patterns</section>
+        <reason>Frontend architecture patterns for widget organization.</reason>
+        <applies-to>task1</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>UI Component Patterns, Theme Patterns</section>
+        <reason>Standard patterns for reusable UI components and theming.</reason>
+        <applies-to>task1</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="HIGH">
+        <name>Flutter</name>
+        <path>docs/frameworks/flutter-monorepo-guide.md</path>
+        <section>Shared Package Organization</section>
+        <reason>Package structure for shared design system.</reason>
+        <applies-to>task1</applies-to>
+      </framework>
+    </frameworks>
+    <adrs>
+      <adr priority="HIGH">
+        <number>ADR-0002</number>
+        <path>docs/architecture/adr/ADR-0002-flutter-serverpod-architecture.md</path>
+        <decision>Flutter framework selection</decision>
+        <reason>Flutter UI framework foundation.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+      <adr priority="HIGH">
+        <number>ADR-0006</number>
+        <path>docs/architecture/adr/ADR-0006-modular-monolith.md</path>
+        <decision>Package organization</decision>
+        <reason>Shared package structure for design system.</reason>
+        <applies-to>task1</applies-to>
+      </adr>
+    </adrs>
+  </implementation-guidance>
 </story-context>

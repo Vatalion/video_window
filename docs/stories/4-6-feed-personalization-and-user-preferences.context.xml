@@ -1,32 +1,87 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="4-6-feed-personalization-user-preferences" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="4-6-feed-personalization-and-user-preferences" generated="2025-11-10">
   <metadata>
     <epic>4</epic>
     <story>6</story>
-    <title>Feed Personalization User Preferences</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/4.6.feed-personalization-and-user-preferences.md</story-file>
+    <title>Story 4-6: Feed Personalization &amp; User Preferences</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/4-6-feed-personalization-and-user-preferences.md</story-file>
     <epic-context>docs/epic-4-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-4.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to feed personalization user preferences</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>viewer</as-a>
+    <i-want>to adjust my feed preferences (auto-play</i-want>
+    <so-that>the feed aligns with my comfort and accessibility needs.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Feed settings sheet allows toggling auto-play, captions, playback speed, preferred quality, and tag filters, persisting to Serverpod preferences. [Source: docs/tech-spec-epic-4.md#source-tree--file-directives]</criterion>
+    <criterion id="ac2">Preferences update endpoint recalculates personalization configuration and returns effective settings plus algorithm being used. [Source: docs/tech-spec-epic-4.md#implementation-guide]</criterion>
+    <criterion id="ac3">**ACCESSIBILITY CRITICAL**: Reduced motion preference turns off auto-play and enables static preview thumbnails; captions toggle persists for future videos. [Source: docs/tech-spec-epic-4.md#technology-stack]</criterion>
+    <criterion id="ac4">UI surfaces blocked maker list with ability to add/remove; backend ensures blocked IDs excluded from subsequent feed responses. [Source: docs/tech-spec-epic-4.md#data-models]</criterion>
+    <criterion id="ac5">Analytics event `feed_preferences_updated` fires with diff metadata and experiment variants, ensuring traceability in Segment. [Source: docs/tech-spec-epic-4.md#analytics--observability]</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Create `feed_settings_sheet.dart` with sections for playback, personalization, blocked makers, and accessibility options.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Implement `update_feed_preferences_use_case.dart` to map form values to domain objects and call repository.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Update `VideoFeedBloc` to refresh feed state when preferences change and to adjust preload strategy accordingly.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Extend `feed_endpoint.dart` and `feed_service.dart` to persist `FeedConfiguration` entity, storing blocked makers and quality preferences.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Update recommendation payloads to include user-configured tags and blocked makers.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Emit Segment + Datadog events for preference updates, capturing diff, algorithm, and session IDs.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Ensure accessibility toggles recorded for WCAG reporting dashboard.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 4.1 – Home Feed Implementation</prerequisite>
+    <prerequisite>Story 4.2 – Infinite Scroll &amp; Pagination</prerequisite>
+    <prerequisite>Story 4.5 – Content Recommendation Engine Integration</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-4.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-4-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-4.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-4-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +89,68 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test Feed settings sheet allows toggling auto-play, cap...</test-case>
+      <test-case ac="ac2">Test Preferences update endpoint recalculates personali...</test-case>
+      <test-case ac="ac3">Test **ACCESSIBILITY CRITICAL**: Reduced motion prefere...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for feed implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/frontend-architecture.md</path>
+        <section>Performance, State Management</section>
+        <reason>Feed performance and state management patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Pagination, Caching, Video Playback</section>
+        <reason>Feed pagination, caching, and video playback patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>Pagination, Caching</section>
+        <reason>Serverpod pagination and caching implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/performance-degradation.md</path>
+        <section>ALL</section>
+        <reason>Performance monitoring and optimization procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="HIGH">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including content security</decision>
+        <reason>Content security and access control requirements.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+  </implementation-guidance>
 </story-context>

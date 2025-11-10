@@ -1,32 +1,90 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="4-3-video-preloading-caching-strategy" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="4-3-video-preloading-and-caching-strategy" generated="2025-11-10">
   <metadata>
     <epic>4</epic>
     <story>3</story>
-    <title>Video Preloading Caching Strategy</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/4.3.video-preloading-and-caching-strategy.md</story-file>
+    <title>Story 4-3: Video Preloading &amp; Caching Strategy</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/4-3-video-preloading-and-caching-strategy.md</story-file>
     <epic-context>docs/epic-4-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-4.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to video preloading caching strategy</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>heavy feed user</as-a>
+    <i-want>upcoming videos to preload and stay responsive</i-want>
+    <so-that>playback never stutters even when I swipe quickly.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Video preloader warms the previous and next two videos using controller pooling and releases resources when out of range. [Source: docs/tech-spec-epic-4.md#implementation-guide]</criterion>
+    <criterion id="ac2">Local cache keeps up to 100 MB of feed data (Hive box `feed_cache`) with LRU eviction and redis hydration on launch. [Source: docs/tech-spec-epic-4.md#source-tree--file-directives]</criterion>
+    <criterion id="ac3">Background worker `feed_prefetch_worker.ts` pre-warms CloudFront cache hourly for trending feed segments, configurable via `FEED_PREFETCH_CRON_EXPRESSION`. [Source: docs/tech-spec-epic-4.md#source-tree--file-directives]</criterion>
+    <criterion id="ac4">**PERFORMANCE CRITICAL**: Video startup latency ≤ 800 ms P95 after preload; cold loads ≤ 2 s P95. [Source: docs/tech-spec-epic-4.md#performance-metrics]</criterion>
+    <criterion id="ac5">Cache health metrics (hit rate, eviction count, preload queue depth) are emitted to Datadog and exposed via debug overlay. [Source: docs/tech-spec-epic-4.md#analytics--observability]</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement `preload_videos_use_case.dart` controlling warm-up and teardown of queued controllers.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Update `video_feed_item.dart` to request preloaded controllers and expose preload debug overlay toggled via long-press.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Add `feed_performance_service.dart` to capture preload metrics and surface to overlay.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Create `feed_prefetch_worker.ts` (serverless) to pull trending videos from Serverpod and issue CloudFront cache warm requests.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Provision Terraform `feed_cdn.tf` + `feed_redis.tf` resources and ensure IAM roles permit signed cookie generation.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Implement `feed_cache_manager.dart` for Redis hydration and TTL enforcement.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Emit Datadog gauge `feed.preload.queue_depth` and counter `feed.cache.evictions`.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Add Segment event `feed_preload_complete` with latency metadata.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 4.1 – Home Feed Implementation</prerequisite>
+    <prerequisite>Story 4.2 – Infinite Scroll &amp; Pagination</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-4.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-4-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-4.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-4-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +92,68 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test Video preloader warms the previous and next two vi...</test-case>
+      <test-case ac="ac2">Test Local cache keeps up to 100 MB of feed data (Hive ...</test-case>
+      <test-case ac="ac3">Test Background worker `feed_prefetch_worker.ts` pre-wa...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for feed implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/frontend-architecture.md</path>
+        <section>Performance, State Management</section>
+        <reason>Feed performance and state management patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Pagination, Caching, Video Playback</section>
+        <reason>Feed pagination, caching, and video playback patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>Pagination, Caching</section>
+        <reason>Serverpod pagination and caching implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/performance-degradation.md</path>
+        <section>ALL</section>
+        <reason>Performance monitoring and optimization procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="HIGH">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including content security</decision>
+        <reason>Content security and access control requirements.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+  </implementation-guidance>
 </story-context>

@@ -1,32 +1,112 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="7-2-timeline-editing-captioning-implementation" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="7-2-timeline-editing-and-captioning-implementation" generated="2025-11-10">
   <metadata>
     <epic>7</epic>
     <story>2</story>
-    <title>Timeline Editing Captioning Implementation</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/7.2.timeline-editing-and-captioning-implementation.md</story-file>
+    <title>Story 7-2: Timeline Editing &amp; Captioning Implementation</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/7-2-timeline-editing-and-captioning-implementation.md</story-file>
     <epic-context>docs/epic-7-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-7.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to timeline editing captioning implementation</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>maker-focused experience engineer</as-a>
+    <i-want>a performant timeline editor with frame-accurate trimming plus a rich captioning surface</i-want>
+    <so-that>makers can assemble multi-clip stories with accessible, polished narration on mobile devices.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Timeline editor provides drag-to-reorder, trim, split, and merge operations with 60fps scrubbing and p95 operation latency ≤ 100ms. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §2, Monitoring &amp; Analytics)*</criterion>
+    <criterion id="ac2">Caption editor supports rich styling (font, size, color, background), positional presets, and time-synchronized preview with waveform guidance. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §2)*</criterion>
+    <criterion id="ac3">Timeline processing offloads heavy operations (trim, frame extraction, transitions) to isolates via `timeline_processing_service.dart`, emitting metrics `maker.timeline.frame_time_ms` and `maker.timeline.trim_duration_ms`. *(Ref: docs/tech-spec-epic-7.md – Source Tree &amp; Monitoring)*</criterion>
+    <criterion id="ac4">Analytics events `maker_timeline_trimmed`, `maker_caption_added`, and `maker_caption_style_changed` fire with payloads defined in `packages/shared/lib/analytics/analytics_events.dart`. *(Ref: docs/tech-spec-epic-7.md – Monitoring &amp; Analytics)*</criterion>
+    <criterion id="ac5">Widget, unit, and integration tests cover edit flows, caption styling, and analytics instrumentation with ≥85% coverage for new modules. *(Ref: docs/tech-spec-epic-7.md – Test Traceability)*</criterion>
+    <criterion id="ac6">UI adapts across device orientations/sizes with accessible touch targets (≥44px) and keyboard shortcuts on tablets. *(Ref: docs/tech-spec-epic-7.md – Source Tree &amp; File Directives, Design System)*</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Create `timeline_editor_page.dart` shell loading capture drafts and binding blocs. *(Ref: docs/tech-spec-epic-7.md – Source Tree &amp; File Directives)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Implement `timeline_scrubber.dart` with 60fps custom painter, gesture throttling via `rxdart`. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §2)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Extend `timeline_editor_bloc.dart` for trim, split, reorder, merge events and performance states. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §2)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Build `timeline_processing_service.dart` isolates for trim/split/extract frame with ffmpeg-kit 4.5.1. *(Ref: docs/tech-spec-epic-7.md – Technology Stack)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Record metrics using `PerformanceMonitor.recordMetric` for every edit operation and publish to Datadog. *(Ref: docs/tech-spec-epic-7.md – Monitoring &amp; Analytics)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Implement `caption_editor_sheet.dart` with styling controls and design token integration. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §2)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Enhance `caption_editor_bloc.dart` to manage timing, positioning, style overrides, and analytics events. *(Ref: docs/tech-spec-epic-7.md – Source Tree &amp; Monitoring)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Add waveform visualization using isolate-generated audio peaks cached via `timeline_processing_service.dart`. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §2)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Ensure captions auto-save with draft sync hooks (emits `draft_sync_bloc` events). *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §3)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task10">
+      <description>Implement responsive layouts for portrait/landscape, tablet split-view, and external keyboard shortcuts. *(Ref: docs/tech-spec-epic-7.md – Source Tree &amp; File Directives)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task11">
+      <description>Add accessibility semantics, focus order, and caption contrast validation. *(Ref: docs/architecture/coding-standards.md#accessibility, docs/tech-spec-epic-7.md – Technology Stack)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task12">
+      <description>Create widget tests for timeline gestures and caption controls; golden tests for caption rendering. *(Ref: docs/tech-spec-epic-7.md – Test Traceability)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task13">
+      <description>Update `maker_studio_checks.yaml` to run performance benchmarks and fail if p95 metrics regress. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §4)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 7.1 – Maker Story Capture &amp; Editing Tools (capture pipeline and secure storage in place).</prerequisite>
+    <prerequisite>Shared design tokens updated via `packages/shared` (Epic 5) for typography/color parity. *(Ref: docs/pattern-library.md)*</prerequisite>
+    <prerequisite>Performance monitoring baselines configured in Datadog per Epic 7 spec.</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-7.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-7-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-7.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-7-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +114,69 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test Timeline editor provides drag-to-reorder, trim, sp...</test-case>
+      <test-case ac="ac2">Test Caption editor supports rich styling (font, size, ...</test-case>
+      <test-case ac="ac3">Test Timeline processing offloads heavy operations (tri...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Video Pipeline, Content Security</section>
+        <reason>Video and content processing patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/incident-response.md</path>
+        <section>ALL</section>
+        <reason>Incident response procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including content security</decision>
+        <reason>Security requirements for content processing.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Content Security, Access Controls</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

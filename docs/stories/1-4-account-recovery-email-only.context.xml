@@ -1,32 +1,62 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="1.4.account-recovery-email-only" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="1-4-account-recovery-email-only" generated="2025-11-10">
   <metadata>
     <epic>1</epic>
     <story>4</story>
-    <title>Account Recovery (Email Only)</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/1.4.account-recovery-email-only.md</story-file>
+    <title>Story 1-4: Account Recovery (Email Only)</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/1-4-account-recovery-email-only.md</story-file>
     <epic-context>docs/epic-1-context.md</epic-context>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>functionality described in story</i-want>
-    <so-that>requirements are met</so-that>
+    <as-a>viewer or maker who has lost access</as-a>
+    <i-want>to recover my account using a secure email workflow</i-want>
+    <so-that>I can regain access without contacting support.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Recovery flow issues a one-time recovery token that expires in 15 minutes and can only be used once.</criterion>
+    <criterion id="ac2">Recovery emails include device + location metadata and a “Not You?” link that revokes the token immediately.</criterion>
+    <criterion id="ac3">Submitting a recovery token allows the user to re-authenticate and forces a passwordless login plus full session rotation.</criterion>
+    <criterion id="ac4">Attempting to reuse or brute force recovery tokens locks the account for 30 minutes and alerts security monitoring.</criterion>
+    <criterion id="ac5">Successful recovery must invalidate all active sessions and refresh tokens associated with the account.</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement core functionality</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 1.1 – Implement Email OTP Sign-In</prerequisite>
+    <prerequisite>Story 1.2 – Add Social Sign-In Options</prerequisite>
+    <prerequisite>Story 1.3 – Session Management &amp; Refresh</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-1.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-1-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-1.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-1-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +64,192 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test Recovery flow issues a one-time recovery token tha...</test-case>
+      <test-case ac="ac2">Test Recovery emails include device + location metadata...</test-case>
+      <test-case ac="ac3">Test Submitting a recovery token allows the user to re-...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 to provide explicit documentation references -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="CRITICAL">
+        <path>docs/architecture/serverpod-auth-module-analysis.md</path>
+        <section>Account Recovery, Password Reset Patterns</section>
+        <reason>Serverpod auth module's account recovery capabilities and passwordless recovery token patterns. Essential for secure recovery implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/serverpod-integration-guide.md</path>
+        <section>Account Recovery Endpoints, Email Integration</section>
+        <reason>Standard patterns for Serverpod recovery endpoint implementation, token generation, and email dispatch.</reason>
+        <applies-to>task1</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code style, naming conventions, and quality standards that must be followed.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/bloc-implementation-guide.md</path>
+        <section>Authentication BLoC Patterns, Recovery Flow State</section>
+        <reason>BLoC patterns for recovery flow state management and re-authentication after recovery.</reason>
+        <applies-to>task1</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/design-system.md</path>
+        <section>Form Components, Email Templates, Error States</section>
+        <reason>Design system components for recovery UI and email template styling.</reason>
+        <applies-to>task1</applies-to>
+      </doc>
+      <doc priority="MEDIUM">
+        <path>docs/architecture/data-flow-mapping.md</path>
+        <section>Authentication Flow, Recovery Workflow</section>
+        <reason>Layer-by-layer data transformation patterns for account recovery flow.</reason>
+        <applies-to>task1</applies-to>
+      </doc>
+    </architecture>
+    
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Account Recovery Patterns, One-Time Token Patterns</section>
+        <reason>CRITICAL patterns for secure recovery token generation, expiration, single-use enforcement, and brute force protection.</reason>
+        <applies-to>task1</applies-to>
+      </pattern>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Authentication Patterns, Session Invalidation</section>
+        <reason>Shared authentication patterns including full session invalidation on account recovery.</reason>
+        <applies-to>task1</applies-to>
+      </pattern>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Email Template Patterns, Security Communication</section>
+        <reason>Email template patterns including security metadata display and revocation links.</reason>
+        <applies-to>task1</applies-to>
+      </pattern>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Rate Limiting Patterns, Account Lockout</section>
+        <reason>Rate limiting and account lockout patterns for brute force protection on recovery attempts.</reason>
+        <applies-to>task1</applies-to>
+      </pattern>
+    </patterns>
+    
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/05-authentication-sessions.md</path>
+        <section>Account Recovery, Passwordless Authentication</section>
+        <reason>Serverpod account recovery framework documentation. MUST READ for secure recovery token implementation and session rotation after recovery.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+      <framework priority="HIGH">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>Email Integration, Recovery Endpoint Development</section>
+        <reason>Core Serverpod patterns for email integration and recovery endpoint implementation.</reason>
+        <applies-to>task1</applies-to>
+      </framework>
+      <framework priority="HIGH">
+        <name>BLoC</name>
+        <path>docs/frameworks/bloc-integration-guide.md</path>
+        <section>ALL</section>
+        <reason>Flutter BLoC integration patterns for recovery flow state management.</reason>
+        <applies-to>task1</applies-to>
+      </framework>
+      <framework priority="HIGH">
+        <name>Redis</name>
+        <path>docs/frameworks/redis-patterns-guide.md</path>
+        <section>Rate Limiting Patterns, Token Storage</section>
+        <reason>Redis patterns for recovery token storage, rate limiting, and account lockout tracking.</reason>
+        <applies-to>task1</applies-to>
+      </framework>
+    </frameworks>
+    
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/authentication.md</path>
+        <section>Account Recovery, Password Reset Procedures</section>
+        <reason>Operational procedures for account recovery workflows, troubleshooting recovery failures, and security incident response.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+      <runbook priority="MEDIUM">
+        <path>docs/runbooks/code-generation-workflow.md</path>
+        <section>Serverpod Code Generation</section>
+        <reason>Code generation procedures for Serverpod recovery models and endpoints.</reason>
+        <applies-to>task1</applies-to>
+      </runbook>
+    </runbooks>
+    
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including one-time token security, brute force protection, and account lockout policies for recovery flows</decision>
+        <reason>Defines MANDATORY security requirements for account recovery. Recovery token security, expiration, and anti-abuse measures are non-negotiable.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+      <adr priority="HIGH">
+        <number>ADR-0002</number>
+        <path>docs/architecture/adr/ADR-0002-flutter-serverpod-architecture.md</path>
+        <decision>Flutter + Serverpod architecture stack</decision>
+        <reason>Foundational architecture decision explaining the Flutter/Serverpod integration approach.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+      <adr priority="HIGH">
+        <number>ADR-0007</number>
+        <path>docs/architecture/adr/ADR-0007-state-management.md</path>
+        <decision>BLoC for state management</decision>
+        <reason>State management approach for handling recovery flow states in Flutter app.</reason>
+        <applies-to>task1</applies-to>
+      </adr>
+      <adr priority="HIGH">
+        <number>ADR-0008</number>
+        <path>docs/architecture/adr/ADR-0008-api-design.md</path>
+        <decision>RESTful API design principles</decision>
+        <reason>API contract design standards for recovery endpoint implementation.</reason>
+        <applies-to>task1</applies-to>
+      </adr>
+      <adr priority="HIGH">
+        <number>ADR-0006</number>
+        <path>docs/architecture/adr/ADR-0006-modular-monolith.md</path>
+        <decision>Modular monolith with clear module boundaries</decision>
+        <reason>Package structure and module organization principles.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>One-Time Token Security, Recovery Token Generation</section>
+        <applies-to>task1</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Rate Limiting and Account Lockout Policies</section>
+        <applies-to>task1</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>SEC-003: JWT Token Management, Session Rotation</section>
+        <applies-to>task1</applies-to>
+      </requirement>
+      <requirement priority="HIGH">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Device Fingerprinting, Location Tracking</section>
+        <applies-to>task1</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

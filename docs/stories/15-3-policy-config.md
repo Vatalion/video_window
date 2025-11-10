@@ -1,4 +1,7 @@
 # Story 15-3: Policy Configuration
+
+## Status
+ready-for-dev
 **Epic:** 15
 **Points:** 5
 **Status:** Ready

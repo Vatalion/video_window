@@ -4,6 +4,9 @@
 **Story ID:** 02-4  
 # Story 02-4: Analytics Service Foundation
 
+## Status
+ready-for-dev
+
 **Epic:** 02 - Core Platform Services  
 **Story ID:** 02-4  
 **Status:** review

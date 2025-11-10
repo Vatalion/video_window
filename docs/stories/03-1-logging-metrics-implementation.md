@@ -1,5 +1,8 @@
 # Story 03-1: Logging & Metrics Implementation
 
+## Status
+ready-for-dev
+
 **Epic:** 03 - Observability & Compliance  
 **Story ID:** 03-1  
 **Status:** done  <!-- ready-for-dev | in-progress | review | done | blocked -->

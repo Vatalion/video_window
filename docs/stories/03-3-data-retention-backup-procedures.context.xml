@@ -1,32 +1,74 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="03-3-data-retention-backup-procedures" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="03-3-data-retention-backup-procedures" generated="2025-11-10">
   <metadata>
     <epic>03</epic>
     <story>3</story>
-    <title>Data Retention Backup Procedures</title>
+    <title>Story 03-3: Data Retention &amp; Backup Procedures</title>
     <status>ready-for-dev</status>
     <story-file>docs/stories/03-3-data-retention-backup-procedures.md</story-file>
     <epic-context>docs/epic-03-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-03.md</tech-spec>
   </metadata>
   <user-story>
     <as-a>user</as-a>
-    <i-want>to data retention backup procedures</i-want>
-    <so-that>the system meets requirements</so-that>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">AWS Backup configured</criterion>
+    <criterion id="ac2">PostgreSQL PITR enabled</criterion>
+    <criterion id="ac3">Backup retention policy (30 days)</criterion>
+    <criterion id="ac4">Recovery tested (&lt;4 hour RTO)</criterion>
+    <criterion id="ac5">Backup monitoring and alerting</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement: AWS Backup configured</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Implement: PostgreSQL PITR enabled</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Implement: Backup retention policy (30 days)</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Implement: Recovery tested (&lt;4 hour RTO)</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Implement: Backup monitoring and alerting</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
   </story-tasks>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-3.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-3-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-03.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-03-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +76,154 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test See story file for complete acceptance criteria...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 to provide explicit documentation references -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code style, naming conventions, and quality standards for infrastructure code.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="MEDIUM">
+        <path>docs/architecture/database-indexing-strategy.md</path>
+        <section>Backup Considerations</section>
+        <reason>Database design considerations that impact backup and recovery procedures.</reason>
+        <applies-to>task2</applies-to>
+      </doc>
+    </architecture>
+    
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Infrastructure Patterns</section>
+        <reason>Infrastructure as code patterns, backup automation, and disaster recovery patterns.</reason>
+        <applies-to>task1,task3,task5</applies-to>
+      </pattern>
+      <pattern priority="MEDIUM">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Monitoring and Alerting Patterns</section>
+        <reason>Standard patterns for backup monitoring and failure alerting.</reason>
+        <applies-to>task5</applies-to>
+      </pattern>
+    </patterns>
+    
+    <frameworks>
+      <framework priority="HIGH">
+        <name>Terraform</name>
+        <path>docs/frameworks/terraform-iac-guide.md</path>
+        <section>AWS Backup Resources, RDS Backup Configuration</section>
+        <reason>Terraform patterns for declaring AWS Backup and RDS PITR configuration as infrastructure as code.</reason>
+        <applies-to>task1,task2,task3</applies-to>
+      </framework>
+      <framework priority="HIGH">
+        <name>PostgreSQL</name>
+        <path>docs/frameworks/postgresql-patterns-guide.md</path>
+        <section>Point-in-Time Recovery, Backup Strategies</section>
+        <reason>PostgreSQL-specific backup and PITR configuration patterns.</reason>
+        <applies-to>task2,task4</applies-to>
+      </framework>
+      <framework priority="MEDIUM">
+        <name>Docker</name>
+        <path>docs/frameworks/docker-development-guide.md</path>
+        <section>Data Persistence, Volume Backups</section>
+        <reason>Docker volume backup patterns for local development consistency.</reason>
+        <applies-to>task4</applies-to>
+      </framework>
+    </frameworks>
+    
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/dsar-process.md</path>
+        <section>Data Backup and Retention Requirements</section>
+        <reason>GDPR and privacy compliance requirements for data retention, backup scope, and recovery procedures. MUST understand legal obligations.</reason>
+        <applies-to>task3,task4</applies-to>
+      </runbook>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/data-classification.md</path>
+        <section>ALL</section>
+        <reason>Data classification requirements determining which data requires backup, encryption at rest, and retention policies.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/local-development-setup.md</path>
+        <section>Database Setup, Data Seeding</section>
+        <reason>Local development procedures for testing backup and recovery workflows.</reason>
+        <applies-to>task4</applies-to>
+      </runbook>
+      <runbook priority="MEDIUM">
+        <path>docs/runbooks/performance-degradation.md</path>
+        <section>Database Performance Impact</section>
+        <reason>Understanding performance impact of backup operations on production systems.</reason>
+        <applies-to>task1,task2</applies-to>
+      </runbook>
+    </runbooks>
+    
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0005</number>
+        <path>docs/architecture/adr/ADR-0005-aws-infrastructure.md</path>
+        <decision>AWS infrastructure architecture including RDS, backup strategies, and disaster recovery approach</decision>
+        <reason>Defines cloud infrastructure architecture, backup requirements, RTO/RPO targets, and AWS service usage. Foundation for all backup decisions.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+      <adr priority="CRITICAL">
+        <number>ADR-0003</number>
+        <path>docs/architecture/adr/ADR-0003-database-architecture.md</path>
+        <decision>PostgreSQL database architecture including backup and recovery strategy</decision>
+        <reason>Database architecture decisions that impact backup procedures, PITR configuration, and recovery testing.</reason>
+        <applies-to>task2,task4</applies-to>
+      </adr>
+      <adr priority="HIGH">
+        <number>ADR-0010</number>
+        <path>docs/architecture/adr/ADR-0010-observability-strategy.md</path>
+        <decision>Observability strategy including backup monitoring and alerting requirements</decision>
+        <reason>Monitoring and alerting strategy for backup health, failure detection, and recovery validation.</reason>
+        <applies-to>task5</applies-to>
+      </adr>
+      <adr priority="HIGH">
+        <number>ADR-0002</number>
+        <path>docs/architecture/adr/ADR-0002-flutter-serverpod-architecture.md</path>
+        <decision>Flutter + Serverpod architecture stack</decision>
+        <reason>Foundational architecture understanding for data flow and persistence layers.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+      <adr priority="HIGH">
+        <number>ADR-0006</number>
+        <path>docs/architecture/adr/ADR-0006-modular-monolith.md</path>
+        <decision>Modular monolith with clear module boundaries</decision>
+        <reason>Understanding data boundaries and module isolation for backup scope definition.</reason>
+        <applies-to>task3</applies-to>
+      </adr>
+    </adrs>
+    
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/compliance-guide.md</path>
+        <section>Data Retention Requirements, GDPR Compliance</section>
+        <applies-to>task3</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/privacy-policy.md</path>
+        <section>Data Retention, User Data Rights</section>
+        <applies-to>task3</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Data Encryption at Rest, Backup Security</section>
+        <applies-to>task1,task2</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

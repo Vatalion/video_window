@@ -1,32 +1,74 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="03-2-privacy-legal-disclosures" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="03-2-privacy-legal-disclosures" generated="2025-11-10">
   <metadata>
     <epic>03</epic>
     <story>2</story>
-    <title>Privacy Legal Disclosures</title>
+    <title>Story 03-2: Privacy &amp; Legal Disclosures</title>
     <status>ready-for-dev</status>
     <story-file>docs/stories/03-2-privacy-legal-disclosures.md</story-file>
     <epic-context>docs/epic-03-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-03.md</tech-spec>
   </metadata>
   <user-story>
     <as-a>user</as-a>
-    <i-want>to privacy legal disclosures</i-want>
-    <so-that>the system meets requirements</so-that>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Privacy policy implemented</criterion>
+    <criterion id="ac2">Terms of service implemented</criterion>
+    <criterion id="ac3">Cookie consent mechanism</criterion>
+    <criterion id="ac4">Data classification framework</criterion>
+    <criterion id="ac5">DSAR process documented</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement: Privacy policy implemented</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Implement: Terms of service implemented</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Implement: Cookie consent mechanism</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Implement: Data classification framework</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Implement: DSAR process documented</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
   </story-tasks>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-3.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-3-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-03.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-03-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +76,75 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test See story file for complete acceptance criteria...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for UI implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Consent Management Patterns</section>
+        <reason>Standard patterns for consent UI and management.</reason>
+        <applies-to>task3</applies-to>
+      </pattern>
+    </patterns>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/dsar-process.md</path>
+        <section>ALL</section>
+        <reason>DSAR process implementation requirements. MUST READ.</reason>
+        <applies-to>task5</applies-to>
+      </runbook>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/consent-management.md</path>
+        <section>ALL</section>
+        <reason>Consent management procedures and requirements.</reason>
+        <applies-to>task3</applies-to>
+      </runbook>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/data-classification.md</path>
+        <section>ALL</section>
+        <reason>Data classification framework implementation.</reason>
+        <applies-to>task4</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including privacy requirements</decision>
+        <reason>Privacy and data protection requirements.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/privacy-policy.md</path>
+        <section>ALL</section>
+        <applies-to>task1</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/compliance-guide.md</path>
+        <section>ALL</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

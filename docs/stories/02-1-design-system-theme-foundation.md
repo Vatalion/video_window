@@ -1,5 +1,8 @@
 # Story 02-1: Design System & Theme Foundation
 
+## Status
+ready-for-dev
+
 **Epic:** 02 - Core Platform Services  
 **Story ID:** 02-1  
 **Status:** review

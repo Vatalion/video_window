@@ -1,0 +1,31 @@
+# Token blacklist for revoked/invalidated tokens
+class: TokenBlacklist
+table: token_blacklist
+
+fields:
+  # Unique identifier
+  id: int?
+  
+  # Token identifier (jti claim from JWT)
+  tokenId: String
+  
+  # Token type (access or refresh)
+  tokenType: String
+  
+  # User ID for bulk revocation
+  userId: int
+  
+  # Reason for blacklisting (logout, token_reuse, security_breach, etc)
+  reason: String?
+  
+  # Expiry (for cleanup - can delete after token naturally expires)
+  expiresAt: DateTime
+  
+  # Timestamp
+  blacklistedAt: DateTime
+
+indexes:
+  token_id_idx:
+    fields: tokenId
+  user_id_idx:
+    fields: userId

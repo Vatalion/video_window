@@ -1,32 +1,98 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="5-3-share-save-functionality" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="5-3-share-and-save-functionality" generated="2025-11-10">
   <metadata>
     <epic>5</epic>
     <story>3</story>
-    <title>Share Save Functionality</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/5.3.share-and-save-functionality.md</story-file>
+    <title>Story 5-3: Share &amp; Save Functionality</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/5-3-share-and-save-functionality.md</story-file>
     <epic-context>docs/epic-5-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-5.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to share save functionality</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>viewer who wants to revisit and promote favorite stories</as-a>
+    <i-want>to save stories to a wishlist and share deep linked previews with friends</i-want>
+    <so-that>I can return later to purchase and help others discover the maker</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">"Save" button toggles wishlist state with optimistic UI, persists via Serverpod, and reflects status across sessions within 2 seconds.</criterion>
+    <criterion id="ac2">Share sheet presents platform native options (iOS ShareSheet, Android Intent chooser) and copies deep link to clipboard with success confirmation.</criterion>
+    <criterion id="ac3">Generated deep links include signed Firebase Dynamic Link, UTM parameters, maker attribution, expiry 24h, and open the corresponding story/section in-app/web.</criterion>
+    <criterion id="ac4">Share previews render OG metadata (title, description, image) using `story-share-renderer@2025.10` Lambda; preview loads in ≤400ms p95.</criterion>
+    <criterion id="ac5">Every share/save action emits analytics events (`story_shared`, `story_saved`) with schema defined in the tech spec and correlates with story feed metrics.</criterion>
+    <criterion id="ac6">Rate limiting prevents more than 20 share tokens per user per hour; exceeding attempts return friendly error state with retry guidance.</criterion>
+    <criterion id="ac7">Offline handling queues share/save requests and syncs within 10 seconds of reconnect.</criterion>
+    <criterion id="ac8">QA sign-off confirms links operate correctly on iOS, Android, and mobile web, including deep link fallback to the App Store when app absent.</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Update `toggle_story_save_use_case.dart` to call new Serverpod endpoint and handle optimistic UI with rollback on failure</description>
+      <acceptance-criteria>ac1,ac7</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Instrument `story_saved` analytics via `story_analytics_service.dart` capturing `storyId`, `makerId`, `saveState`, `ctaSurface`</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Build `story_share_sheet.dart` widget invoking platform share sheets, clipboard operations, and preview thumbnails</description>
+      <acceptance-criteria>ac2,ac4</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Implement `generate_story_deep_link_use_case.dart` to call `story_share_endpoint.dart`, handle rate limiting (HTTP 429), and produce `ShareResponse` domain entity</description>
+      <acceptance-criteria>ac3,ac6</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Create Serverpod `story_share_endpoint.dart` with rate limiting (20/hour) using Redis token bucket and audit logging</description>
+      <acceptance-criteria>ac3,ac6</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Extend Lambda `story-share-renderer@2025.10` to fetch story assets and render OG metadata compliant with spec</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Update Segment schemas and Datadog dashboards for `story_shared` and `story_saved` metrics with conversion goals</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Execute cross-platform QA playbook verifying deep link routing, App Store fallback, and expirations</description>
+      <acceptance-criteria>ac8</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Validate offline queue with simulated airplane mode scenario and ensure sync within 10 seconds on reconnect</description>
+      <acceptance-criteria>ac7</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 5.1 – Story Detail Page Implementation (CTA placement, base share button)</prerequisite>
+    <prerequisite>Story 5.2 – Accessible Playback &amp; Transcripts (ensures share button accessible semantics)</prerequisite>
+    <prerequisite>Epic 1 Story 1.1 – Viewer Authentication (for user identity in shares/saves)</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-5.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-5-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-5-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +100,69 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test "Save" button toggles wishlist state with optimist...</test-case>
+      <test-case ac="ac2">Test Share sheet presents platform native options (iOS ...</test-case>
+      <test-case ac="ac3">Test Generated deep links include signed Firebase Dynam...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Video Pipeline, Content Security</section>
+        <reason>Video and content processing patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/incident-response.md</path>
+        <section>ALL</section>
+        <reason>Incident response procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including content security</decision>
+        <reason>Security requirements for content processing.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Content Security, Access Controls</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

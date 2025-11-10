@@ -1,165 +1,130 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="02-2-navigation-infrastructure-routing" generated="2025-11-06">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="02-2-navigation-infrastructure-routing" generated="2025-11-10">
   <metadata>
     <epic>02</epic>
     <story>2</story>
-    <title>Navigation Infrastructure & Routing</title>
+    <title>Story 02-2: Navigation Infrastructure &amp; Routing</title>
     <status>ready-for-dev</status>
     <story-file>docs/stories/02-2-navigation-infrastructure-routing.md</story-file>
     <epic-context>docs/epic-02-context.md</epic-context>
     <tech-spec>docs/tech-spec-epic-02.md</tech-spec>
-    <depends-on>02-1-design-system-theme-foundation</depends-on>
   </metadata>
-  
   <user-story>
     <as-a>user</as-a>
-    <i-want>seamless navigation between app features</i-want>
-    <so-that>I can efficiently access content and functionality</so-that>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
   </user-story>
-  
   <acceptance-criteria>
-    <criterion id="ac1">go_router configuration with route definitions</criterion>
-    <criterion id="ac2">Deep linking support for all main flows</criterion>
-    <criterion id="ac3">Authentication-aware route guards</criterion>
-    <criterion id="ac4">Navigation service in packages/core/</criterion>
-    <criterion id="ac5">Route testing infrastructure</criterion>
+    <criterion id="ac1">go_router configured with type-safe routes</criterion>
+    <criterion id="ac2">Deep linking support implemented</criterion>
+    <criterion id="ac3">Navigation state managed via BLoC</criterion>
+    <criterion id="ac4">Route guards for authentication</criterion>
+    <criterion id="ac5">Navigation analytics instrumented (deferred - no analytics yet)</criterion>
   </acceptance-criteria>
-  
   <story-tasks>
     <task id="task1">
-      <description>Configure go_router with type-safe route definitions</description>
+      <description>Implement core functionality</description>
       <acceptance-criteria>ac1</acceptance-criteria>
-      <location>video_window_flutter/lib/app_shell/routing/app_router.dart</location>
-    </task>
-    <task id="task2">
-      <description>Implement deep linking for authentication, stories, commerce flows</description>
-      <acceptance-criteria>ac2</acceptance-criteria>
-      <location>video_window_flutter/lib/app_shell/routing/deep_links.dart</location>
-    </task>
-    <task id="task3">
-      <description>Create route guards for authenticated routes</description>
-      <acceptance-criteria>ac3</acceptance-criteria>
-      <location>video_window_flutter/lib/app_shell/routing/route_guards.dart</location>
-    </task>
-    <task id="task4">
-      <description>Build navigation service abstraction layer</description>
-      <acceptance-criteria>ac4</acceptance-criteria>
-      <location>video_window_flutter/packages/core/lib/services/navigation_service.dart</location>
-    </task>
-    <task id="task5">
-      <description>Create route testing utilities and integration tests</description>
-      <acceptance-criteria>ac5</acceptance-criteria>
-      <location>video_window_flutter/test/routing/</location>
     </task>
   </story-tasks>
-  
   <artifacts>
     <docs>
       <doc>
         <path>docs/tech-spec-epic-02.md</path>
-        <section>Navigation Architecture</section>
-        <snippet>go_router v12.1.3+ with type-safe routing, deep linking, and route guards. Integration with BLoC for state management.</snippet>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
       </doc>
       <doc>
-        <path>docs/architecture/bloc-implementation-guide.md</path>
-        <section>Navigation with BLoC</section>
-        <snippet>BLoC-based navigation state management. Route redirects based on authentication state.</snippet>
-      </doc>
-      <doc>
-        <path>docs/prd.md</path>
-        <section>User Flows</section>
-        <snippet>Main user flows: Authentication → Feed → Story Detail → Commerce → Checkout. Deep linking requirements for sharing and notifications.</snippet>
+        <path>docs/epic-02-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
       </doc>
     </docs>
-    
     <code>
       <artifact>
-        <path>video_window_flutter/lib/app_shell/routing/</path>
-        <kind>directory</kind>
-        <symbol>routing</symbol>
-        <reason>Location for app-wide routing configuration</reason>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
       </artifact>
       <artifact>
-        <path>video_window_flutter/packages/core/lib/services/</path>
-        <kind>directory</kind>
-        <symbol>services</symbol>
-        <reason>Core services including navigation abstraction</reason>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
       </artifact>
     </code>
-    
-    <dependencies>
-      <flutter>
-        <package>go_router</package>
-        <version>^12.1.3</version>
-        <reason>Declarative routing with deep linking support</reason>
-      </flutter>
-      <flutter>
-        <package>flutter_bloc</package>
-        <version>^8.1.3</version>
-        <reason>State management for navigation state</reason>
-      </flutter>
-    </dependencies>
   </artifacts>
-  
-  <interfaces>
-    <interface>
-      <name>GoRouter</name>
-      <kind>Router configuration</kind>
-      <signature>GoRouter with routes, guards, and redirects</signature>
-      <path>video_window_flutter/lib/app_shell/routing/app_router.dart</path>
-    </interface>
-    <interface>
-      <name>NavigationService</name>
-      <kind>Service abstraction</kind>
-      <signature>push(), pop(), pushNamed(), replaceNamed(), goNamed()</signature>
-      <path>video_window_flutter/packages/core/lib/services/navigation_service.dart</path>
-    </interface>
-    <interface>
-      <name>RouteGuard</name>
-      <kind>Guard interface</kind>
-      <signature>canNavigate(BuildContext, GoRouterState) → bool</signature>
-      <path>video_window_flutter/lib/app_shell/routing/route_guards.dart</path>
-    </interface>
-  </interfaces>
-  
   <constraints>
-    <constraint priority="CRITICAL">All routes must be type-safe with generated route classes</constraint>
-    <constraint priority="CRITICAL">Authentication state must control access to protected routes</constraint>
-    <constraint priority="HIGH">Deep links must work from cold app start</constraint>
-    <constraint priority="HIGH">Route guards must redirect unauthenticated users to sign-in</constraint>
-    <constraint priority="MEDIUM">Navigation service must abstract go_router for testability</constraint>
-    <constraint priority="MEDIUM">All routes must be testable in isolation</constraint>
+    <constraint priority="HIGH">Follow architecture patterns and coding standards</constraint>
+    <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
-  
   <tests>
     <standards>
-      <standard>Integration tests for each main route and navigation flow</standard>
-      <standard>Unit tests for route guards with mocked authentication state</standard>
-      <standard>Deep link tests verifying correct route resolution from URLs</standard>
-      <standard>Navigation service tests with mocked router</standard>
+      <standard>Unit and integration tests required</standard>
     </standards>
-    
     <locations>
-      <location>video_window_flutter/test/routing/</location>
-      <location>video_window_flutter/integration_test/navigation/</location>
+      <location>test/</location>
     </locations>
-    
     <ideas>
-      <test-case ac="ac1">Test all routes are properly registered and resolve correctly</test-case>
-      <test-case ac="ac2">Test deep link opens correct screen from cold start</test-case>
-      <test-case ac="ac2">Test deep link with invalid ID shows error page</test-case>
-      <test-case ac="ac3">Test unauthenticated user redirected to sign-in when accessing protected route</test-case>
-      <test-case ac="ac3">Test authenticated user can access protected routes</test-case>
-      <test-case ac="ac4">Test navigation service methods call go_router correctly</test-case>
-      <test-case ac="ac5">Test route navigation preserves query parameters</test-case>
+      <test-case ac="ac1">Test See story file for complete acceptance criteria...</test-case>
     </ideas>
   </tests>
   
-  <technical-notes>
-    <note>Use go_router's redirect mechanism for authentication checks</note>
-    <note>Implement GoRouter.refreshListenable to react to auth state changes</note>
-    <note>Deep links format: videowindow://story/{id}, videowindow://offer/{id}</note>
-    <note>Test deep links on both iOS and Android with physical devices</note>
-    <note>Consider shell routes for tab-based navigation in future iterations</note>
-  </technical-notes>
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for navigation implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/front-end-architecture.md</path>
+        <section>Navigation Patterns</section>
+        <reason>Frontend navigation architecture patterns.</reason>
+        <applies-to>task1</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/bloc-implementation-guide.md</path>
+        <section>Navigation State Management</section>
+        <reason>BLoC patterns for navigation state.</reason>
+        <applies-to>task1</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Navigation Patterns, Route Guard Patterns</section>
+        <reason>Standard navigation and route protection patterns.</reason>
+        <applies-to>task1</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>GoRouter</name>
+        <path>docs/frameworks/go-router-integration-guide.md</path>
+        <section>ALL</section>
+        <reason>GoRouter framework for type-safe routing. MUST READ.</reason>
+        <applies-to>task1</applies-to>
+      </framework>
+      <framework priority="HIGH">
+        <name>BLoC</name>
+        <path>docs/frameworks/bloc-integration-guide.md</path>
+        <section>Navigation Integration</section>
+        <reason>BLoC integration with navigation.</reason>
+        <applies-to>task1</applies-to>
+      </framework>
+    </frameworks>
+    <adrs>
+      <adr priority="HIGH">
+        <number>ADR-0007</number>
+        <path>docs/architecture/adr/ADR-0007-state-management.md</path>
+        <decision>BLoC state management</decision>
+        <reason>Navigation state management approach.</reason>
+        <applies-to>task1</applies-to>
+      </adr>
+    </adrs>
+  </implementation-guidance>
 </story-context>

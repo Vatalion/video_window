@@ -1,0 +1,37 @@
+# User model for authentication and authorization
+class: User
+table: users
+
+fields:
+  # Unique identifier
+  id: int?
+  
+  # Authentication identifiers
+  email: String?
+  phone: String?
+  
+  # User role (viewer, maker, admin)
+  role: String
+  
+  # Auth provider metadata (email, phone, google, apple)
+  authProvider: String
+  
+  # Account status
+  isEmailVerified: bool
+  isPhoneVerified: bool
+  isActive: bool
+  
+  # Account lockout tracking
+  failedAttempts: int
+  lockedUntil: DateTime?
+  
+  # Timestamps
+  createdAt: DateTime
+  updatedAt: DateTime
+  lastLoginAt: DateTime?
+
+indexes:
+  email_idx:
+    fields: email
+  phone_idx:
+    fields: phone

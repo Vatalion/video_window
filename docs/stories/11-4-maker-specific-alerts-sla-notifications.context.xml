@@ -1,32 +1,131 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="11.4.maker-specific-alerts-sla-notifications" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="11-4-maker-specific-alerts-sla-notifications" generated="2025-11-10">
   <metadata>
     <epic>11</epic>
     <story>4</story>
-    <title>Maker-Specific Alerts & SLA Notifications</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/11.4.maker-specific-alerts-sla-notifications.md</story-file>
+    <title>Story 11-4: Maker-Specific Alerts &amp; SLA Notifications</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/11-4-maker-specific-alerts-sla-notifications.md</story-file>
     <epic-context>docs/epic-11-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-11.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>functionality described in story</i-want>
-    <so-that>requirements are met</so-that>
+    <as-a>maker</as-a>
+    <i-want>to receive time-sensitive alerts for my listings</i-want>
+    <so-that>I can respond promptly and avoid SLA violations or missed opportunities</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Maker receives immediate push notification when first qualifying offer received on listing (≥ minimum price), triggering 72-hour auction countdown.</criterion>
+    <criterion id="ac2">Maker receives push notification when new bid placed on active auction, including bid amount and current high bidder status.</criterion>
+    <criterion id="ac3">**SLA CRITICAL**: Maker receives escalating alerts for shipping tracking requirement (24h, 48h, 72h warnings) before SLA violation.</criterion>
+    <criterion id="ac4">Maker receives push notification when auction enters final 15 minutes (soft-close period) with option to accept current high bid immediately.</criterion>
+    <criterion id="ac5">Maker receives push notification when payment received, triggering fulfillment workflow with 72-hour tracking requirement countdown.</criterion>
+    <criterion id="ac6">**BUSINESS CRITICAL**: Maker can accept current high bid from notification action button, immediately ending auction and entering payment window.</criterion>
+    <criterion id="ac7">Maker dashboard shows SLA status indicators for all active orders with color-coded urgency (green/yellow/red) and time remaining.</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Define maker-specific notification events</description>
+      <acceptance-criteria>ac1,ac2,ac3,ac4,ac5</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Implement notification trigger points in auction service</description>
+      <acceptance-criteria>ac1,ac2,ac4</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Implement SLA tracking and warning system</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Implement payment success notification</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>BUSINESS CRITICAL: Implement accept bid action from notification</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Build notification action routing system</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Add deep link actions to notification payloads</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Build SLA status dashboard widgets</description>
+      <acceptance-criteria>ac7</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Implement real-time SLA countdown updates</description>
+      <acceptance-criteria>ac7</acceptance-criteria>
+    </task>
+    <task id="task10">
+      <description>Add maker dashboard filtering and sorting</description>
+      <acceptance-criteria>ac7</acceptance-criteria>
+    </task>
+    <task id="task11">
+      <description>Craft maker-specific notification copy</description>
+      <acceptance-criteria>ac1,ac2,ac3,ac4,ac5</acceptance-criteria>
+    </task>
+    <task id="task12">
+      <description>Optimize notification timing and frequency</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task13">
+      <description>Implement maker notification analytics</description>
+      <acceptance-criteria>ac1,ac2,ac3,ac4,ac5,ac6</acceptance-criteria>
+    </task>
+    <task id="task14">
+      <description>Build SLA monitoring dashboard</description>
+      <acceptance-criteria>ac3,ac7</acceptance-criteria>
+    </task>
+    <task id="task15">
+      <description>Unit tests for maker notification triggers</description>
+      <acceptance-criteria>ac1,ac2,ac3,ac4,ac5</acceptance-criteria>
+    </task>
+    <task id="task16">
+      <description>Integration tests for notification actions</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task17">
+      <description>E2E tests for SLA workflow</description>
+      <acceptance-criteria>ac3,ac7</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 11.1 – Push Notification Infrastructure (push delivery system)</prerequisite>
+    <prerequisite>Story 11.2 – In-App Activity Feed (notification center)</prerequisite>
+    <prerequisite>Story 9.2 – Server Validation &amp; Auction Trigger (auction state management)</prerequisite>
+    <prerequisite>Story 10.3 – Auction State Transitions (auction lifecycle)</prerequisite>
+    <prerequisite>Story 13.2 – Tracking Integration System (shipping tracking)</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-11.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-11-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-11.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-11-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +133,74 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test Maker receives immediate push notification when fi...</test-case>
+      <test-case ac="ac2">Test Maker receives push notification when new bid plac...</test-case>
+      <test-case ac="ac3">Test **SLA CRITICAL**: Maker receives escalating alerts...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Payment Processing, Transaction Management</section>
+        <reason>Payment and transaction patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/payment-processing.md</path>
+        <section>ALL</section>
+        <reason>Payment processing and transaction procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including payment security</decision>
+        <reason>Payment security and PCI compliance requirements.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Payment Security, Transaction Security</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/compliance-guide.md</path>
+        <section>PCI DSS</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

@@ -91,3 +91,15 @@ _(To be completed by Dev Agent)_
 
 ## QA Results
 _(To be completed by QA Agent)_
+
+## Dev Notes
+
+### Implementation Guidance
+- Follow architecture patterns defined in tech spec
+- Reference epic context for integration points
+- Ensure test coverage meets acceptance criteria requirements
+
+### Key Considerations
+- Review security requirements if authentication/authorization involved
+- Check performance requirements and optimize accordingly
+- Validate against Definition of Ready before starting implementation

@@ -1,4 +1,7 @@
 # Story 15-2: Listing Takedown
+
+## Status
+ready-for-dev
 **Epic:** 15
 **Points:** 8
 **Status:** Ready

@@ -1,4 +1,7 @@
 # Story 16-1: Secrets & RBAC
+
+## Status
+ready-for-dev
 **Epic:** 16
 **Points:** 5
 **Status:** Ready

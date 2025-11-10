@@ -1,32 +1,73 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="01-3-code-generation-workflows" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="01-3-code-generation-workflows" generated="2025-11-10">
   <metadata>
     <epic>01</epic>
     <story>3</story>
-    <title>Code Generation Workflows</title>
+    <title>Story 01-3: Code Generation Workflows</title>
     <status>ready-for-dev</status>
     <story-file>docs/stories/01-3-code-generation-workflows.md</story-file>
     <epic-context>docs/epic-01-context.md</epic-context>
   </metadata>
   <user-story>
     <as-a>user</as-a>
-    <i-want>to code generation workflows</i-want>
-    <so-that>the system meets requirements</so-that>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">`serverpod generate` workflow documented and tested</criterion>
+    <criterion id="ac2">`melos run generate` triggers Flutter code generation</criterion>
+    <criterion id="ac3">Generated files excluded from version control</criterion>
+    <criterion id="ac4">Pre-commit hooks validate generated code is up-to-date</criterion>
+    <criterion id="ac5">CI pipeline fails if generated code is stale</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement: `serverpod generate` workflow documented and tested</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Implement: `melos run generate` triggers Flutter code generation</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Implement: Generated files excluded from version control</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Implement: Pre-commit hooks validate generated code is up-to-date</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Implement: CI pipeline fails if generated code is stale</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
   </story-tasks>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-1.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-1-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-01.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-01-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +75,93 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test See story file for complete acceptance criteria...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code quality and generation standards.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/melos-configuration.md</path>
+        <section>Code Generation Scripts</section>
+        <reason>Melos script configuration for code generation.</reason>
+        <applies-to>task2</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Code Generation Patterns</section>
+        <reason>Standard code generation workflow patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/03-code-generation.md</path>
+        <section>ALL</section>
+        <reason>Serverpod code generation framework. MUST READ for generation workflow.</reason>
+        <applies-to>task1,task3,task4,task5</applies-to>
+      </framework>
+      <framework priority="HIGH">
+        <name>Melos</name>
+        <path>docs/frameworks/melos-integration-guide.md</path>
+        <section>Code Generation Commands</section>
+        <reason>Melos integration for coordinated code generation.</reason>
+        <applies-to>task2</applies-to>
+      </framework>
+      <framework priority="MEDIUM">
+        <name>Freezed</name>
+        <path>docs/frameworks/freezed-integration-guide.md</path>
+        <section>ALL</section>
+        <reason>Freezed code generation patterns.</reason>
+        <applies-to>task2</applies-to>
+      </framework>
+      <framework priority="MEDIUM">
+        <name>JSON Serializable</name>
+        <path>docs/frameworks/json-serializable-guide.md</path>
+        <section>ALL</section>
+        <reason>JSON serialization code generation.</reason>
+        <applies-to>task2</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/code-generation-workflow.md</path>
+        <section>ALL</section>
+        <reason>Complete code generation procedures and workflows. Primary reference.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/ci-cd-pipeline.md</path>
+        <section>Code Generation Validation</section>
+        <reason>CI/CD integration for generated code validation.</reason>
+        <applies-to>task4,task5</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="HIGH">
+        <number>ADR-0002</number>
+        <path>docs/architecture/adr/ADR-0002-flutter-serverpod-architecture.md</path>
+        <decision>Flutter + Serverpod stack</decision>
+        <reason>Architecture requiring code generation.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+  </implementation-guidance>
 </story-context>

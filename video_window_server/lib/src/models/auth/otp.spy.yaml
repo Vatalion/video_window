@@ -1,0 +1,27 @@
+# OTP storage model with secure hashing
+class: Otp
+table: otps
+
+fields:
+  # Unique identifier
+  id: int?
+  
+  # Identifier (email or phone)
+  identifier: String
+  
+  # Hashed OTP with user-specific salt (SHA-256)
+  otpHash: String
+  salt: String
+  
+  # Security metadata
+  attempts: int
+  used: bool
+  
+  # Expiry and timestamps
+  expiresAt: DateTime
+  createdAt: DateTime
+  usedAt: DateTime?
+
+indexes:
+  identifier_idx:
+    fields: identifier

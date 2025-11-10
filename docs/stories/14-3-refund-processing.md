@@ -1,5 +1,8 @@
 # Story 14-3: Refund Processing
 
+## Status
+ready-for-dev
+
 **Epic:** 14 - Issue Resolution & Refund Handling  
 **Points:** 8  
 **Status:** Ready

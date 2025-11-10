@@ -1,32 +1,111 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="3-1-viewer-profile-management" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="3-1-viewer-profile-management" generated="2025-11-10">
   <metadata>
     <epic>3</epic>
     <story>1</story>
-    <title>Viewer Profile Management</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/3.1.viewer-profile-management.md</story-file>
+    <title>Story 3-1: Viewer Profile Management</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/3-1-viewer-profile-management.md</story-file>
     <epic-context>docs/epic-3-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-3.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to viewer profile management</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>viewer</as-a>
+    <i-want>to create and manage my profile with avatar</i-want>
+    <so-that>I can personalize my experience and control my data privacy and communications</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Complete profile management interface with avatar/media upload, personal information editing, and real-time validation with optimistic updates and comprehensive error handling.</criterion>
+    <criterion id="ac2">Secure media upload system with file validation, virus scanning, automatic resizing/compression, and secure CDN storage with signed URLs for privacy protection.</criterion>
+    <criterion id="ac3">Granular privacy settings allowing viewers to control profile visibility, data sharing preferences, and consent management with GDPR/CCPA compliance and audit trails.</criterion>
+    <criterion id="ac4">**SECURITY CRITICAL**: Implement comprehensive PII data encryption at rest and in transit with field-level encryption for sensitive profile data and secure key management.</criterion>
+    <criterion id="ac5">**SECURITY CRITICAL**: Implement data subject access request (DSAR) functionality allowing users to export, correct, and delete their personal information with audit logging.</criterion>
+    <criterion id="ac6">**SECURITY CRITICAL**: Implement role-based access controls ensuring users can only modify their own profiles with proper authentication and authorization validation.</criterion>
+    <criterion id="ac7">**PUSH NOTIFICATIONS (MVP)**: Notification preference matrix with granular controls for email, push, and in-app notifications including: new offer notifications, outbid alerts, auction ending reminders, order updates, and maker activity notifications.</criterion>
+    <criterion id="ac8">Integration tests covering profile CRUD operations, privacy controls, media upload workflows, and comprehensive security testing including data access patterns.</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>SECURITY CRITICAL - SEC-004: Implement field-level encryption for sensitive PII data in user profiles</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>SECURITY CRITICAL - SEC-004: Implement secure key management system for profile data encryption</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>SECURITY CRITICAL - SEC-005: Implement comprehensive DSAR (Data Subject Access Request) functionality</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>SECURITY CRITICAL - SEC-005: Implement role-based access controls for profile management</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>SECURITY CRITICAL - SEC-004: Implement secure media upload pipeline with virus scanning</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Implement profile editing UI with form validation, auto-save, and optimistic updates using shared design tokens and BLoC state management</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Implement avatar/media upload functionality with drag-and-drop, cropping, and preview capabilities</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Create comprehensive privacy settings interface with granular controls and clear explanations</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Implement notification preference matrix with intelligent delivery and suppression</description>
+      <acceptance-criteria>ac7</acceptance-criteria>
+    </task>
+    <task id="task10">
+      <description>Connect profile operations to Profile Service API endpoints with proper error handling and caching</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task11">
+      <description>Emit analytics events for profile interactions, privacy changes, and notification preferences</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task12">
+      <description>Cover profile security testing including PII encryption, access controls, and DSAR workflows</description>
+      <acceptance-criteria>ac8</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 01.1 – Bootstrap Repository and Flutter App</prerequisite>
+    <prerequisite>Story 1.1 – Implement Email OTP Sign-In (authenticated session guarantees)</prerequisite>
+    <prerequisite>Story 2.1 – Capability Enablement Request Flow (capability metadata + blockers API)</prerequisite>
+    <prerequisite>Media pipeline baseline from Story 6.1 (for secure uploads) should at least provide signed URL scaffold</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-3.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-3-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-3.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-3-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +113,86 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test Complete profile management interface with avatar/...</test-case>
+      <test-case ac="ac2">Test Secure media upload system with file validation, v...</test-case>
+      <test-case ac="ac3">Test Granular privacy settings allowing viewers to cont...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for profile management implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/frontend-architecture.md</path>
+        <section>BLoC Pattern, Form Validation</section>
+        <reason>BLoC pattern and form validation for profile UI.</reason>
+        <applies-to>task6,task10</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Data Encryption, PII Handling</section>
+        <reason>Field-level encryption and PII handling patterns.</reason>
+        <applies-to>task1,task2</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>Data Encryption, Session Management</section>
+        <reason>Serverpod encryption and secure storage.</reason>
+        <applies-to>task1,task2,task10</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/dsar-process.md</path>
+        <section>ALL</section>
+        <reason>DSAR implementation procedures. MUST READ.</reason>
+        <applies-to>task3</applies-to>
+      </runbook>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/data-classification.md</path>
+        <section>ALL</section>
+        <reason>Data classification and PII handling procedures.</reason>
+        <applies-to>task1,task2,task3</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including PII encryption and RBAC</decision>
+        <reason>Security requirements for profile data. MUST READ.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Data Encryption, Access Controls, DSAR</section>
+        <applies-to>task1,task2,task3,task4,task12</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/compliance-guide.md</path>
+        <section>GDPR, CCPA Compliance</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

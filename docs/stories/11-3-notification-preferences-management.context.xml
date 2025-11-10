@@ -1,32 +1,125 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="11.3.notification-preferences-management" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="11-3-notification-preferences-management" generated="2025-11-10">
   <metadata>
     <epic>11</epic>
     <story>3</story>
-    <title>Notification Preferences & Channel Management</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/11.3.notification-preferences-management.md</story-file>
+    <title>Story 11-3: Notification Preferences &amp; Channel Management</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/11-3-notification-preferences-management.md</story-file>
     <epic-context>docs/epic-11-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-11.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>functionality described in story</i-want>
-    <so-that>requirements are met</so-that>
+    <as-a>user (viewer or maker)</as-a>
+    <i-want>to control which notifications I receive and through which channels</i-want>
+    <so-that>I only get alerts that matter to me without notification fatigue</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">User can enable/disable notifications globally (push, email, in-app) with immediate effect across all notification types.</criterion>
+    <criterion id="ac2">User can configure per-notification-type preferences for each channel (e.g., push for auction_won but email for shipping_reminder).</criterion>
+    <criterion id="ac3">User can set quiet hours (start time, end time, days of week) to suppress non-critical notifications during specified periods.</criterion>
+    <criterion id="ac4">**RELIABILITY CRITICAL**: Preference changes sync to server immediately with optimistic UI updates and rollback on failure.</criterion>
+    <criterion id="ac5">Critical notifications (payment_received, auction_won) bypass quiet hours and cannot be disabled to protect business operations.</criterion>
+    <criterion id="ac6">Notification preferences accessible from both Settings and Activity Feed with consistent UI and behavior.</criterion>
+    <criterion id="ac7">User receives confirmation when preferences are saved successfully with clear indication of what changed.</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Define notification preferences data models</description>
+      <acceptance-criteria>ac1,ac2,ac3</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Implement preferences repository</description>
+      <acceptance-criteria>ac1,ac2,ac3,ac4</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Build Serverpod preferences endpoints</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Create NotificationPreferencesBloc</description>
+      <acceptance-criteria>ac1,ac2,ac3,ac4</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Implement preference validation logic</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Build Notification Preferences page</description>
+      <acceptance-criteria>ac1,ac2,ac6</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Create per-type preference controls</description>
+      <acceptance-criteria>ac2,ac5</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Implement quiet hours configuration</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Build save confirmation and error handling</description>
+      <acceptance-criteria>ac4,ac7</acceptance-criteria>
+    </task>
+    <task id="task10">
+      <description>Add notification preferences to Settings menu</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task11">
+      <description>Add quick access from Activity Feed</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task12">
+      <description>Implement preference checking in notification service</description>
+      <acceptance-criteria>ac1,ac2,ac3,ac5</acceptance-criteria>
+    </task>
+    <task id="task13">
+      <description>Build quiet hours evaluation logic</description>
+      <acceptance-criteria>ac3,ac5</acceptance-criteria>
+    </task>
+    <task id="task14">
+      <description>Unit tests for preferences BLoC</description>
+      <acceptance-criteria>ac1,ac2,ac3,ac4</acceptance-criteria>
+    </task>
+    <task id="task15">
+      <description>Widget tests for preferences UI</description>
+      <acceptance-criteria>ac1,ac2,ac3,ac6,ac7</acceptance-criteria>
+    </task>
+    <task id="task16">
+      <description>Integration tests for preference enforcement</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 11.1 – Push Notification Infrastructure (notification delivery system)</prerequisite>
+    <prerequisite>Story 11.2 – In-App Activity Feed (notification center UI)</prerequisite>
+    <prerequisite>Story 3.5 – Account Settings Management (settings navigation structure)</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-11.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-11-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-11.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-11-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +127,74 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test User can enable/disable notifications globally (pu...</test-case>
+      <test-case ac="ac2">Test User can configure per-notification-type preferenc...</test-case>
+      <test-case ac="ac3">Test User can set quiet hours (start time, end time, da...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Payment Processing, Transaction Management</section>
+        <reason>Payment and transaction patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/payment-processing.md</path>
+        <section>ALL</section>
+        <reason>Payment processing and transaction procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including payment security</decision>
+        <reason>Payment security and PCI compliance requirements.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Payment Security, Transaction Security</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/compliance-guide.md</path>
+        <section>PCI DSS</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

@@ -1,32 +1,94 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="12.3.payment-retry-mechanisms" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="12-3-payment-retry-mechanisms" generated="2025-11-10">
   <metadata>
     <epic>12</epic>
     <story>3</story>
-    <title>Payment Retry Mechanisms</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/12.3.payment-retry-mechanisms.md</story-file>
+    <title>Story 12-3: Payment Retry Mechanisms</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/12-3-payment-retry-mechanisms.md</story-file>
     <epic-context>docs/epic-12-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-12.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>functionality described in story</i-want>
-    <so-that>requirements are met</so-that>
+    <as-a>buyer who encountered a payment failure</as-a>
+    <i-want>to retry payment safely within the original 24-hour window</i-want>
+    <so-that>I still have a fair chance to complete my purchase.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">**RETRY FLOW**: `payment_retry_service.dart` enqueues retries to SQS `payments-retry-${ENV}` with exponential backoff (1, 5, 15 minutes) and caps attempts at 3 per session. (Implementation Guide §3)</criterion>
+    <criterion id="ac2">**WORKER EXECUTION**: `payment_retry_worker.dart` processes queue messages, recreates checkout sessions with preserved metadata, and marks attempts in `payment_session_repository.dart`. (Implementation Guide §3)</criterion>
+    <criterion id="ac3">**CLIENT UX**: `payment_retry_bloc.dart` exposes retry availability, surfaces failure reasons, and triggers `schedule_payment_retry_use_case.dart`; UI disables retry when limit reached. (Implementation Guide §3)</criterion>
+    <criterion id="ac4">**TELEMETRY**: Metrics `payments.retry.attempt_count`, `payments.retry.success_rate`, and Segment event `payments.retry.initiated` capture attempt metadata and outcomes. (Implementation Guide §3, Monitoring &amp; Analytics)</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement `payment_retry_service.dart` to check eligibility, increment attempt counters, and enqueue retry payload with delay strategy.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Extend `payment_session_repository.dart` with retry metadata (`attempts`, `lastRetryAt`).</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Add `payment_retry_endpoint.dart` to expose retry initiation API with RBAC + idempotency token.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Build `payment_retry_worker.dart` to consume SQS, recreate checkout via `stripe_service.dart`, and update audit log `retry_initiated`.</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Update `payment_bloc.dart` / `payment_status_page.dart` to reflect retry progress, final outcomes, and disable CTA when attempts exhausted.</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Implement `payment_retry_bloc.dart` + `schedule_payment_retry_use_case.dart` bridging UI and server endpoint.</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Emit Datadog metrics `payments.retry.attempt_count`, `payments.retry.success_rate`, `payments.retry.failure_count` with tags `failure_reason`, `retry_attempt`.</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Track Segment event `payments.retry.initiated` + `payments.retry.completed` with `success` boolean.</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Tests: `payment_retry_service_test.dart`, `payment_retry_worker_test.dart`, `payment_retry_endpoint_test.dart`, `payment_retry_bloc_test.dart`.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 12.1 – Stripe Checkout Integration.</prerequisite>
+    <prerequisite>Story 12.2 – Payment Window Enforcement for session expiry boundaries.</prerequisite>
+    <prerequisite>SQS queue + IAM policies applied via `infrastructure/terraform/payments.tf`.</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-12.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-12-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-12.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-12-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +96,74 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test **RETRY FLOW**: `payment_retry_service.dart` enque...</test-case>
+      <test-case ac="ac2">Test **WORKER EXECUTION**: `payment_retry_worker.dart` ...</test-case>
+      <test-case ac="ac3">Test **CLIENT UX**: `payment_retry_bloc.dart` exposes r...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Payment Processing, Transaction Management</section>
+        <reason>Payment and transaction patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/payment-processing.md</path>
+        <section>ALL</section>
+        <reason>Payment processing and transaction procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including payment security</decision>
+        <reason>Payment security and PCI compliance requirements.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Payment Security, Transaction Security</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/compliance-guide.md</path>
+        <section>PCI DSS</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

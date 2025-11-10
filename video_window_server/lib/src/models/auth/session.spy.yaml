@@ -1,0 +1,35 @@
+# User session model with JWT token tracking
+class: UserSession
+table: sessions
+
+fields:
+  # Unique identifier
+  id: int?
+  
+  # Foreign key to users table
+  userId: int
+  
+  # Token identifiers
+  accessToken: String
+  refreshToken: String
+  
+  # Device binding for security
+  deviceId: String
+  deviceInfo: String?
+  
+  # Token metadata
+  accessTokenExpiry: DateTime
+  refreshTokenExpiry: DateTime
+  
+  # Session tracking
+  ipAddress: String?
+  isRevoked: bool
+  revokedAt: DateTime?
+  
+  # Timestamps
+  createdAt: DateTime
+  lastUsedAt: DateTime
+
+indexes:
+  refresh_token_idx:
+    fields: refreshToken

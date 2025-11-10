@@ -1,32 +1,117 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="6-3-content-security-anti-piracy-system" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="6-3-content-security-and-anti-piracy-system" generated="2025-11-10">
   <metadata>
     <epic>6</epic>
     <story>3</story>
-    <title>Content Security Anti Piracy System</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/6.3.content-security-and-anti-piracy-system.md</story-file>
+    <title>Story 6-3: Content Security &amp; Anti-Piracy System</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/6-3-content-security-and-anti-piracy-system.md</story-file>
     <epic-context>docs/epic-6-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-6.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to content security anti piracy system</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>security engineering lead</as-a>
+    <i-want>multi-DRM licensing</i-want>
+    <so-that>premium video assets remain protected and enforcement actions trigger immediately when misuse is detected.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">`drm_license_service.dart` issues Widevine, FairPlay, and PlayReady licenses with per-user entitlements, device binding, and 5-minute TTL, persisting audit logs for every issuance. *(Ref: docs/tech-spec-epic-6.md – Implementation Guide §4 &amp; DRM License Service pseudocode)*</criterion>
+    <criterion id="ac2">NexGuard forensic watermark payloads embed `userId`, `deviceId`, and `sessionId` metadata in every distributed asset; extraction tooling can recover identifiers from sampled leaks. *(Ref: docs/tech-spec-epic-6.md – Forensic Watermarking Service)*</criterion>
+    <criterion id="ac3">Flutter playback integrates multi-DRM negotiation plus capture deterrence (FLAG_SECURE, UIScreen.isCaptured hooks) and attaches forensic claims via `forensic_watermark_client.dart`. *(Ref: docs/tech-spec-epic-6.md – Implementation Guide §5)*</criterion>
+    <criterion id="ac4">Forter fingerprinting agent 3.2.2 monitors CDN traffic, emitting piracy alerts to EventBridge `media-pipeline-events`; Lambda `piracy-escalation@2025-10` files takedown tickets within 10 minutes. *(Ref: docs/tech-spec-epic-6.md – Implementation Guide §6)*</criterion>
+    <criterion id="ac5">Security dashboards in Grafana and Kibana surface DRM success rate ≥ 99.7%, forensic verification ≥ 99%, and piracy alert false positives ≤ 2%. *(Ref: docs/tech-spec-epic-6.md – Monitoring &amp; Analytics &amp; Success Metrics)*</criterion>
+    <criterion id="ac6">Infrastructure codified in `infrastructure/terraform/media_drm.tf` provisions CloudHSM cluster, DRM license endpoints, NexGuard integration, and SNS `piracy-escalations` topic with environment-specific secrets fetched from Vault. *(Ref: docs/tech-spec-epic-6.md – Environment Configuration &amp; Infrastructure Requirements)*</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement `drm_license_service.dart` with adapters for Widevine, FairPlay, and PlayReady SDKs 17.0.0/4.1.0/4.5.3 respectively; include usage policy enforcement (resolution caps, concurrent streams)...</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Configure CloudHSM-backed key storage and Vault secret sync for DRM signing keys, documenting rotation workflow. *(Ref: docs/tech-spec-epic-6.md – Security &amp; Key Management)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Extend `watermark_service.dart` to request NexGuard payloads (`TEMPLATE_ID: vw-forensic-watermark-v2`), embed per-session markers, and log metadata in relational store. *(Ref: docs/tech-spec-epic-6...</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Create Flutter `forensic_watermark_client.dart` to attach claims to playback requests and respond to extraction callbacks. *(Ref: docs/tech-spec-epic-6.md – Source Tree)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Update `media_playback_service.dart` to negotiate DRM across platforms (Widevine, FairPlay, PlayReady) and enforce capture deterrence (FLAG_SECURE, UIScreen.isCaptured observer, brightness dimming)...</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Implement automated watermark extraction CLI for security ops to validate suspected leaks. *(Ref: docs/security/watermarking-requirements.md#forensic-tooling)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Deploy Forter agent 3.2.2 across CloudFront logs, streaming telemetry to EventBridge `media-pipeline-events`. *(Ref: docs/tech-spec-epic-6.md – Implementation Guide §6)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Implement Lambda `piracy-escalation@2025-10` to correlate alerts, enrich with user/device metadata, and open tickets in security queue + send to SNS `piracy-escalations`. *(Ref: docs/tech-spec-epic...</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Create Kibana dashboards for piracy trends and DMCA response times; Grafana panels for DRM license success and watermark extraction latency. *(Ref: docs/tech-spec-epic-6.md – Monitoring &amp; Analytics)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task10">
+      <description>Define escalation runbook `docs/runbooks/piracy-response.md` with SLA (10 minutes) and communication steps. *(Ref: docs/security/incident-response.md)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task11">
+      <description>Populate `content_access_logs` with license issuance, playback attempts, and takedown actions; secure retention policy ≥ 1 year. *(Ref: docs/tech-spec-epic-6.md – Content Access Log Entity)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task12">
+      <description>Write integration tests under `video_window_server/test/endpoints/media/` validating license issuance, watermark embedding, and piracy alert webhooks (mocked). *(Ref: docs/tech-spec-epic-6.md – Sou...</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task13">
+      <description>Add CI checks in `media_pipeline_checks.yaml` for DRM linting (key expiry, license formats) and watermark smoke tests. *(Ref: docs/tech-spec-epic-6.md – Workflow Orchestration)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task14">
+      <description>Conduct red-team style tests simulating token theft and watermark stripping; document findings in `docs/security/pentest/media-pipeline-2025q4.md`. *(Ref: docs/security/security-testing.md#protecti...</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 6.1 – Media Pipeline &amp; MVP Content Protection (baseline encryption and signed URLs).</prerequisite>
+    <prerequisite>Story 6.2 – Advanced Video Processing &amp; Optimization (multi-rendition pipeline available for protection overlay).</prerequisite>
+    <prerequisite>Security runbooks and KMS policies defined in `docs/security/content-protection-security-research.md`.</prerequisite>
+    <prerequisite>Vault namespaces and CloudHSM cluster activated per `docs/architecture/security-configuration.md`.</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-6.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-6-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-6.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-6-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +119,69 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test `drm_license_service.dart` issues Widevine, FairPl...</test-case>
+      <test-case ac="ac2">Test NexGuard forensic watermark payloads embed `userId...</test-case>
+      <test-case ac="ac3">Test Flutter playback integrates multi-DRM negotiation ...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Video Pipeline, Content Security</section>
+        <reason>Video and content processing patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/incident-response.md</path>
+        <section>ALL</section>
+        <reason>Incident response procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including content security</decision>
+        <reason>Security requirements for content processing.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Content Security, Access Controls</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

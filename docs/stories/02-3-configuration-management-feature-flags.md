@@ -4,6 +4,9 @@
 **Story ID:** 02-3  
 # Story 02-3: Configuration Management & Feature Flags
 
+## Status
+ready-for-dev
+
 **Epic:** 02 - Core Platform Services  
 **Story ID:** 02-3  
 **Status:** review

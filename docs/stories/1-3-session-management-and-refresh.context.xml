@@ -1,32 +1,94 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="1.3.session-management-and-refresh" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="1-3-session-management-and-refresh" generated="2025-11-10">
   <metadata>
     <epic>1</epic>
     <story>3</story>
-    <title>Session Management & Refresh</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/1.3.session-management-and-refresh.md</story-file>
+    <title>Story 1-3: Session Management &amp; Refresh</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/1-3-session-management-and-refresh.md</story-file>
     <epic-context>docs/epic-1-context.md</epic-context>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>functionality described in story</i-want>
-    <so-that>requirements are met</so-that>
+    <as-a>logged-in viewer or maker</as-a>
+    <i-want>sessions to refresh automatically and revoke securely when needed</i-want>
+    <so-that>I stay authenticated without interruption while protecting my account.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Client schedules background refresh five minutes before access token expiry, retries with exponential backoff, and logs out gracefully after consecutive failures. [Source: docs/tech-spec-epic-1.md#implementation-guide]</criterion>
+    <criterion id="ac2">Serverpod `session_service.dart` rotates refresh tokens on each use, rejects reuse, records device/IP metadata, and blacklists revoked tokens. [Source: docs/tech-spec-epic-1.md#session-management]</criterion>
+    <criterion id="ac3">Logout invalidates sessions server-side, clears secure storage, and broadcasts revocation analytics + audit events. [Source: docs/tech-spec-epic-1.md#security-implementation]</criterion>
+    <criterion id="ac4">**SECURITY CRITICAL**: Refresh token reuse detection locks the account, forces global logout, and alerts security monitoring. [Source: docs/tech-spec-epic-1.md#security-implementation]</criterion>
+    <criterion id="ac5">**PERFORMANCE**: Refresh latency ≤ 1s p95 and failure rate &lt;1% under load, measured via Datadog dashboards. [Source: docs/analytics/authentication-dashboard.md]</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement `session_service.dart` client with refresh scheduler, retries, and logout hooks .</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Persist refresh metadata (last refresh time, failure streak) to secure storage for crash resilience .</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Extend `AuthBloc` to handle `SessionRefreshRequested`, `SessionRefreshSucceeded`, `SessionRefreshFailed`, and `LogoutRequested` transitions .</description>
+      <acceptance-criteria>ac1,ac3</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Update Serverpod `session_service.dart` to rotate refresh tokens, blacklist revoked tokens, and store device/IP fingerprinting .</description>
+      <acceptance-criteria>ac2,ac4</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Add refresh token repository + migration for hashed token storage and reuse detection timestamps .</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Emit audit events (`auth.session.rotated`, `auth.session.revoked`, `auth.session.reuse_detected`) and push to security channel.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Configure Datadog monitors for refresh latency, failure rate, and reuse alerts; integrate with `Authentication Dashboard`.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Write unit tests for client scheduler, secure storage adapters, and server reuse detection logic .</description>
+      <acceptance-criteria>ac1,ac2,ac4</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Add integration tests covering successful refresh, expired refresh token, reuse attempt, and logout flows .</description>
+      <acceptance-criteria>ac2,ac3,ac4</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 1.1 – Implement Email OTP Sign-In (baseline session issuance).</prerequisite>
+    <prerequisite>Story 1.2 – Social Login Integration (shared auth repository + analytics events).</prerequisite>
+    <prerequisite>Redis and Postgres migrations for refresh tokens deployed per tech spec.</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-1.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-1-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-1.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-1-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +96,212 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test Client schedules background refresh five minutes b...</test-case>
+      <test-case ac="ac2">Test Serverpod `session_service.dart` rotates refresh t...</test-case>
+      <test-case ac="ac3">Test Logout invalidates sessions server-side, clears se...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 to provide explicit documentation references -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="CRITICAL">
+        <path>docs/architecture/serverpod-auth-module-analysis.md</path>
+        <section>Session Management, Token Lifecycle</section>
+        <reason>Serverpod auth module's session management capabilities, refresh token rotation mechanisms, and token blacklisting strategies. Foundation for session implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/serverpod-integration-guide.md</path>
+        <section>Session Management, Token Refresh Endpoints</section>
+        <reason>Standard patterns for Serverpod session service implementation, refresh token rotation, and logout flows.</reason>
+        <applies-to>task1,task4,task5</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code style, naming conventions, and quality standards that must be followed.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/bloc-implementation-guide.md</path>
+        <section>Authentication BLoC Patterns, State Transitions</section>
+        <reason>BLoC patterns for session state management, refresh event handling, and logout transitions.</reason>
+        <applies-to>task1,task3</applies-to>
+      </doc>
+      <doc priority="MEDIUM">
+        <path>docs/architecture/data-flow-mapping.md</path>
+        <section>Authentication Flow, Session Lifecycle</section>
+        <reason>Layer-by-layer data transformation patterns for session refresh and token rotation flows.</reason>
+        <applies-to>task1,task3,task4</applies-to>
+      </doc>
+      <doc priority="MEDIUM">
+        <path>docs/architecture/performance-optimization-guide.md</path>
+        <section>Background Task Optimization, Network Request Optimization</section>
+        <reason>Performance optimization patterns for background refresh scheduler and network retry logic to meet p95 latency requirements.</reason>
+        <applies-to>task1,task7</applies-to>
+      </doc>
+    </architecture>
+    
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Session Management Patterns, Token Rotation Patterns</section>
+        <reason>CRITICAL patterns for refresh token rotation, reuse detection, blacklisting, and secure session lifecycle management.</reason>
+        <applies-to>task1,task2,task4,task5</applies-to>
+      </pattern>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Retry Patterns, Exponential Backoff</section>
+        <reason>Standard retry patterns with exponential backoff for refresh request failures.</reason>
+        <applies-to>task1</applies-to>
+      </pattern>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Security Audit Event Patterns</section>
+        <reason>Audit event patterns for session rotation, revocation, and reuse detection logging.</reason>
+        <applies-to>task6</applies-to>
+      </pattern>
+      <pattern priority="MEDIUM">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Background Task Patterns</section>
+        <reason>Patterns for implementing background refresh scheduler with crash resilience.</reason>
+        <applies-to>task1,task2</applies-to>
+      </pattern>
+    </patterns>
+    
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/05-authentication-sessions.md</path>
+        <section>Session Management, Refresh Token Rotation, Logout</section>
+        <reason>Serverpod session management framework documentation. MUST READ for refresh token rotation, reuse detection, and secure logout implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+      <framework priority="HIGH">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>Session Service Development, Middleware</section>
+        <reason>Core Serverpod service development patterns for session endpoints.</reason>
+        <applies-to>task4,task5</applies-to>
+      </framework>
+      <framework priority="HIGH">
+        <name>BLoC</name>
+        <path>docs/frameworks/bloc-integration-guide.md</path>
+        <section>State Management, Event Handling</section>
+        <reason>Flutter BLoC integration patterns for session state transitions and refresh event flows.</reason>
+        <applies-to>task1,task3</applies-to>
+      </framework>
+      <framework priority="HIGH">
+        <name>Redis</name>
+        <path>docs/frameworks/redis-patterns-guide.md</path>
+        <section>Token Blacklisting, Session Storage</section>
+        <reason>Redis patterns for token blacklisting, refresh metadata storage, and fast session lookups.</reason>
+        <applies-to>task2,task4,task5</applies-to>
+      </framework>
+      <framework priority="HIGH">
+        <name>PostgreSQL</name>
+        <path>docs/frameworks/postgresql-patterns-guide.md</path>
+        <section>Session Storage, Token Repository</section>
+        <reason>Database patterns for refresh token storage, device fingerprinting, and audit trails.</reason>
+        <applies-to>task5</applies-to>
+      </framework>
+    </frameworks>
+    
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/authentication.md</path>
+        <section>Session Management, Token Refresh Troubleshooting</section>
+        <reason>Operational procedures for session management, refresh token issues, and logout workflows.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+      <runbook priority="MEDIUM">
+        <path>docs/runbooks/code-generation-workflow.md</path>
+        <section>Serverpod Code Generation, Database Migrations</section>
+        <reason>Code generation procedures for Serverpod session models and refresh token repository migrations.</reason>
+        <applies-to>task4,task5</applies-to>
+      </runbook>
+      <runbook priority="MEDIUM">
+        <path>docs/runbooks/metric-interpretation.md</path>
+        <section>Authentication Metrics, Performance Monitoring</section>
+        <reason>Interpreting refresh latency metrics, failure rates, and performance monitoring dashboards.</reason>
+        <applies-to>task7</applies-to>
+      </runbook>
+    </runbooks>
+    
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including SEC-003 JWT Token Management, refresh token rotation, reuse detection, and token blacklisting requirements</decision>
+        <reason>Defines MANDATORY security requirements for session management. Refresh token security, reuse detection, and account lockout policies are non-negotiable.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+      <adr priority="HIGH">
+        <number>ADR-0002</number>
+        <path>docs/architecture/adr/ADR-0002-flutter-serverpod-architecture.md</path>
+        <decision>Flutter + Serverpod architecture stack</decision>
+        <reason>Foundational architecture decision explaining the Flutter/Serverpod session integration approach.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+      <adr priority="HIGH">
+        <number>ADR-0007</number>
+        <path>docs/architecture/adr/ADR-0007-state-management.md</path>
+        <decision>BLoC for state management</decision>
+        <reason>State management approach for handling session refresh states and events in Flutter app.</reason>
+        <applies-to>task1,task3</applies-to>
+      </adr>
+      <adr priority="HIGH">
+        <number>ADR-0008</number>
+        <path>docs/architecture/adr/ADR-0008-api-design.md</path>
+        <decision>RESTful API design principles</decision>
+        <reason>API contract design standards for refresh and logout endpoint implementation.</reason>
+        <applies-to>task4</applies-to>
+      </adr>
+      <adr priority="HIGH">
+        <number>ADR-0010</number>
+        <path>docs/architecture/adr/ADR-0010-observability-strategy.md</path>
+        <decision>Observability strategy including session metrics and security monitoring</decision>
+        <reason>Monitoring strategy for refresh latency, failure rates, and reuse detection alerting.</reason>
+        <applies-to>task6,task7</applies-to>
+      </adr>
+      <adr priority="HIGH">
+        <number>ADR-0006</number>
+        <path>docs/architecture/adr/ADR-0006-modular-monolith.md</path>
+        <decision>Modular monolith with clear module boundaries</decision>
+        <reason>Package structure and module organization principles.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>SEC-003: JWT Token Management, Refresh Token Rotation</section>
+        <applies-to>task1,task2,task4,task5,task10</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Refresh Token Reuse Detection</section>
+        <applies-to>task4,task5</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Token Blacklisting, Secure Logout</section>
+        <applies-to>task3,task4</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Device Fingerprinting, Session Metadata</section>
+        <applies-to>task4,task5</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

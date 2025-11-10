@@ -1,32 +1,117 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="7-1-video-capture-import-with-security-controls" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="7-1-maker-story-capture-editing-tools" generated="2025-11-10">
   <metadata>
     <epic>7</epic>
     <story>1</story>
-    <title>Video Capture Import With Security Controls</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/7.1.maker-story-capture-editing-tools.md</story-file>
+    <title>Story 7-1: Maker Story Capture &amp; Editing Tools with Carousel Support</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/7-1-maker-story-capture-editing-tools.md</story-file>
     <epic-context>docs/epic-7-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-7.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to video capture import with security controls</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>maker</as-a>
+    <i-want>functionality described in story</i-want>
+    <so-that>I can create compelling multi-perspective product stories without leaving the app</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">In-app video capture with multi-clip recording for carousel (3-7 videos), exposure/focus controls, and secure local encryption of raw footage until upload completion.</criterion>
+    <criterion id="ac2">Carousel creation interface allowing makers to assign context labels ("In Use," "Details," "Making Process," "Variations," custom) to 3-7 video clips with drag-to-reorder and set primary video.</criterion>
+    <criterion id="ac3">Timeline editor with drag-to-reorder clips, split/trim functionality, frame-accurate preview transitions, and real-time performance optimization for mobile devices.</criterion>
+    <criterion id="ac4">Caption editor with manual text input, styling options (font, size, position), time-synchronized display, and auto-save after each edit with conflict resolution.</criterion>
+    <criterion id="ac5">Process Timeline journal interface for makers to log development entries with photos, sketches, text notes, and timestamps in chronological vertical-scroll format.</criterion>
+    <criterion id="ac6">Import pipeline supporting device gallery access with format validation (MP4, MOV, H.264), DRM content warnings, and secure temporary storage processing.</criterion>
+    <criterion id="ac7">Draft autosave system with local encrypted storage, incremental sync to cloud, device conflict resolution, and recovery from interruption during editing.</criterion>
+    <criterion id="ac8">Mobile performance optimization maintaining 60fps timeline scrubbing, memory-efficient video processing, background rendering, and adaptive quality for device capabilities.</criterion>
+    <criterion id="ac9">Integration with content pipeline including metadata tagging, preview generation, publishing workflow handoff, and compliance with media protection standards.</criterion>
+    <criterion id="ac10">**PERFORMANCE CRITICAL**: Ensure smooth timeline interaction with &lt;100ms response time for trim/split operations and &lt;500ms clip loading on mid-tier mobile devices.</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>PERFORMANCE CRITICAL - PERF-001: Implement optimized video capture service with multi-clip recording and device-adaptive encoding</description>
+      <acceptance-criteria>ac1,ac6</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>PERFORMANCE CRITICAL - PERF-001: Implement secure local encryption for raw video footage</description>
+      <acceptance-criteria>ac1,ac5</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>SECURITY CRITICAL - SEC-002: Implement format validation and DRM detection for imported media</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>PERFORMANCE CRITICAL - PERF-001: Implement memory-efficient video processing pipeline</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Implement timeline editor with drag-to-reorder, split/trim, and frame-accurate preview using Flutter performance patterns</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Implement caption editor with text styling, positioning, and time synchronization using shared design tokens</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Implement draft autosave system with incremental sync and conflict resolution</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Connect capture and editing tools to media pipeline service with secure upload and processing</description>
+      <acceptance-criteria>ac7</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Implement publishing workflow handoff with draft review and status management</description>
+      <acceptance-criteria>ac7</acceptance-criteria>
+    </task>
+    <task id="task10">
+      <description>Optimize timeline interaction for 60fps performance with &lt;100ms response time</description>
+      <acceptance-criteria>ac6,ac8</acceptance-criteria>
+    </task>
+    <task id="task11">
+      <description>Implement adaptive UI for different device sizes and orientations</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task12">
+      <description>Emit comprehensive analytics events for story creation workflow using analytics service</description>
+      <acceptance-criteria>ac2,ac3,ac4</acceptance-criteria>
+    </task>
+    <task id="task13">
+      <description>Implement comprehensive error handling with user-friendly recovery options</description>
+      <acceptance-criteria>ac1,ac4,ac5</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 01.1 – Bootstrap Repository and Flutter App</prerequisite>
+    <prerequisite>Story 1.1 – Implement Email OTP Sign-In (for secure maker sessions)</prerequisite>
+    <prerequisite>Story 6.1 – Media Pipeline &amp; MVP Content Protection (upload + signed URL contracts)</prerequisite>
+    <prerequisite>Device security baseline (camera permissions and encryption guidance) from `docs/architecture/security-configuration.md`</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-7.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-7-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-7.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-7-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +119,69 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test In-app video capture with multi-clip recording for...</test-case>
+      <test-case ac="ac2">Test Carousel creation interface allowing makers to ass...</test-case>
+      <test-case ac="ac3">Test Timeline editor with drag-to-reorder clips, split/...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Video Pipeline, Content Security</section>
+        <reason>Video and content processing patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/incident-response.md</path>
+        <section>ALL</section>
+        <reason>Incident response procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including content security</decision>
+        <reason>Security requirements for content processing.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Content Security, Access Controls</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

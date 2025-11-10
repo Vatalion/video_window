@@ -1,5 +1,8 @@
 # Story 03-3: Data Retention & Backup Procedures
 
+## Status
+ready-for-dev
+
 **Epic:** 03 - Observability & Compliance  
 **Story ID:** 03-3  
 **Status:** Ready for Development

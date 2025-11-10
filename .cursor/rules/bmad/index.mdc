@@ -6,6 +6,24 @@ alwaysApply: true
 
 # BMAD Method - Cursor Rules Index
 
+## Project Documentation Quick Links
+
+### Serverpod Framework
+- **Main Guide**: `docs/frameworks/serverpod/README.md`
+- **Setup**: `docs/frameworks/serverpod/01-setup-installation.md`
+- **Structure**: `docs/frameworks/serverpod/02-project-structure.md`
+- **Code Gen**: `docs/frameworks/serverpod/03-code-generation.md`
+- **Migrations**: `docs/frameworks/serverpod/04-database-migrations.md`
+- **Auth**: `docs/frameworks/serverpod/05-authentication-sessions.md`
+
+### Architecture Decisions
+- **Serverpod Auth Analysis**: `docs/architecture/serverpod-auth-module-analysis.md`
+- **Security Architecture**: `docs/architecture/adr/ADR-0009-security-architecture.md`
+
+---
+
+# BMAD Method - Cursor Rules Index
+
 This is the master index for all BMAD agents, tasks, tools, and workflows available in your project.
 
 ## Installation Complete!

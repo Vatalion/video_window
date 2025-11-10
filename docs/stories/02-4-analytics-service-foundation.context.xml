@@ -1,32 +1,58 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="02-4-analytics-service-foundation" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="02-4-analytics-service-foundation" generated="2025-11-10">
   <metadata>
     <epic>02</epic>
     <story>4</story>
-    <title>Analytics Service Foundation</title>
+    <title>Story 02-4: Analytics Service Foundation</title>
     <status>ready-for-dev</status>
     <story-file>docs/stories/02-4-analytics-service-foundation.md</story-file>
     <epic-context>docs/epic-02-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-02.md</tech-spec>
   </metadata>
   <user-story>
     <as-a>user</as-a>
-    <i-want>to analytics service foundation</i-want>
-    <so-that>the system meets requirements</so-that>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Analytics service interface defined</criterion>
+    <criterion id="ac2">Event schema documented</criterion>
+    <criterion id="ac3">BigQuery integration planned</criterion>
+    <criterion id="ac4">Privacy controls implemented</criterion>
+    <criterion id="ac5">Example events instrumented</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement core functionality</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-2.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-2-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-02.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-02-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +60,73 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test See story file for complete acceptance criteria...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="CRITICAL">
+        <path>docs/analytics.md</path>
+        <section>ALL</section>
+        <reason>Complete analytics strategy and event schema. Primary reference.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for analytics service.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Analytics Event Patterns</section>
+        <reason>Standard analytics instrumentation patterns.</reason>
+        <applies-to>task1</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="HIGH">
+        <name>BigQuery</name>
+        <path>docs/frameworks/bigquery-analytics-guide.md</path>
+        <section>ALL</section>
+        <reason>BigQuery integration patterns for analytics.</reason>
+        <applies-to>task1</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/data-classification.md</path>
+        <section>ALL</section>
+        <reason>Data classification requirements for analytics privacy controls.</reason>
+        <applies-to>task1</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="HIGH">
+        <number>ADR-0010</number>
+        <path>docs/architecture/adr/ADR-0010-observability-strategy.md</path>
+        <decision>Observability and analytics strategy</decision>
+        <reason>Analytics architecture and implementation approach.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/privacy-policy.md</path>
+        <section>Analytics and Data Collection</section>
+        <applies-to>task1</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

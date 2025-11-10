@@ -1,32 +1,90 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="3-3-privacy-settings-and-controls" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="3-3-privacy-settings-and-controls" generated="2025-11-10">
   <metadata>
     <epic>3</epic>
     <story>3</story>
-    <title>Privacy Settings And Controls</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/3.3.privacy-settings-and-controls.md</story-file>
+    <title>Story 3-3: Privacy Settings &amp; Controls</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/3-3-privacy-settings-and-controls.md</story-file>
     <epic-context>docs/epic-3-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-3.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to privacy settings and controls</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>privacy-conscious viewer</as-a>
+    <i-want>granular control over who can see my information and how my data is used</i-want>
+    <so-that>I can manage compliance preferences and protect my personal data.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Privacy settings page surfaces profile visibility, data sharing, tagging, search-by-phone, and marketing consent toggles with descriptive helper text. [Source: docs/tech-spec-epic-3.md#implementation-guide]</criterion>
+    <criterion id="ac2">Saving privacy settings instantly updates server values and returns the effective configuration; UI confirms success and rolls back on failure. [Source: docs/tech-spec-epic-3.md#profile-management-flow]</criterion>
+    <criterion id="ac3">`PrivacyManager` enforces visibility rules for public, friends-only, and private queries including blocked user lists. [Source: docs/tech-spec-epic-3.md#privacy-settings-entity]</criterion>
+    <criterion id="ac4">**COMPLIANCE CRITICAL**: Consent changes generate audit log entries and emit analytics event `privacy_settings_changed`. [Source: docs/tech-spec-epic-3.md#analytics-events]</criterion>
+    <criterion id="ac5">DSAR export/delete actions reference latest privacy settings and require explicit confirmation modal before proceeding. [Source: docs/tech-spec-epic-3.md#implementation-guide]</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Create `privacy_settings_page.dart` with grouped toggles, inline learn-more links, and WCAG-compliant contrast.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Build `privacy_toggle_tile.dart` widget for reusable switches + compliance copy.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Extend `ProfileBloc` with `PrivacySettingsSubmitted` event and success/error states; connect to DSAR CTA.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Implement `privacy_manager.dart` applying business rules for visibility, blocked users, and consent toggles.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Update `profile_endpoint.dart` to persist privacy settings and emit audit log + segment event.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Add integration test `privacy_visiblity_enforcement_test.dart` ensuring correct data filtering.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Emit `privacy_settings_changed` event with `setting_name`, `old_value`, `new_value`.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Record audit entries in `privacy_audit_log` table (migration add) with actor, change summary, timestamp.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 3.1 – Viewer Profile Management</prerequisite>
+    <prerequisite>Epic 2 – RBAC enforcement in place for ownership validation.</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-3.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-3-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-3.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-3-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +92,75 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test Privacy settings page surfaces profile visibility,...</test-case>
+      <test-case ac="ac2">Test Saving privacy settings instantly updates server v...</test-case>
+      <test-case ac="ac3">Test `PrivacyManager` enforces visibility rules for pub...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for privacy controls implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Privacy Controls, Consent Management</section>
+        <reason>Privacy control and consent management patterns.</reason>
+        <applies-to>task4,task5</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>Data Access, Audit Logging</section>
+        <reason>Data access enforcement and audit logging.</reason>
+        <applies-to>task4,task5,task8</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/consent-management.md</path>
+        <section>ALL</section>
+        <reason>Consent management procedures. MUST READ.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/data-classification.md</path>
+        <section>Privacy Enforcement</section>
+        <reason>Privacy enforcement and data classification.</reason>
+        <applies-to>task4,task6</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including privacy controls</decision>
+        <reason>Privacy control requirements and enforcement.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/compliance-guide.md</path>
+        <section>GDPR, CCPA, Consent Management</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

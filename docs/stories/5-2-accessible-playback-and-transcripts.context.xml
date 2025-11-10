@@ -1,32 +1,98 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="5-2-accessible-playback-transcripts" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="5-2-accessible-playback-and-transcripts" generated="2025-11-10">
   <metadata>
     <epic>5</epic>
     <story>2</story>
-    <title>Accessible Playback Transcripts</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/5.2.accessible-playback-and-transcripts.md</story-file>
+    <title>Story 5-2: Accessible Playback &amp; Transcripts</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/5-2-accessible-playback-and-transcripts.md</story-file>
     <epic-context>docs/epic-5-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-5.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to accessible playback transcripts</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>viewer who relies on accessibility features</as-a>
+    <i-want>captions</i-want>
+    <so-that>I can fully consume story content regardless of my accessibility needs</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Closed captions support at least English, Spanish, and French tracks with ability to toggle per user session and styling that meets WCAG 2.1 AA contrast requirements.</criterion>
+    <criterion id="ac2">Transcript panel renders synchronized cues with keyboard navigation (Tab/Shift+Tab, Arrow keys), search filtering, and click-to-seek back into the video.</criterion>
+    <criterion id="ac3">Screen reader announcements cover playback state changes, section navigation, and transcript selection using localized messaging.</criterion>
+    <criterion id="ac4">Keyboard shortcuts (Space, Arrow Left/Right, Arrow Up/Down, `C`, `F`) control playback, seeking, volume, captions, and fullscreen as defined in the spec without conflicting with OS reserved keys.</criterion>
+    <criterion id="ac5">High contrast mode and reduced motion preferences are auto-detected from system settings and applied without requiring a restart.</criterion>
+    <criterion id="ac6">Accessibility assets (captions/transcripts) are cached offline per story for 24 hours with eviction when storage exceeds 50MB.</criterion>
+    <criterion id="ac7">Analytics events `story_caption_toggled` and `story_transcript_viewed` emit with required attributes (`storyId`, `language`, `wasEnabled`, `searchTerm`, `userAccessibilityProfile`).</criterion>
+    <criterion id="ac8">Axe-core CI job (`story_accessibility_checks.yaml`) and widget tests pass with zero violations; manual QA confirms compliance using VoiceOver/TalkBack.</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement `prepare_accessibility_assets_use_case.dart` to fetch caption and transcript assets, persisting to secure storage with 24h TTL</description>
+      <acceptance-criteria>ac1,ac2,ac6</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Create `accessibility/caption_service.dart` for WebVTT parsing, styling, and language switching</description>
+      <acceptance-criteria>ac1,ac7</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Build `transcript_panel.dart` widget with synchronized cue highlighting, search box, and keyboard nav traps</description>
+      <acceptance-criteria>ac2,ac4</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Enhance `story_video_player.dart` controls for screen reader labels, high contrast themes, and reduced motion toggles</description>
+      <acceptance-criteria>ac3,ac5</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Implement keyboard shortcut handler referencing spec key map, including conflict detection with OS shortcuts</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Create `story_accessibility_page.dart` debug surface toggled from developer menu to visualize captions, transcript sync, and focus order</description>
+      <acceptance-criteria>ac8</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Extend `story_event_sink.dart` to publish `story_caption_toggled` and `story_transcript_viewed` schemas with defined attributes</description>
+      <acceptance-criteria>ac7</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Configure CI workflow `story_accessibility_checks.yaml` to run axe-core Flutter driver tests nightly</description>
+      <acceptance-criteria>ac8</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Document VoiceOver/TalkBack manual QA steps in `testing/manual/accessibility-story.md`</description>
+      <acceptance-criteria>ac8</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 5.1 – Story Detail Page Implementation (layout and base player shell)</prerequisite>
+    <prerequisite>Epic 6 Story 6.1 – Media Pipeline Content Protection (ensures caption track availability)</prerequisite>
+    <prerequisite>Accessibility guidelines outlined in `accessibility/accessibility-guide.md`</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-5.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-5-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-5.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-5-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +100,69 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test Closed captions support at least English, Spanish,...</test-case>
+      <test-case ac="ac2">Test Transcript panel renders synchronized cues with ke...</test-case>
+      <test-case ac="ac3">Test Screen reader announcements cover playback state c...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Video Pipeline, Content Security</section>
+        <reason>Video and content processing patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/incident-response.md</path>
+        <section>ALL</section>
+        <reason>Incident response procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including content security</decision>
+        <reason>Security requirements for content processing.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Content Security, Access Controls</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

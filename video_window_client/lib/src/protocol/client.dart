@@ -63,6 +63,39 @@ class EndpointAuth extends _i1.EndpointRef {
       );
 }
 
+/// Endpoint for exposing Prometheus metrics
+///
+/// Provides /metrics endpoint that returns Prometheus-formatted metrics
+/// for scraping by Prometheus server.
+/// {@category Endpoint}
+class EndpointMetrics extends _i1.EndpointRef {
+  EndpointMetrics(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'metrics';
+
+  /// Export metrics in Prometheus text format
+  ///
+  /// GET /metrics
+  /// Returns: text/plain with Prometheus metrics
+  _i2.Future<String> getMetrics() => caller.callServerEndpoint<String>(
+        'metrics',
+        'getMetrics',
+        {},
+      );
+
+  /// Health check endpoint
+  ///
+  /// GET /metrics/health
+  /// Returns: JSON with status
+  _i2.Future<Map<String, dynamic>> getHealth() =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'metrics',
+        'getHealth',
+        {},
+      );
+}
+
 /// Offer submission endpoint for marketplace
 /// Placeholder for Epic 9 - Offer Submission
 /// {@category Endpoint}
@@ -215,6 +248,7 @@ class Client extends _i1.ServerpodClientShared {
         ) {
     health = EndpointHealth(this);
     auth = EndpointAuth(this);
+    metrics = EndpointMetrics(this);
     offer = EndpointOffer(this);
     order = EndpointOrder(this);
     payment = EndpointPayment(this);
@@ -225,6 +259,8 @@ class Client extends _i1.ServerpodClientShared {
   late final EndpointHealth health;
 
   late final EndpointAuth auth;
+
+  late final EndpointMetrics metrics;
 
   late final EndpointOffer offer;
 
@@ -240,6 +276,7 @@ class Client extends _i1.ServerpodClientShared {
   Map<String, _i1.EndpointRef> get endpointRefLookup => {
         'health': health,
         'auth': auth,
+        'metrics': metrics,
         'offer': offer,
         'order': order,
         'payment': payment,

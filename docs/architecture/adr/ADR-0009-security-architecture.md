@@ -8,6 +8,8 @@
 ## Context
 The video marketplace platform handles sensitive user data, financial transactions, and valuable intellectual property (video content). We need a comprehensive security architecture that protects against common threats while maintaining usability and performance. This includes user authentication, data protection, payment security, and content protection requirements.
 
+**Note (2025-11-10):** Authentication implementation uses custom OTP-based system rather than Serverpod's built-in auth module. See [`serverpod-auth-module-analysis.md`](../serverpod-auth-module-analysis.md) for detailed rationale.
+
 ## Decision
 Implement a defense-in-depth security architecture with multiple layers of protection: authentication & authorization, data encryption, payment security (PCI compliance), content protection, and comprehensive monitoring. This approach provides robust security while meeting regulatory requirements and business needs.
 

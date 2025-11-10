@@ -1,32 +1,108 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="7-3-draft-autosave-sync-system" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="7-3-draft-autosave-and-sync-system" generated="2025-11-10">
   <metadata>
     <epic>7</epic>
     <story>3</story>
-    <title>Draft Autosave Sync System</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/7.3.draft-autosave-and-sync-system.md</story-file>
+    <title>Story 7-3: Draft Autosave &amp; Sync System</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/7-3-draft-autosave-and-sync-system.md</story-file>
     <epic-context>docs/epic-7-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-7.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to draft autosave sync system</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>platform reliability engineer</as-a>
+    <i-want>resilient draft autosave</i-want>
+    <so-that>makers never lose editing progress and can seamlessly collaborate across devices.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Autosave cadence runs every 20 seconds (configurable via `AUTO_SAVE_INTERVAL_SECONDS`) persisting encrypted snapshots to Drift-backed storage with version numbers. *(Ref: docs/tech-spec-epic-7.md – Environment Configuration, Implementation Guide §3)*</criterion>
+    <criterion id="ac2">Draft sync communicates with Serverpod `draft_endpoint.dart`, exchanging version vectors and detecting conflicts; conflicts surface UI prompts via `draft_sync_bloc`. *(Ref: docs/tech-spec-epic-7.md – Source Tree &amp; File Directives, Implementation Guide §3)*</criterion>
+    <criterion id="ac3">Conflict resolution uses three-way merge with audit logging; resolved drafts emit analytics event `maker_draft_resolved` and create history entries. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §3, Monitoring &amp; Analytics)*</criterion>
+    <criterion id="ac4">Autosave latency p95 ≤ 250ms and sync success ≥ 99% tracked through Datadog metrics `maker.draft.autosave_latency_ms` and `maker.capture.success_rate`. *(Ref: docs/tech-spec-epic-7.md – Monitoring &amp; Analytics)*</criterion>
+    <criterion id="ac5">Offline resilience ensures edits queue locally and replay once connectivity returns, with backoff/retry policy and end-to-end tests. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §3)*</criterion>
+    <criterion id="ac6">Drift schema (`draft_database.dart`) migrates existing draft data without loss and exposes migrations tested in staging. *(Ref: docs/tech-spec-epic-7.md – Source Tree &amp; File Directives)*</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Create Drift schema `draft_database.dart` mirroring spec tables, including migrations for legacy SQLite data. *(Ref: docs/tech-spec-epic-7.md – Source Tree &amp; File Directives)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Update `draft_repository.dart` to use Drift DAOs, encryption via `local_encryption_service.dart`, and LRU cleanup of stale drafts. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §3)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Implement autosave scheduler in `draft_sync_bloc.dart` using `AUTO_SAVE_INTERVAL_SECONDS` and device profiling for throttle adjustments. *(Ref: docs/tech-spec-epic-7.md – Environment Configuration)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Emit Datadog metric `maker.draft.autosave_latency_ms` and Segment event `maker_draft_autosaved` with payload (version, clip count). *(Ref: docs/tech-spec-epic-7.md – Monitoring &amp; Analytics)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Extend Serverpod `draft_endpoint.dart` to accept version vectors, detection flags, and return conflict payloads. *(Ref: docs/tech-spec-epic-7.md – Source Tree &amp; File Directives)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Implement `resolve_draft_conflict_use_case.dart` using three-way merge strategy; add unit tests for clip merges, caption merges, and simultaneous edits. *(Ref: docs/tech-spec-epic-7.md – Implementa...</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Build UI flow in `draft_sync_bloc` and maker studio page for conflict toast, comparison view, and manual selection. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §3)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Log conflicts to Kibana via structured logs and emit Segment `maker_draft_conflict_detected`. *(Ref: docs/tech-spec-epic-7.md – Monitoring &amp; Analytics)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Add queued sync transactions with exponential backoff, dedupe, and jitter; verify offline-first behaviour via integration tests. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §3)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task10">
+      <description>Update `maker_studio_checks.yaml` to run conflict simulation suite and offline replay tests. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §4)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task11">
+      <description>Document runbook `docs/runbooks/maker-studio.md` for autosave failures, conflicts, and remediation steps. *(Ref: docs/tech-spec-epic-7.md – Implementation Guide §5)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task12">
+      <description>Ensure GDPR/CCPA compliance for draft data retention and deletion workflows. *(Ref: docs/compliance/data-retention.md)*</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 7.1 – Maker Story Capture &amp; Editing Tools (baseline capture data model).</prerequisite>
+    <prerequisite>Story 7.2 – Timeline Editing &amp; Captioning Implementation (timeline surface &amp; analytics hooks).</prerequisite>
+    <prerequisite>Serverpod infrastructure for drafts (`story/draft` endpoints) provisioned per Epic 7 spec.</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-7.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-7-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-7.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-7-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +110,69 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test Autosave cadence runs every 20 seconds (configurab...</test-case>
+      <test-case ac="ac2">Test Draft sync communicates with Serverpod `draft_endp...</test-case>
+      <test-case ac="ac3">Test Conflict resolution uses three-way merge with audi...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Video Pipeline, Content Security</section>
+        <reason>Video and content processing patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/incident-response.md</path>
+        <section>ALL</section>
+        <reason>Incident response procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including content security</decision>
+        <reason>Security requirements for content processing.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Content Security, Access Controls</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

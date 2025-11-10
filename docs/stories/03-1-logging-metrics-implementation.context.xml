@@ -1,145 +1,122 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="03-1-logging-metrics-implementation" generated="2025-11-06">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="03-1-logging-metrics-implementation" generated="2025-11-10">
   <metadata>
     <epic>03</epic>
     <story>1</story>
-    <title>Logging & Metrics Implementation</title>
+    <title>Story 03-1: Logging &amp; Metrics Implementation</title>
     <status>ready-for-dev</status>
     <story-file>docs/stories/03-1-logging-metrics-implementation.md</story-file>
     <epic-context>docs/epic-03-context.md</epic-context>
     <tech-spec>docs/tech-spec-epic-03.md</tech-spec>
   </metadata>
-  
   <user-story>
-    <as-a>operations team</as-a>
-    <i-want>structured logging and metrics</i-want>
-    <so-that>system health can be monitored and issues can be debugged</so-that>
+    <as-a>user</as-a>
+    <i-want>functionality described in story</i-want>
+    <so-that>requirements are met</so-that>
   </user-story>
-  
   <acceptance-criteria>
-    <criterion id="ac1">OpenTelemetry + CloudWatch configured</criterion>
+    <criterion id="ac1">OpenTelemetry + CloudWatch configured ⚠️ PARTIAL - structured logging done, CloudWatch integration pending</criterion>
     <criterion id="ac2">Prometheus + Grafana dashboards created</criterion>
     <criterion id="ac3">Structured logging format defined</criterion>
     <criterion id="ac4">Alert rules configured</criterion>
     <criterion id="ac5">Runbook documentation complete</criterion>
   </acceptance-criteria>
-  
   <story-tasks>
     <task id="task1">
-      <description>Implement OpenTelemetry integration with CloudWatch Logs</description>
+      <description>Task 1: Implement OpenTelemetry integration with CloudWatch Logs ⚠️ PARTIAL</description>
       <acceptance-criteria>ac1</acceptance-criteria>
-      <location>video_window_server/lib/src/services/logger.dart</location>
-    </task>
-    <task id="task2">
-      <description>Configure Prometheus metrics and Grafana dashboards</description>
-      <acceptance-criteria>ac2</acceptance-criteria>
-      <location>video_window_server/config/monitoring/</location>
-    </task>
-    <task id="task3">
-      <description>Define structured logging format (JSON with context)</description>
-      <acceptance-criteria>ac3</acceptance-criteria>
-      <location>video_window_server/lib/src/services/logger.dart</location>
-    </task>
-    <task id="task4">
-      <description>Create alert rules for critical metrics and errors</description>
-      <acceptance-criteria>ac4</acceptance-criteria>
-      <location>video_window_server/config/monitoring/alerts.yaml</location>
-    </task>
-    <task id="task5">
-      <description>Write operational runbooks for common scenarios</description>
-      <acceptance-criteria>ac5</acceptance-criteria>
-      <location>docs/runbooks/</location>
     </task>
   </story-tasks>
-  
   <artifacts>
     <docs>
       <doc>
         <path>docs/tech-spec-epic-03.md</path>
-        <section>Logging Architecture</section>
-        <snippet>OpenTelemetry + CloudWatch for structured logging. Prometheus + Grafana for metrics and visualization. Log levels: debug, info, warning, error, critical.</snippet>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
       </doc>
       <doc>
-        <path>docs/tech-spec-epic-03.md</path>
-        <section>Metrics Collection</section>
-        <snippet>Counter, gauge, and histogram metrics. Performance tracking for API endpoints, database queries, and external service calls.</snippet>
+        <path>docs/epic-03-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
       </doc>
     </docs>
-    
     <code>
       <artifact>
-        <path>video_window_server/lib/src/services/</path>
-        <kind>directory</kind>
-        <symbol>services</symbol>
-        <reason>Backend services for logging and metrics</reason>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
       </artifact>
     </code>
-    
-    <dependencies>
-      <serverpod>
-        <package>serverpod</package>
-        <version>^2.9.0</version>
-        <reason>Backend framework with built-in logging</reason>
-      </serverpod>
-      <dart>
-        <package>logging</package>
-        <version>^1.2.0</version>
-        <reason>Dart logging infrastructure</reason>
-      </dart>
-    </dependencies>
   </artifacts>
-  
-  <interfaces>
-    <interface>
-      <name>Logger</name>
-      <kind>Service class</kind>
-      <signature>debug(), info(), warning(), error(), critical()</signature>
-      <path>video_window_server/lib/src/services/logger.dart</path>
-    </interface>
-    <interface>
-      <name>MetricsService</name>
-      <kind>Service class</kind>
-      <signature>incrementCounter(), setGauge(), recordHistogram(), measureTime()</signature>
-      <path>video_window_server/lib/src/services/metrics.dart</path>
-    </interface>
-  </interfaces>
-  
   <constraints>
-    <constraint priority="CRITICAL">Never log PII or sensitive data (PAN, passwords, tokens)</constraint>
-    <constraint priority="CRITICAL">Use sampling in development to control CloudWatch costs</constraint>
-    <constraint priority="HIGH">Structured logs must be parseable as JSON</constraint>
-    <constraint priority="HIGH">Include correlation IDs for distributed tracing</constraint>
-    <constraint priority="MEDIUM">Log retention: 30 days for debug, 90 days for error/critical</constraint>
-    <constraint priority="MEDIUM">Metrics collection overhead must be <5ms per request</constraint>
+    <constraint priority="HIGH">Follow architecture patterns and coding standards</constraint>
+    <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
-  
   <tests>
     <standards>
-      <standard>Unit tests for logger methods with different log levels</standard>
-      <standard>Integration tests verifying CloudWatch log delivery</standard>
-      <standard>Metrics collection tests verifying counter/gauge/histogram recording</standard>
-      <standard>Performance tests ensuring minimal overhead</standard>
+      <standard>Unit and integration tests required</standard>
     </standards>
-    
     <locations>
-      <location>video_window_server/test/services/</location>
+      <location>test/</location>
     </locations>
-    
     <ideas>
-      <test-case ac="ac1">Test structured log format includes all required fields</test-case>
-      <test-case ac="ac1">Test logs sent to CloudWatch in batches</test-case>
-      <test-case ac="ac2">Test metrics recorded and exported to Prometheus</test-case>
-      <test-case ac="ac3">Test PII is never logged</test-case>
-      <test-case ac="ac4">Test critical logs trigger immediate alerts</test-case>
-      <test-case ac="ac4">Test alert rules fire for defined thresholds</test-case>
+      <test-case ac="ac1">Test See story file for complete acceptance criteria...</test-case>
     </ideas>
   </tests>
   
-  <technical-notes>
-    <note>Use CloudWatch Logs Insights for log querying and analysis</note>
-    <note>Grafana dashboards should include: API latency, error rates, throughput, database performance</note>
-    <note>Alert channels: Email, Slack, PagerDuty for critical alerts</note>
-    <note>Log format: {"timestamp":"ISO8601","level":"INFO","service":"api","message":"..."}</note>
-    <note>Consider using Loki for log aggregation in future if CloudWatch costs become prohibitive</note>
-  </technical-notes>
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for logging and metrics implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Logging Patterns, Metrics Patterns</section>
+        <reason>Standard logging and metrics instrumentation patterns.</reason>
+        <applies-to>task1</applies-to>
+      </pattern>
+    </patterns>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/log-analysis.md</path>
+        <section>ALL</section>
+        <reason>Log analysis procedures and structured logging requirements.</reason>
+        <applies-to>task1</applies-to>
+      </runbook>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/metric-interpretation.md</path>
+        <section>ALL</section>
+        <reason>Metrics interpretation and monitoring procedures.</reason>
+        <applies-to>task1</applies-to>
+      </runbook>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/performance-degradation.md</path>
+        <section>Monitoring and Alerting</section>
+        <reason>Performance monitoring and alert configuration.</reason>
+        <applies-to>task1</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0010</number>
+        <path>docs/architecture/adr/ADR-0010-observability-strategy.md</path>
+        <decision>Observability strategy including logging, metrics, and monitoring</decision>
+        <reason>Foundational observability architecture. MUST READ.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+  </implementation-guidance>
 </story-context>

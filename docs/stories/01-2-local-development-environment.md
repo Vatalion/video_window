@@ -1,5 +1,8 @@
 # Story 01-2: Local Development Environment
 
+## Status
+ready-for-dev
+
 **Epic:** 01 - Environment & CI/CD Setup  
 **Story ID:** 01-2  
 **Status:** Done

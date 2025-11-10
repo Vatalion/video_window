@@ -1,32 +1,97 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="13.3.delivery-confirmation-flow" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="13-3-delivery-confirmation-flow" generated="2025-11-10">
   <metadata>
     <epic>13</epic>
     <story>3</story>
-    <title>Delivery Confirmation Flow</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/13.3.delivery-confirmation-flow.md</story-file>
+    <title>Story 13-3: Delivery Confirmation Flow</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/13-3-delivery-confirmation-flow.md</story-file>
     <epic-context>docs/epic-13-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-13.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>functionality described in story</i-want>
-    <so-that>requirements are met</so-that>
+    <as-a>buyer</as-a>
+    <i-want>to confirm receipt of my order and provide feedback</i-want>
+    <so-that>the transaction can be completed and the maker can be paid</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Buyer receives notification when package is delivered (carrier confirmation) with delivery timestamp, photo proof (if available), and confirmation prompt.</criterion>
+    <criterion id="ac2">Buyer can mark order as received within app with optional rating/feedback and confirmation that item matches description and condition.</criterion>
+    <criterion id="ac3">**BUSINESS CRITICAL**: Order auto-completes 7 days after delivery if no issues reported, triggering payment release to maker and closing transaction lifecycle.</criterion>
+    <criterion id="ac4">Buyer can report delivery issues before auto-completion with issue categorization (not received, damaged, wrong item, quality issue) and evidence upload.</criterion>
+    <criterion id="ac5">Maker receives notification when order is marked complete with buyer feedback, final payment release confirmation, and transaction summary.</criterion>
+    <criterion id="ac6">**BUSINESS CRITICAL**: Payment is released to maker after completion confirmation via Stripe Connect transfer with 2-3 business day deposit timeline and fee deduction.</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Process carrier delivery webhook events</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Create buyer delivery notification</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Build in-app delivery confirmation interface</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>BUSINESS CRITICAL: Implement 7-day auto-completion timer</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Build maker completion notification</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>BUSINESS CRITICAL: Implement payment release via Stripe Connect</description>
+      <acceptance-criteria>ac6</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Add "Report Issue" option before auto-completion</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Hold payment pending issue resolution</description>
+      <acceptance-criteria>ac4,ac6</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Integrate with customer support escalation</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 13.2 – Tracking Integration System (delivery event tracking and status updates)</prerequisite>
+    <prerequisite>Story 12.1 – Stripe Checkout Integration (payment capture and Connect setup)</prerequisite>
+    <prerequisite>Story 11.1 – Notification System (delivery and completion notifications)</prerequisite>
+    <prerequisite>Story 13.4 – Shipping Issue Resolution (issue reporting and escalation workflow)</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-13.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-13-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-13.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-13-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +99,74 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test Buyer receives notification when package is delive...</test-case>
+      <test-case ac="ac2">Test Buyer can mark order as received within app with o...</test-case>
+      <test-case ac="ac3">Test **BUSINESS CRITICAL**: Order auto-completes 7 days...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>ALL</section>
+        <reason>Implementation patterns and best practices.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/incident-response.md</path>
+        <section>ALL</section>
+        <reason>Incident response and monitoring procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture and compliance requirements</decision>
+        <reason>Security and compliance requirements.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>ALL</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+      <requirement priority="HIGH">
+        <path>docs/compliance/compliance-guide.md</path>
+        <section>ALL</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

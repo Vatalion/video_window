@@ -1,32 +1,94 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="12.4.receipt-generation-and-storage" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="12-4-receipt-generation-and-storage" generated="2025-11-10">
   <metadata>
     <epic>12</epic>
     <story>4</story>
-    <title>Receipt Generation and Storage</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/12.4.receipt-generation-and-storage.md</story-file>
+    <title>Story 12-4: Receipt Generation and Storage</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/12-4-receipt-generation-and-storage.md</story-file>
     <epic-context>docs/epic-12-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-12.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>functionality described in story</i-want>
-    <so-that>requirements are met</so-that>
+    <as-a>buyer and maker</as-a>
+    <i-want>a detailed digital receipt after payment success</i-want>
+    <so-that>both parties can keep verifiable records of the transaction.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">**RECEIPT RENDERING**: `receipt_generation_service.dart` produces branded PDF receipts using template `RECEIPT_TEMPLATE_VERSION` and stores output in S3 bucket `craft-video-receipts-${ENV}` encrypted with KMS key `payments-receipts`. (Implementation Guide §4)</criterion>
+    <criterion id="ac2">**DELIVERY**: `payment_receipt_endpoint.dart` issues signed CloudFront URLs valid for 24 hours, and `fetch_receipt_use_case.dart` retrieves/caches metadata for the client. (Implementation Guide §4)</criterion>
+    <criterion id="ac3">**AUDIT &amp; ANALYTICS**: Receipt records persisted via `receipt_repository.dart` with sequential IDs from `receipt_number_generator.dart`, logging Segment event `payments.receipt.generated` and Datadog metric `payments.receipt.render_time_ms`. (Implementation Guide §4, Monitoring &amp; Analytics)</criterion>
+    <criterion id="ac4">**RUNBOOK LINK**: Runbook `docs/runbooks/stripe-payments.md` updated with receipt troubleshooting steps, and dashboard widgets tracking receipt successes/failures referenced in `docs/analytics/stripe-payments-dashboard.md`. (Implementation Guide §4)</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Implement `receipt_number_generator.dart` for deterministic sequencing (`RCPT-${YYYY}${NNNNN}`).</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Build `receipt_generation_service.dart` using `pdfx` templates to render localized receipts and upload to S3 with Object Lock + metadata.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Create `receipt_repository.dart` storing receipt metadata, buyer/maker IDs, and Stripe fee breakdown.</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Add `payment_receipt_endpoint.dart` returning signed CloudFront URL + hash for cache validation.</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Implement `fetch_receipt_use_case.dart` and UI component `payment_receipt_card.dart` to display summary and download CTA.</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Update `payment_status_page.dart` to surface receipt info post-success and provide resend link.</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Emit Datadog metric `payments.receipt.render_time_ms` and `payments.receipt.error_count`, plus Segment event `payments.receipt.generated` with `receipt_number`, `amount_usd`, `currency`.</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Update `docs/analytics/stripe-payments-dashboard.md` + `docs/runbooks/stripe-payments.md` with receipt monitoring + troubleshooting steps.</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Tests: `receipt_generation_service_test.dart`, `receipt_repository_test.dart`, `payment_receipt_endpoint_test.dart`, `fetch_receipt_use_case_test.dart`, synthetic `payments_receipt_smoke_test.dart`.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 12.1 – Stripe Checkout Integration for completed transactions.</prerequisite>
+    <prerequisite>Story 12.3 – Payment Retry Mechanisms to propagate final success state.</prerequisite>
+    <prerequisite>S3 bucket + CloudFront distribution provisioned via `infrastructure/terraform/payments.tf`.</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-12.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-12-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-12.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-12-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +96,74 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test **RECEIPT RENDERING**: `receipt_generation_service...</test-case>
+      <test-case ac="ac2">Test **DELIVERY**: `payment_receipt_endpoint.dart` issu...</test-case>
+      <test-case ac="ac3">Test **AUDIT &amp; ANALYTICS**: Receipt records persisted v...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Payment Processing, Transaction Management</section>
+        <reason>Payment and transaction patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/payment-processing.md</path>
+        <section>ALL</section>
+        <reason>Payment processing and transaction procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including payment security</decision>
+        <reason>Payment security and PCI compliance requirements.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Payment Security, Transaction Security</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/compliance-guide.md</path>
+        <section>PCI DSS</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

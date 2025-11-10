@@ -1,5 +1,8 @@
 # Story 01-3: Code Generation Workflows
 
+## Status
+ready-for-dev
+
 **Epic:** 01 - Environment & CI/CD Setup  
 **Story ID:** 01-3  
 **Status:** Done

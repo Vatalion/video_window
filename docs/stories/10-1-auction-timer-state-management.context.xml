@@ -1,32 +1,100 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="10.1.auction-timer-state-management" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="10-1-auction-timer-state-management" generated="2025-11-10">
   <metadata>
     <epic>10</epic>
     <story>1</story>
-    <title>Auction Timer & State Management</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/10.1.auction-timer-state-management.md</story-file>
+    <title>Story 10-1: Auction Timer &amp; State Management</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/10-1-auction-timer-state-management.md</story-file>
     <epic-context>docs/epic-10-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-10.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>functionality described in story</i-want>
-    <so-that>requirements are met</so-that>
+    <as-a>marketplace participant (viewer</as-a>
+    <i-want>the auction timer to start</i-want>
+    <so-that>I can trust auction countdowns and react to bids without timing surprises</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">**TIMER CRITICAL**: Auction timers register automatically when Epic 9 emits `offers.auction.started`, storing start/end metadata in Redis with version control and recovering after restarts (Implementation Guide §1).</criterion>
+    <criterion id="ac2">**REAL-TIME CRITICAL**: `auction_timer_task` publishes WebSocket timer ticks every ≤15 seconds, and clients display countdowns with drift warning banner when deviation &gt;250ms (Implementation Guide §1).</criterion>
+    <criterion id="ac3">**BUSINESS CRITICAL**: Client timer bloc reconnects, rehydrates via `GET /auctions/{id}/timer`, and reconciles differences using monotonic clock + Datadog drift metrics (Implementation Guide §1).</criterion>
+    <criterion id="ac4">**RELIABILITY CRITICAL**: Timer persistence survives Redis failover scenarios with background reconciliation job ensuring remaining duration accuracy ≤ ±5s across 100 concurrent auctions (Implementation Guide §1 &amp; §5).</criterion>
+    <criterion id="ac5">**OBSERVABILITY CRITICAL**: Datadog metrics `auctions.timer.drift_ms`, `auctions.timer.tick_delay_ms`, and Segment events `auction_timer_started`/`auction_timer_resynced` emit with trace IDs (Monitoring &amp; Analytics).</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>TIMER CRITICAL - TIMER-INIT: Register auction timers in Redis with versioned payload</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Build `auction_timer_scheduler.dart` &amp; `auction_timer_task.dart`</description>
+      <acceptance-criteria>ac1,ac2</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Update `auction_timer_bloc.dart` to reconcile ticks with monotonic clock</description>
+      <acceptance-criteria>ac2,ac3</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Refresh `auction_timer_page.dart` &amp; `auction_timer_banner.dart` UI</description>
+      <acceptance-criteria>ac2,ac3</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Implement `timer_reconciliation_service` baseline functions</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Wire analytics and monitoring hooks</description>
+      <acceptance-criteria>ac5</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Implement Flutter auction timer UI with BLoC state management using shared design tokens</description>
+      <acceptance-criteria>ac1,ac4</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Connect timer UI to Serverpod auction service via WebSocket and REST APIs</description>
+      <acceptance-criteria>ac1,ac2,ac4</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Implement timer accuracy monitoring and SLA compliance tracking</description>
+      <acceptance-criteria>ac8</acceptance-criteria>
+    </task>
+    <task id="task10">
+      <description>Comprehensive timer testing including precision, concurrency, and failure scenarios</description>
+      <acceptance-criteria>ac1,ac2,ac3,ac4,ac5,ac6,ac7,ac8</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 01.1 – Bootstrap Repository and Flutter App</prerequisite>
+    <prerequisite>Story 9.1 – Offer Submission Flow (auction activation event stream)</prerequisite>
+    <prerequisite>Redis + Serverpod cron infrastructure configured per `docs/architecture/message-queue-architecture.md`</prerequisite>
+    <prerequisite>Observability baseline (metrics/logging) established using `docs/runbooks/auction-timer.md`</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-10.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-10-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-10.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-10-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +102,74 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test **TIMER CRITICAL**: Auction timers register automa...</test-case>
+      <test-case ac="ac2">Test **REAL-TIME CRITICAL**: `auction_timer_task` publi...</test-case>
+      <test-case ac="ac3">Test **BUSINESS CRITICAL**: Client timer bloc reconnect...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Payment Processing, Transaction Management</section>
+        <reason>Payment and transaction patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/payment-processing.md</path>
+        <section>ALL</section>
+        <reason>Payment processing and transaction procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including payment security</decision>
+        <reason>Payment security and PCI compliance requirements.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Payment Security, Transaction Security</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/compliance-guide.md</path>
+        <section>PCI DSS</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

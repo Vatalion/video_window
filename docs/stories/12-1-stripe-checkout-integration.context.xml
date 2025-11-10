@@ -1,32 +1,94 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="12.1.stripe-checkout-integration" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="12-1-stripe-checkout-integration" generated="2025-11-10">
   <metadata>
     <epic>12</epic>
     <story>1</story>
-    <title>Stripe Checkout Integration</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/12.1.stripe-checkout-integration.md</story-file>
+    <title>Story 12-1: Stripe Checkout Integration</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/12-1-stripe-checkout-integration.md</story-file>
     <epic-context>docs/epic-12-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-12.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>functionality described in story</i-want>
-    <so-that>requirements are met</so-that>
+    <as-a>winning bidder</as-a>
+    <i-want>to finish paying through Stripe Checkout with Craft’s branded flow</i-want>
+    <so-that>my purchase stays secure and within the mandated 24-hour window.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">**PAYMENTS CRITICAL**: `payment_checkout_endpoint.dart` creates Stripe Checkout Sessions with idempotency key `auctionId:buyerId`, embeds metadata (`auction_id`, `buyer_id`, `payment_session_id`), and persists expiry in `payment_session_repository.dart`. (Implementation Guide §1)</criterion>
+    <criterion id="ac2">**WEBHOOK CRITICAL**: `stripe_checkout_webhook.dart` validates signatures via `webhook_signature_validator.dart`, updates payment session + transaction status, and logs Datadog metric `payments.checkout.session_completed`. (Implementation Guide §1, Monitoring &amp; Analytics)</criterion>
+    <criterion id="ac3">**CLIENT EXPERIENCE**: `payment_checkout_page.dart` launches hosted checkout using `flutter_stripe`, handles return/cancel URLs via `uni_links`, and renders countdown + security copy driven by `payment_bloc.dart`. (Implementation Guide §1)</criterion>
+    <criterion id="ac4">**ANALYTICS &amp; AUDIT**: Segment events `payments.checkout.started` / `completed` include `payment_session_id`, `auction_id`, `amount_usd`; audit trail entries `checkout_created` &amp; `checkout_completed` stored per session. (Implementation Guide §1, Monitoring &amp; Analytics)</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Update `payment_checkout_endpoint.dart` to call `stripe_service.dart`, enforce idempotency, persist session, and return checkout URL + expiry.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Expand `payment_session_repository.dart` with metadata upsert + expiry helpers; store Stripe checkout ID and timestamps.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Harden `stripe_checkout_webhook.dart` using `webhook_signature_validator.dart` for `checkout.session.completed` and `payment_intent.payment_failed`; create transaction records.</description>
+      <acceptance-criteria>ac2</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Implement `create_checkout_session_use_case.dart` to hit checkout API, cache `payment_session_id`, and emit analytics via `payments_metrics.dart`.</description>
+      <acceptance-criteria>ac1,ac4</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Update `payment_bloc.dart` and `payment_checkout_page.dart` to launch `flutter_stripe`, render countdown banner, and handle cancel/return flows with toast copy.</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Add Sentry breadcrumbs for checkout launch, completion, and cancellation events.</description>
+      <acceptance-criteria>ac3</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Emit Datadog events `payments.checkout.session_completed` / `failed` and wire to dashboard in `docs/analytics/stripe-payments-dashboard.md`.</description>
+      <acceptance-criteria>ac2,ac4</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Record audit entries `checkout_created` + `checkout_completed` for every session.</description>
+      <acceptance-criteria>ac4</acceptance-criteria>
+    </task>
+    <task id="task9">
+      <description>Add tests: `payment_checkout_endpoint_test.dart`, `stripe_service_test.dart`, `stripe_checkout_webhook_test.dart`, `payment_checkout_page_test.dart`.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 9.4 – Offer State Management supplies winning-offer payloads.</prerequisite>
+    <prerequisite>Story 10.3 – Auction State Transitions marks auction `accepted` before payment.</prerequisite>
+    <prerequisite>Stripe Connect account + webhook endpoint provisioned in `infrastructure/terraform/payments.tf`.</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-12.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-12-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-12.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-12-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +96,74 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test **PAYMENTS CRITICAL**: `payment_checkout_endpoint....</test-case>
+      <test-case ac="ac2">Test **WEBHOOK CRITICAL**: `stripe_checkout_webhook.dar...</test-case>
+      <test-case ac="ac3">Test **CLIENT EXPERIENCE**: `payment_checkout_page.dart...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="CRITICAL">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Payment Processing, Transaction Management</section>
+        <reason>Payment and transaction patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>ALL</section>
+        <reason>Serverpod implementation patterns.</reason>
+        <applies-to>ALL</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="CRITICAL">
+        <path>docs/runbooks/payment-processing.md</path>
+        <section>ALL</section>
+        <reason>Payment processing and transaction procedures.</reason>
+        <applies-to>ALL</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="CRITICAL">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including payment security</decision>
+        <reason>Payment security and PCI compliance requirements.</reason>
+        <applies-to>ALL</applies-to>
+      </adr>
+    </adrs>
+    <security>
+      <requirement priority="CRITICAL">
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <section>Payment Security, Transaction Security</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+      <requirement priority="CRITICAL">
+        <path>docs/compliance/compliance-guide.md</path>
+        <section>PCI DSS</section>
+        <applies-to>ALL</applies-to>
+      </requirement>
+    </security>
+  </implementation-guidance>
 </story-context>

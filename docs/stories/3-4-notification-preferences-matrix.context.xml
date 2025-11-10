@@ -1,32 +1,90 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<story-context id="3-4-notification-preferences" generated="2025-11-05">
+<?xml version="1.0" encoding="utf-8"?>
+<story-context id="3-4-notification-preferences-matrix" generated="2025-11-10">
   <metadata>
     <epic>3</epic>
     <story>4</story>
-    <title>Notification Preferences</title>
-    <status>ready-for-dev</status>
-    <story-file>docs/stories/3.4.notification-preferences-matrix.md</story-file>
+    <title>Story 3-4: Notification Preferences Matrix</title>
+    <status>Ready for Dev</status>
+    <story-file>docs/stories/3-4-notification-preferences-matrix.md</story-file>
     <epic-context>docs/epic-3-context.md</epic-context>
+    <tech-spec>docs/tech-spec-epic-3.md</tech-spec>
   </metadata>
   <user-story>
-    <as-a>user</as-a>
-    <i-want>to notification preferences</i-want>
-    <so-that>the system meets requirements</so-that>
+    <as-a>viewer</as-a>
+    <i-want>to configure which channels and frequencies I receive platform notifications</i-want>
+    <so-that>I stay informed without being overwhelmed.</so-that>
   </user-story>
   <acceptance-criteria>
-    <criterion id="ac1">See story file for complete acceptance criteria</criterion>
+    <criterion id="ac1">Notification preferences page renders matrix of notification types (offers, bids, orders, maker activity, security alerts) across email, push, and in-app channels with per-channel toggles. [Source: docs/tech-spec-epic-3.md#implementation-guide]</criterion>
+    <criterion id="ac2">Quiet hours editor lets users define daily start/end times (local timezone) and disables push/email delivery during that window. [Source: docs/tech-spec-epic-3.md#notification-preferences-entity]</criterion>
+    <criterion id="ac3">Preferences persist via `notification_manager.dart`, update Firebase topics, and sync to SendGrid suppression groups. [Source: docs/tech-spec-epic-3.md#source-tree--file-directives]</criterion>
+    <criterion id="ac4">**SECURITY CRITICAL**: Critical security alerts ignore quiet hours and cannot be disabled; UI communicates constraint. [Source: docs/tech-spec-epic-3.md#security-monitoring]</criterion>
+    <criterion id="ac5">Analytics event `notification_preferences_updated` fires with channel + frequency metadata, and audit trail stored. [Source: docs/tech-spec-epic-3.md#analytics-events]</criterion>
   </acceptance-criteria>
   <story-tasks>
-    <task id="task1"><description>Implement core functionality</description><acceptance-criteria>ac1</acceptance-criteria></task>
+    <task id="task1">
+      <description>Create `notification_preferences_page.dart` with tabular layout, quiet hours modal, and validation messaging.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task2">
+      <description>Build `notification_channel_row.dart` widget to render per-type channel toggles.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task3">
+      <description>Update `ProfileBloc` to handle `NotificationSettingsSubmitted` event and propagate success/failure states.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task4">
+      <description>Implement `notification_manager.dart` to persist preferences, manage quiet hours, and call Firebase/SendGrid integrations.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task5">
+      <description>Extend `profile_endpoint.dart` with `/notification-preferences` routes and enforce critical alert immutability.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task6">
+      <description>Add integration test `notification_preferences_sync_test.dart` ensuring external services update correctly.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task7">
+      <description>Configure Firebase Cloud Messaging topics per notification type; ensure device tokens stored with opt-in flags.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
+    <task id="task8">
+      <description>Map SendGrid categories to notification types and update suppression group IDs in configuration.</description>
+      <acceptance-criteria>ac1</acceptance-criteria>
+    </task>
   </story-tasks>
+  <prerequisites>
+    <prerequisite>Story 3.1 – Viewer Profile Management</prerequisite>
+    <prerequisite>Story 3.3 – Privacy Settings &amp; Controls (to align consent toggles)</prerequisite>
+  </prerequisites>
   <artifacts>
     <docs>
-      <doc><path>docs/tech-spec-epic-3.md</path><section>Technical Specification</section><snippet>Implementation details</snippet></doc>
-      <doc><path>docs/epic-3-context.md</path><section>Epic Context</section><snippet>Architecture and integration</snippet></doc>
+      <doc>
+        <path>docs/tech-spec-epic-3.md</path>
+        <section>Technical Specification</section>
+        <snippet>Implementation details</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-3-context.md</path>
+        <section>Epic Context</section>
+        <snippet>Architecture and integration</snippet>
+      </doc>
     </docs>
     <code>
-      <artifact><path>video_window_flutter/packages/features/</path><kind>feature</kind><symbol>code</symbol><reason>Feature code</reason></artifact>
-      <artifact><path>video_window_server/lib/src/endpoints/</path><kind>endpoint</kind><symbol>api</symbol><reason>Backend API</reason></artifact>
+      <artifact>
+        <path>video_window_flutter/packages/features/</path>
+        <kind>feature</kind>
+        <symbol>code</symbol>
+        <reason>Feature code</reason>
+      </artifact>
+      <artifact>
+        <path>video_window_server/lib/src/endpoints/</path>
+        <kind>endpoint</kind>
+        <symbol>api</symbol>
+        <reason>Backend API</reason>
+      </artifact>
     </code>
   </artifacts>
   <constraints>
@@ -34,8 +92,68 @@
     <constraint priority="MEDIUM">Maintain ≥80% test coverage</constraint>
   </constraints>
   <tests>
-    <standards><standard>Unit and integration tests required</standard></standards>
-    <locations><location>test/</location></locations>
-    <ideas><test-case ac="ac1">Happy path test</test-case></ideas>
+    <standards>
+      <standard>Unit and integration tests required</standard>
+    </standards>
+    <locations>
+      <location>test/</location>
+    </locations>
+    <ideas>
+      <test-case ac="ac1">Test Notification preferences page renders matrix of no...</test-case>
+      <test-case ac="ac2">Test Quiet hours editor lets users define daily start/e...</test-case>
+      <test-case ac="ac3">Test Preferences persist via `notification_manager.dart...</test-case>
+    </ideas>
   </tests>
+  
+  <!-- IMPLEMENTATION GUIDANCE: Added 2025-11-10 -->
+  <implementation-guidance>
+    <architecture>
+      <doc priority="HIGH">
+        <path>docs/architecture/coding-standards.md</path>
+        <section>ALL</section>
+        <reason>Code standards for notification preferences implementation.</reason>
+        <applies-to>ALL</applies-to>
+      </doc>
+      <doc priority="HIGH">
+        <path>docs/architecture/backend-architecture.md</path>
+        <section>Notification System</section>
+        <reason>Notification system architecture and integration.</reason>
+        <applies-to>task4,task5,task7,task8</applies-to>
+      </doc>
+    </architecture>
+    <patterns>
+      <pattern priority="HIGH">
+        <path>docs/architecture/pattern-library.md</path>
+        <section>Notification Management</section>
+        <reason>Notification preference management patterns.</reason>
+        <applies-to>task4,task5</applies-to>
+      </pattern>
+    </patterns>
+    <frameworks>
+      <framework priority="CRITICAL">
+        <name>Serverpod</name>
+        <path>docs/frameworks/serverpod/README.md</path>
+        <section>Push Notifications, Integration</section>
+        <reason>Serverpod notification integration.</reason>
+        <applies-to>task4,task5</applies-to>
+      </framework>
+    </frameworks>
+    <runbooks>
+      <runbook priority="HIGH">
+        <path>docs/runbooks/notification-delivery.md</path>
+        <section>ALL</section>
+        <reason>Notification delivery and preference enforcement.</reason>
+        <applies-to>task4,task7,task8</applies-to>
+      </runbook>
+    </runbooks>
+    <adrs>
+      <adr priority="HIGH">
+        <number>ADR-0009</number>
+        <path>docs/architecture/adr/ADR-0009-security-architecture.md</path>
+        <decision>Security architecture including notification security</decision>
+        <reason>Security requirements for notifications.</reason>
+        <applies-to>task4,task5</applies-to>
+      </adr>
+    </adrs>
+  </implementation-guidance>
 </story-context>
