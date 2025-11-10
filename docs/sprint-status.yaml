@@ -59,7 +59,7 @@ development_status:
   # Epic 03: Operational Foundation
   epic-03: contexted
   03-1-logging-metrics-implementation: done # ✅ Complete with all review feedback addressed
-  03-2-privacy-legal-disclosures: ready-for-dev
+  03-2-privacy-legal-disclosures: done
   03-3-data-retention-backup-procedures: ready-for-dev
   epic-03-retrospective: optional
 

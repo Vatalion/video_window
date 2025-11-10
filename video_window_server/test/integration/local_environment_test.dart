@@ -68,10 +68,9 @@ void main() {
       final dbUser = Platform.environment['POSTGRES_USER'] ?? 'postgres';
       final dbPassword = Platform.environment['POSTGRES_PASSWORD'];
 
-      // Skip test if not running with actual database
+      // Skip test if not running with actual database (needs POSTGRES_PASSWORD env var)
       if (dbPassword == null) {
-        print(
-            'Skipping PostgreSQL connection test - POSTGRES_PASSWORD not set');
+        // Test skipped - set POSTGRES_PASSWORD environment variable to run
         return;
       }
 

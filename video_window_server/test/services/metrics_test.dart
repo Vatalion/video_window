@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import '../../lib/src/services/metrics.dart';
+import 'package:video_window_server/src/services/metrics.dart';
 
 void main() {
   group('MetricsService', () {
