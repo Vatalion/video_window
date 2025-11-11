@@ -30,6 +30,7 @@ class FeedLoaded extends FeedState {
   final String? currentVisibleVideoId;
   final Map<String, bool> likedVideos; // videoId -> isLiked
   final Map<String, bool> wishlistedVideos; // videoId -> isInWishlist
+  final bool isBatterySaverMode; // AC5: Battery saver mode state
 
   const FeedLoaded({
     required this.videos,
@@ -41,6 +42,7 @@ class FeedLoaded extends FeedState {
     this.currentVisibleVideoId,
     this.likedVideos = const {},
     this.wishlistedVideos = const {},
+    this.isBatterySaverMode = false, // AC5: Default to false
   });
 
   FeedLoaded copyWith({
@@ -53,6 +55,7 @@ class FeedLoaded extends FeedState {
     String? currentVisibleVideoId,
     Map<String, bool>? likedVideos,
     Map<String, bool>? wishlistedVideos,
+    bool? isBatterySaverMode,
   }) {
     return FeedLoaded(
       videos: videos ?? this.videos,
@@ -65,6 +68,7 @@ class FeedLoaded extends FeedState {
           currentVisibleVideoId ?? this.currentVisibleVideoId,
       likedVideos: likedVideos ?? this.likedVideos,
       wishlistedVideos: wishlistedVideos ?? this.wishlistedVideos,
+      isBatterySaverMode: isBatterySaverMode ?? this.isBatterySaverMode,
     );
   }
 
@@ -82,6 +86,7 @@ class FeedLoaded extends FeedState {
         currentVisibleVideoId,
         likedVideos,
         wishlistedVideos,
+        isBatterySaverMode,
       ];
 }
 

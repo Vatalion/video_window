@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/repositories/feed_repository.dart';
-import '../../domain/entities/video.dart';
 import '../../domain/entities/video_interaction.dart';
 import 'feed_event.dart';
 import 'feed_state.dart';
@@ -30,6 +29,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     on<FeedVideoPlaybackStateChanged>(_onVideoPlaybackStateChanged);
     on<FeedToggleLike>(_onToggleLike);
     on<FeedToggleWishlist>(_onToggleWishlist);
+    on<FeedBatterySaverModeChanged>(_onBatterySaverModeChanged); // AC5
   }
 
   @override
@@ -259,5 +259,31 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       rollbackWishlistedVideos[event.videoId] = !event.isInWishlist;
       emit(currentState.copyWith(wishlistedVideos: rollbackWishlistedVideos));
     }
+  }
+
+  /// AC5: Handle battery saver mode changes
+  /// Disables auto-play and preloading when battery saver is active
+  Future<void> _onBatterySaverModeChanged(
+    FeedBatterySaverModeChanged event,
+    Emitter<FeedState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! FeedLoaded) return;
+
+    // AC5: Update battery saver mode state
+    // When battery saver is active, pause all videos and disable auto-play
+    final newPlaybackStates =
+        Map<String, bool>.from(currentState.videoPlaybackStates);
+    if (event.isBatterySaverMode) {
+      // Pause all videos when battery saver activates
+      for (final videoId in newPlaybackStates.keys) {
+        newPlaybackStates[videoId] = false;
+      }
+    }
+
+    emit(currentState.copyWith(
+      isBatterySaverMode: event.isBatterySaverMode,
+      videoPlaybackStates: newPlaybackStates,
+    ));
   }
 }

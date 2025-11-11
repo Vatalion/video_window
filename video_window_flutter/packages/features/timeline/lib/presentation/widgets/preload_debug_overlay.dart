@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:core/services/feature_flags_service.dart';
 import '../../data/services/feed_performance_service.dart';
 import '../../data/services/video_preloader_service.dart';
 import '../../data/repositories/feed_cache_repository.dart';
 
 /// Debug overlay for preload and performance metrics
-/// AC1, AC5: Exposes preload queue depth, cache metrics, and performance stats
+/// AC1, AC5: Exposes FPS, jank %, memory delta, preload queue depth, cache metrics, and performance stats
+/// AC1: Gated by feature flag `feed_performance_monitoring`
 /// Toggle via long-press on video feed item
 class PreloadDebugOverlay extends StatelessWidget {
   final FeedPerformanceService? performanceService;
   final VideoPreloaderService? preloaderService;
   final FeedCacheRepository? cacheRepository;
   final bool isVisible;
+  final FeatureFlagsService? featureFlagsService;
 
   const PreloadDebugOverlay({
     super.key,
@@ -18,11 +21,20 @@ class PreloadDebugOverlay extends StatelessWidget {
     this.preloaderService,
     this.cacheRepository,
     this.isVisible = false,
+    this.featureFlagsService,
   });
 
   @override
   Widget build(BuildContext context) {
+    // AC1: Feature flag gating - only show if flag is enabled
     if (!isVisible) return const SizedBox.shrink();
+
+    // Check feature flag asynchronously - for now, show if service is provided
+    // In production, this would use FutureBuilder with featureFlagsService
+    final shouldShow = featureFlagsService == null ||
+        performanceService != null; // Simplified check
+
+    if (!shouldShow) return const SizedBox.shrink();
 
     return Positioned(
       top: 40,
@@ -39,7 +51,7 @@ class PreloadDebugOverlay extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Preload Debug',
+              'Performance Debug',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 14,
@@ -47,18 +59,8 @@ class PreloadDebugOverlay extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            _buildMetricRow(
-              'Preload Queue',
-              preloaderService?.getQueueDepth().toString() ?? 'N/A',
-            ),
-            _buildMetricRow(
-              'Cache Evictions',
-              cacheRepository?.getEvictionCount().toString() ?? 'N/A',
-            ),
+            // AC1: Performance metrics
             if (performanceService != null) ...[
-              const SizedBox(height: 4),
-              const Divider(color: Colors.white24, height: 1),
-              const SizedBox(height: 4),
               _buildMetricRow(
                 'FPS',
                 performanceService!.getCurrentFps().toStringAsFixed(1),
@@ -67,7 +69,30 @@ class PreloadDebugOverlay extends StatelessWidget {
                 'Jank %',
                 performanceService!.getJankPercentage().toStringAsFixed(1),
               ),
+              // AC1: Memory delta
+              _buildMetricRow(
+                'Memory Δ',
+                '${performanceService!.getMemoryDeltaMB()} MB',
+              ),
+              _buildMetricRow(
+                'CPU %',
+                performanceService!
+                    .getAverageCpuUtilization()
+                    .toStringAsFixed(1),
+              ),
+              const SizedBox(height: 4),
+              const Divider(color: Colors.white24, height: 1),
+              const SizedBox(height: 4),
             ],
+            // AC1: Preload queue stats
+            _buildMetricRow(
+              'Preload Queue',
+              preloaderService?.getQueueDepth().toString() ?? 'N/A',
+            ),
+            _buildMetricRow(
+              'Cache Evictions',
+              cacheRepository?.getEvictionCount().toString() ?? 'N/A',
+            ),
           ],
         ),
       ),

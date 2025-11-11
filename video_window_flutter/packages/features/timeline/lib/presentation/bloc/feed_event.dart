@@ -106,3 +106,16 @@ class FeedToggleWishlist extends FeedEvent {
 class FeedRetryPagination extends FeedEvent {
   const FeedRetryPagination();
 }
+
+/// AC5: Battery saver mode changed
+/// Disables auto-play and preloading when battery saver is active
+class FeedBatterySaverModeChanged extends FeedEvent {
+  final bool isBatterySaverMode;
+
+  const FeedBatterySaverModeChanged({
+    required this.isBatterySaverMode,
+  });
+
+  @override
+  List<Object?> get props => [isBatterySaverMode];
+}

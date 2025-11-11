@@ -20,7 +20,16 @@ class BatteryService {
   }
 
   /// Check if battery saver mode is active
-  bool get isBatterySaverMode => _currentState == BatteryState.charging;
+  /// AC5: Battery saver mode detection for auto-play/prefetch disabling
+  /// Note: battery_plus doesn't directly expose battery saver mode, so we use
+  /// low battery level (< 20%) as a proxy. For true battery saver detection,
+  /// platform channels would be needed.
+  Future<bool> isBatterySaverMode() async {
+    final level = await _battery.batteryLevel;
+    // Consider battery saver active if battery is low (< 20%) or discharging
+    // In production, this should use platform channels for true battery saver detection
+    return level < 20 || _currentState == BatteryState.discharging;
+  }
 
   /// Check if battery is low
   Future<bool> isBatteryLow() async {

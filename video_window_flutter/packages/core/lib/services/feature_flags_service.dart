@@ -19,6 +19,9 @@ class FeatureFlags {
   static const String analyticsEnabled = 'analytics_enabled';
   static const String crashReportingEnabled = 'crash_reporting_enabled';
 
+  // Feed performance features
+  static const String feedPerformanceMonitoring = 'feed_performance_monitoring';
+
   /// All available feature flags with their default values
   static const Map<String, bool> defaults = {
     socialLoginEnabled: false,
@@ -30,6 +33,8 @@ class FeatureFlags {
     pushNotificationsEnabled: true,
     analyticsEnabled: true,
     crashReportingEnabled: true,
+    feedPerformanceMonitoring:
+        false, // AC1: Disabled by default, enable via feature flag
   };
 }
 

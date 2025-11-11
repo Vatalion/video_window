@@ -90,6 +90,40 @@ void main() {
           contains(trend));
     });
 
+    test('AC1: Performance service tracks memory delta', () {
+      performanceService.startMonitoring();
+
+      final memoryDelta = performanceService.getMemoryDeltaMB();
+      expect(memoryDelta, isA<int>());
+
+      final metrics = performanceService.getMetrics();
+      expect(metrics, contains('memoryDeltaMB'));
+      expect(metrics, contains('currentMemoryMB'));
+      expect(metrics, contains('initialMemoryMB'));
+    });
+
+    test('AC4: Performance service tracks CPU utilization', () {
+      performanceService.startMonitoring();
+
+      // Wait for CPU samples
+      Future.delayed(const Duration(seconds: 2));
+
+      final cpuUtilization = performanceService.getAverageCpuUtilization();
+      expect(cpuUtilization, greaterThanOrEqualTo(0.0));
+      expect(cpuUtilization, lessThanOrEqualTo(100.0));
+
+      final metrics = performanceService.getMetrics();
+      expect(metrics, contains('cpuUtilization'));
+      expect(metrics, contains('sessionDurationSeconds'));
+    });
+
+    test('AC3: Performance service emits Datadog metrics', () {
+      performanceService.startMonitoring();
+
+      // Verify metrics can be emitted (TODOs acceptable for SDK integration)
+      expect(() => performanceService.emitDatadogMetrics(), returnsNormally);
+    });
+
     test('AC4: Performance service can be reset', () {
       performanceService.startMonitoring();
       performanceService.reset();

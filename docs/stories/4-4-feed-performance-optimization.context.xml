@@ -115,7 +115,7 @@
         <applies-to>ALL</applies-to>
       </doc>
       <doc priority="HIGH">
-        <path>docs/architecture/frontend-architecture.md</path>
+        <path>docs/architecture/front-end-architecture.md</path>
         <section>Performance, State Management</section>
         <reason>Feed performance and state management patterns.</reason>
         <applies-to>ALL</applies-to>

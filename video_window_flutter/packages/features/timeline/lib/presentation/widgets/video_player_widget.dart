@@ -31,6 +31,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   VideoPlayerController? _controller;
   bool _isInitialized = false;
   bool _hasError = false;
+  DateTime? _wakelockAcquiredTime; // AC4: Track wakelock acquisition time
 
   @override
   void initState() {
@@ -62,6 +63,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       _controller!.setLooping(true);
 
       // PERF-002: Keep screen awake during playback
+      // AC4: Track wakelock acquisition time for release timing validation
+      _wakelockAcquiredTime = DateTime.now();
       await WakelockPlus.enable();
 
       if (mounted) {
@@ -103,6 +106,18 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     // AC1: Only dispose if we created it (not preloaded)
     if (widget.preloadedController == null) {
       _controller?.dispose();
+    }
+
+    // AC4: Release wakelock and validate timing (must be within 3 seconds)
+    if (_wakelockAcquiredTime != null) {
+      final releaseTime = DateTime.now();
+      final duration = releaseTime.difference(_wakelockAcquiredTime!);
+      // AC4: Validate wakelock release timing
+      if (duration.inSeconds > 3) {
+        // Log warning if wakelock held too long (would use proper logging in production)
+        debugPrint(
+            '[WARNING] Wakelock held for ${duration.inSeconds}s (target: <3s)');
+      }
     }
     WakelockPlus.disable();
     super.dispose();
