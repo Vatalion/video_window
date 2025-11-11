@@ -3,6 +3,10 @@ health:
 auth:
   - sendOtp:
   - verifyOtp:
+  - refresh:
+  - logout:
+  - verifyAppleToken:
+  - verifyGoogleToken:
 metrics:
   - getMetrics:
   - getHealth:

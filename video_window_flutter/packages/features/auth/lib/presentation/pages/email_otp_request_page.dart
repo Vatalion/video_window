@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../lib/presentation/bloc/auth_bloc.dart';
 import 'otp_verification_page.dart';
+import '../widgets/social_sign_in_buttons.dart';
+import '../widgets/social_sign_in_service.dart';
 
 /// Email OTP Request Page
 /// First step in OTP authentication - user enters email
+/// Includes social sign-in options (Apple & Google)
 class EmailOtpRequestPage extends StatefulWidget {
   const EmailOtpRequestPage({Key? key}) : super(key: key);
 
@@ -15,7 +18,14 @@ class EmailOtpRequestPage extends StatefulWidget {
 class _EmailOtpRequestPageState extends State<EmailOtpRequestPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
+  late final SocialSignInService _socialSignInService;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _socialSignInService = SocialSignInService();
+  }
 
   @override
   void dispose() {
@@ -64,6 +74,15 @@ class _EmailOtpRequestPageState extends State<EmailOtpRequestPage> {
                   email: state.email,
                   expiresIn: state.expiresIn,
                 ),
+              ),
+            );
+          } else if (state is AuthAuthenticated) {
+            // Social sign-in succeeded, navigate to home
+            // TODO: Navigate to home page
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Signed in successfully!'),
+                backgroundColor: Colors.green,
               ),
             );
           } else if (state is AuthError) {
@@ -122,7 +141,7 @@ class _EmailOtpRequestPageState extends State<EmailOtpRequestPage> {
 
                       // Subtitle
                       Text(
-                        'Enter your email to receive a one-time password',
+                        'Sign in to start exploring',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               color: Colors.grey[600],
                             ),
@@ -130,6 +149,29 @@ class _EmailOtpRequestPageState extends State<EmailOtpRequestPage> {
                       ),
 
                       const SizedBox(height: 48),
+
+                      // Social sign-in buttons
+                      SocialSignInButtons(
+                        socialSignInService: _socialSignInService,
+                        onFallbackToEmail: () {
+                          // Focus email input if social auth fails/cancelled
+                          FocusScope.of(context).requestFocus(
+                            FocusNode(),
+                          );
+                        },
+                      ),
+
+                      // Email OTP section header
+                      Text(
+                        'Or continue with email',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      const SizedBox(height: 16),
 
                       // Email input
                       TextFormField(

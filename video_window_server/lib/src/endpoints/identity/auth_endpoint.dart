@@ -3,6 +3,7 @@ import '../../services/auth/otp_service.dart';
 import '../../services/auth/rate_limit_service.dart';
 import '../../services/auth/account_lockout_service.dart';
 import '../../services/auth/jwt_service.dart';
+import '../../services/auth/social_auth_service.dart';
 import '../../generated/auth/user.dart';
 import '../../generated/auth/session.dart';
 
@@ -372,6 +373,226 @@ class AuthEndpoint extends Endpoint {
         'success': false,
         'error': 'INTERNAL_ERROR',
         'message': 'Logout failed. Please try again.',
+      };
+    }
+  }
+
+  /// Verify Apple Sign-In token and create/link account
+  /// Implements account reconciliation to prevent duplicates
+  Future<Map<String, dynamic>> verifyAppleToken(
+    Session session,
+    String idToken, {
+    String? deviceId,
+  }) async {
+    try {
+      if (idToken.isEmpty) {
+        return {
+          'success': false,
+          'error': 'INVALID_TOKEN',
+          'message': 'Apple ID token is required',
+        };
+      }
+
+      final socialAuthService = SocialAuthService(session);
+
+      // Verify Apple ID token
+      final socialAuth = await socialAuthService.verifyAppleToken(idToken);
+
+      if (socialAuth == null) {
+        return {
+          'success': false,
+          'error': 'INVALID_TOKEN',
+          'message': 'Failed to verify Apple ID token',
+        };
+      }
+
+      // Reconcile account (find existing or create new)
+      final user = await socialAuthService.reconcileAccount(socialAuth);
+
+      // Generate JWT tokens (same as email OTP flow)
+      final jwtService = JwtService(session);
+      await jwtService.initialize();
+
+      final sessionId = _generateSessionId();
+      final actualDeviceId = deviceId ?? _generateDeviceId();
+      final ipAddress = _getClientIp(session);
+
+      final accessToken = await jwtService.generateAccessToken(
+        userId: user.id!,
+        email: user.email!,
+        deviceId: actualDeviceId,
+        sessionId: sessionId,
+      );
+
+      final refreshToken = await jwtService.generateRefreshToken(
+        userId: user.id!,
+        email: user.email!,
+        deviceId: actualDeviceId,
+        sessionId: sessionId,
+      );
+
+      // Create session record
+      final userSession = UserSession(
+        userId: user.id!,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        deviceId: actualDeviceId,
+        ipAddress: ipAddress,
+        accessTokenExpiry: DateTime.now().add(Duration(minutes: 15)),
+        refreshTokenExpiry: DateTime.now().add(Duration(days: 30)),
+        isRevoked: false,
+        createdAt: DateTime.now(),
+        lastUsedAt: DateTime.now(),
+      );
+
+      await UserSession.db.insertRow(session, userSession);
+
+      session.log(
+        'Apple Sign-In successful: ${user.email} (userId: ${user.id})',
+        level: LogLevel.info,
+      );
+
+      return {
+        'success': true,
+        'message': 'Apple Sign-In successful',
+        'provider': 'apple',
+        'user': {
+          'id': user.id,
+          'email': user.email,
+          'createdAt': user.createdAt.toIso8601String(),
+        },
+        'tokens': {
+          'accessToken': accessToken,
+          'refreshToken': refreshToken,
+          'expiresIn': 900, // 15 minutes
+        },
+        'session': {
+          'sessionId': sessionId,
+          'deviceId': actualDeviceId,
+        },
+      };
+    } catch (e, stackTrace) {
+      session.log(
+        'Failed to verify Apple token: $e',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: stackTrace,
+      );
+
+      return {
+        'success': false,
+        'error': 'INTERNAL_ERROR',
+        'message': 'Apple Sign-In failed. Please try again.',
+      };
+    }
+  }
+
+  /// Verify Google Sign-In token and create/link account
+  /// Implements account reconciliation to prevent duplicates
+  Future<Map<String, dynamic>> verifyGoogleToken(
+    Session session,
+    String idToken, {
+    String? deviceId,
+  }) async {
+    try {
+      if (idToken.isEmpty) {
+        return {
+          'success': false,
+          'error': 'INVALID_TOKEN',
+          'message': 'Google ID token is required',
+        };
+      }
+
+      final socialAuthService = SocialAuthService(session);
+
+      // Verify Google ID token
+      final socialAuth = await socialAuthService.verifyGoogleToken(idToken);
+
+      if (socialAuth == null) {
+        return {
+          'success': false,
+          'error': 'INVALID_TOKEN',
+          'message': 'Failed to verify Google ID token',
+        };
+      }
+
+      // Reconcile account (find existing or create new)
+      final user = await socialAuthService.reconcileAccount(socialAuth);
+
+      // Generate JWT tokens (same as email OTP flow)
+      final jwtService = JwtService(session);
+      await jwtService.initialize();
+
+      final sessionId = _generateSessionId();
+      final actualDeviceId = deviceId ?? _generateDeviceId();
+      final ipAddress = _getClientIp(session);
+
+      final accessToken = await jwtService.generateAccessToken(
+        userId: user.id!,
+        email: user.email!,
+        deviceId: actualDeviceId,
+        sessionId: sessionId,
+      );
+
+      final refreshToken = await jwtService.generateRefreshToken(
+        userId: user.id!,
+        email: user.email!,
+        deviceId: actualDeviceId,
+        sessionId: sessionId,
+      );
+
+      // Create session record
+      final userSession = UserSession(
+        userId: user.id!,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        deviceId: actualDeviceId,
+        ipAddress: ipAddress,
+        accessTokenExpiry: DateTime.now().add(Duration(minutes: 15)),
+        refreshTokenExpiry: DateTime.now().add(Duration(days: 30)),
+        isRevoked: false,
+        createdAt: DateTime.now(),
+        lastUsedAt: DateTime.now(),
+      );
+
+      await UserSession.db.insertRow(session, userSession);
+
+      session.log(
+        'Google Sign-In successful: ${user.email} (userId: ${user.id})',
+        level: LogLevel.info,
+      );
+
+      return {
+        'success': true,
+        'message': 'Google Sign-In successful',
+        'provider': 'google',
+        'user': {
+          'id': user.id,
+          'email': user.email,
+          'createdAt': user.createdAt.toIso8601String(),
+        },
+        'tokens': {
+          'accessToken': accessToken,
+          'refreshToken': refreshToken,
+          'expiresIn': 900, // 15 minutes
+        },
+        'session': {
+          'sessionId': sessionId,
+          'deviceId': actualDeviceId,
+        },
+      };
+    } catch (e, stackTrace) {
+      session.log(
+        'Failed to verify Google token: $e',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: stackTrace,
+      );
+
+      return {
+        'success': false,
+        'error': 'INTERNAL_ERROR',
+        'message': 'Google Sign-In failed. Please try again.',
       };
     }
   }

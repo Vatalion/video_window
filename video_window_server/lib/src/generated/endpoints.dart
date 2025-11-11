@@ -122,6 +122,11 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<String>(),
               nullable: false,
             ),
+            'deviceId': _i1.ParameterDescription(
+              name: 'deviceId',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
           },
           call: (
             _i1.Session session,
@@ -131,6 +136,97 @@ class Endpoints extends _i1.EndpointDispatch {
             session,
             params['email'],
             params['code'],
+            deviceId: params['deviceId'],
+          ),
+        ),
+        'refresh': _i1.MethodConnector(
+          name: 'refresh',
+          params: {
+            'refreshToken': _i1.ParameterDescription(
+              name: 'refreshToken',
+              type: _i1.getType<String>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint).refresh(
+            session,
+            params['refreshToken'],
+          ),
+        ),
+        'logout': _i1.MethodConnector(
+          name: 'logout',
+          params: {
+            'accessToken': _i1.ParameterDescription(
+              name: 'accessToken',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'refreshToken': _i1.ParameterDescription(
+              name: 'refreshToken',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint).logout(
+            session,
+            params['accessToken'],
+            params['refreshToken'],
+          ),
+        ),
+        'verifyAppleToken': _i1.MethodConnector(
+          name: 'verifyAppleToken',
+          params: {
+            'idToken': _i1.ParameterDescription(
+              name: 'idToken',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'deviceId': _i1.ParameterDescription(
+              name: 'deviceId',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint).verifyAppleToken(
+            session,
+            params['idToken'],
+            deviceId: params['deviceId'],
+          ),
+        ),
+        'verifyGoogleToken': _i1.MethodConnector(
+          name: 'verifyGoogleToken',
+          params: {
+            'idToken': _i1.ParameterDescription(
+              name: 'idToken',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'deviceId': _i1.ParameterDescription(
+              name: 'deviceId',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint).verifyGoogleToken(
+            session,
+            params['idToken'],
+            deviceId: params['deviceId'],
           ),
         ),
       },

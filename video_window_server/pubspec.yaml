@@ -16,6 +16,9 @@ dependencies:
   jose: ^0.3.5
   pointycastle: ^4.0.0
   asn1lib: ^1.6.5
+  
+  # Social auth token verification
+  http: ^1.1.0  # For Apple/Google token verification API calls
   # OpenTelemetry for distributed tracing (experimental - Dart support is limited)
   # opentelemetry: ^0.18.0  # Commented until full integration needed
   # AWS SDK for CloudWatch Logs (production logging)

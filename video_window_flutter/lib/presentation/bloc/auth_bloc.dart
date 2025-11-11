@@ -54,6 +54,24 @@ class AuthSignOutRequested extends AuthEvent {
   const AuthSignOutRequested();
 }
 
+class AuthAppleSignInRequested extends AuthEvent {
+  final String idToken;
+
+  const AuthAppleSignInRequested({required this.idToken});
+
+  @override
+  List<Object?> get props => [idToken];
+}
+
+class AuthGoogleSignInRequested extends AuthEvent {
+  final String idToken;
+
+  const AuthGoogleSignInRequested({required this.idToken});
+
+  @override
+  List<Object?> get props => [idToken];
+}
+
 // States
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -142,6 +160,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthOtpVerifyRequested>(_onOtpVerifyRequested);
     on<AuthRefreshRequested>(_onRefreshRequested);
     on<AuthSignOutRequested>(_onSignOutRequested);
+    on<AuthAppleSignInRequested>(_onAppleSignInRequested);
+    on<AuthGoogleSignInRequested>(_onGoogleSignInRequested);
   }
 
   Future<void> _onCheckRequested(
@@ -317,6 +337,72 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       // Even if backend call fails, clear local storage
       await _tokenStorage.clearSession();
       emit(const AuthUnauthenticated());
+    }
+  }
+
+  Future<void> _onAppleSignInRequested(
+    AuthAppleSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+
+    try {
+      final result = await _authRepository.verifyAppleToken(
+        idToken: event.idToken,
+      );
+
+      if (result.success) {
+        // Store tokens securely
+        await _tokenStorage.saveAuthSession(
+          accessToken: result.tokens!.accessToken,
+          refreshToken: result.tokens!.refreshToken,
+          userId: result.user!.id,
+          deviceId: result.session!.deviceId,
+          sessionId: result.session!.sessionId,
+        );
+
+        emit(AuthAuthenticated(user: result.user!));
+      } else {
+        emit(AuthError(
+          message: result.message ?? 'Failed to sign in with Apple',
+          errorCode: result.error,
+        ));
+      }
+    } catch (e) {
+      emit(AuthError(message: 'Failed to sign in with Apple: $e'));
+    }
+  }
+
+  Future<void> _onGoogleSignInRequested(
+    AuthGoogleSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+
+    try {
+      final result = await _authRepository.verifyGoogleToken(
+        idToken: event.idToken,
+      );
+
+      if (result.success) {
+        // Store tokens securely
+        await _tokenStorage.saveAuthSession(
+          accessToken: result.tokens!.accessToken,
+          refreshToken: result.tokens!.refreshToken,
+          userId: result.user!.id,
+          deviceId: result.session!.deviceId,
+          sessionId: result.session!.sessionId,
+        );
+
+        emit(AuthAuthenticated(user: result.user!));
+      } else {
+        emit(AuthError(
+          message: result.message ?? 'Failed to sign in with Google',
+          errorCode: result.error,
+        ));
+      }
+    } catch (e) {
+      emit(AuthError(message: 'Failed to sign in with Google: $e'));
     }
   }
 }

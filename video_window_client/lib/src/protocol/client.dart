@@ -32,7 +32,7 @@ class EndpointHealth extends _i1.EndpointRef {
 }
 
 /// Authentication endpoint for user identity management
-/// Placeholder for Epic 1 - Viewer Authentication
+/// Implements Epic 1 - Viewer Authentication with full security controls
 /// {@category Endpoint}
 class EndpointAuth extends _i1.EndpointRef {
   EndpointAuth(_i1.EndpointCaller caller) : super(caller);
@@ -40,7 +40,8 @@ class EndpointAuth extends _i1.EndpointRef {
   @override
   String get name => 'auth';
 
-  /// Placeholder: Send OTP for email authentication
+  /// Send OTP for email authentication
+  /// Rate limited: 3 requests/5min per email
   _i2.Future<Map<String, dynamic>> sendOtp(String email) =>
       caller.callServerEndpoint<Map<String, dynamic>>(
         'auth',
@@ -48,17 +49,73 @@ class EndpointAuth extends _i1.EndpointRef {
         {'email': email},
       );
 
-  /// Placeholder: Verify OTP and create session
+  /// Verify OTP and create authenticated session
+  /// Account lockout after failed attempts: 3→5min, 5→30min, 10→1hr, 15→24hr
   _i2.Future<Map<String, dynamic>> verifyOtp(
     String email,
-    String code,
-  ) =>
+    String code, {
+    String? deviceId,
+  }) =>
       caller.callServerEndpoint<Map<String, dynamic>>(
         'auth',
         'verifyOtp',
         {
           'email': email,
           'code': code,
+          'deviceId': deviceId,
+        },
+      );
+
+  /// Refresh access token using refresh token
+  /// Implements token rotation with reuse detection
+  _i2.Future<Map<String, dynamic>> refresh(String refreshToken) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'auth',
+        'refresh',
+        {'refreshToken': refreshToken},
+      );
+
+  /// Logout and blacklist tokens
+  _i2.Future<Map<String, dynamic>> logout(
+    String accessToken,
+    String refreshToken,
+  ) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'auth',
+        'logout',
+        {
+          'accessToken': accessToken,
+          'refreshToken': refreshToken,
+        },
+      );
+
+  /// Verify Apple Sign-In token and create/link account
+  /// Implements account reconciliation to prevent duplicates
+  _i2.Future<Map<String, dynamic>> verifyAppleToken(
+    String idToken, {
+    String? deviceId,
+  }) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'auth',
+        'verifyAppleToken',
+        {
+          'idToken': idToken,
+          'deviceId': deviceId,
+        },
+      );
+
+  /// Verify Google Sign-In token and create/link account
+  /// Implements account reconciliation to prevent duplicates
+  _i2.Future<Map<String, dynamic>> verifyGoogleToken(
+    String idToken, {
+    String? deviceId,
+  }) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'auth',
+        'verifyGoogleToken',
+        {
+          'idToken': idToken,
+          'deviceId': deviceId,
         },
       );
 }

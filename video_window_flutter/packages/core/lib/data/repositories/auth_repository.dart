@@ -120,6 +120,74 @@ class AuthRepository {
       );
     }
   }
+
+  /// Verify Apple Sign-In token and authenticate user
+  /// Returns tokens and user information on success
+  Future<VerifyOtpResult> verifyAppleToken({
+    required String idToken,
+    String? deviceId,
+  }) async {
+    try {
+      final result = await _client.auth.verifyAppleToken(
+        idToken,
+        deviceId: deviceId,
+      );
+
+      if (result['success'] == true) {
+        return VerifyOtpResult.success(
+          user: AuthUser.fromJson(result['user'] as Map<String, dynamic>),
+          tokens: AuthTokens.fromJson(result['tokens'] as Map<String, dynamic>),
+          session:
+              SessionInfo.fromJson(result['session'] as Map<String, dynamic>),
+        );
+      } else {
+        return VerifyOtpResult.failure(
+          error: result['error'] as String? ?? 'UNKNOWN_ERROR',
+          message:
+              result['message'] as String? ?? 'Failed to verify Apple Sign-In',
+        );
+      }
+    } catch (e) {
+      return VerifyOtpResult.failure(
+        error: 'NETWORK_ERROR',
+        message: 'Network error: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Verify Google Sign-In token and authenticate user
+  /// Returns tokens and user information on success
+  Future<VerifyOtpResult> verifyGoogleToken({
+    required String idToken,
+    String? deviceId,
+  }) async {
+    try {
+      final result = await _client.auth.verifyGoogleToken(
+        idToken,
+        deviceId: deviceId,
+      );
+
+      if (result['success'] == true) {
+        return VerifyOtpResult.success(
+          user: AuthUser.fromJson(result['user'] as Map<String, dynamic>),
+          tokens: AuthTokens.fromJson(result['tokens'] as Map<String, dynamic>),
+          session:
+              SessionInfo.fromJson(result['session'] as Map<String, dynamic>),
+        );
+      } else {
+        return VerifyOtpResult.failure(
+          error: result['error'] as String? ?? 'UNKNOWN_ERROR',
+          message:
+              result['message'] as String? ?? 'Failed to verify Google Sign-In',
+        );
+      }
+    } catch (e) {
+      return VerifyOtpResult.failure(
+        error: 'NETWORK_ERROR',
+        message: 'Network error: ${e.toString()}',
+      );
+    }
+  }
 }
 
 // Result classes
