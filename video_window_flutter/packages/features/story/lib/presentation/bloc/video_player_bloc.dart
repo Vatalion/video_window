@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_player/video_player.dart';
 import '../../domain/entities/video_player_state.dart';
 import '../../use_cases/play_video_use_case.dart';
+import '../../../core/services/analytics_service.dart';
+import '../analytics/story_analytics_events.dart';
 
 /// Events for video player
 abstract class VideoPlayerEvent {}
@@ -36,16 +38,25 @@ class VideoPlayerQualityChanged extends VideoPlayerEvent {
 }
 
 /// BLoC for video player state management
-/// AC2, AC3, AC4, AC6: Video playback with controls, accessibility, and content protection
+/// AC2, AC3, AC4, AC6, AC7: Video playback with controls, accessibility, content protection, and analytics
 class VideoPlayerBloc extends Bloc<VideoPlayerEvent, VideoPlayerStateEntity> {
   final PlayVideoUseCase _playVideoUseCase;
+  final AnalyticsService? _analyticsService;
+  final String? _storyId;
+  final String _currentLanguage;
   VideoPlayerController? _controller;
   StreamSubscription? _positionSubscription;
   StreamSubscription? _stateSubscription;
 
   VideoPlayerBloc({
     required PlayVideoUseCase playVideoUseCase,
+    AnalyticsService? analyticsService,
+    String? storyId,
+    String currentLanguage = 'en',
   })  : _playVideoUseCase = playVideoUseCase,
+        _analyticsService = analyticsService,
+        _storyId = storyId,
+        _currentLanguage = currentLanguage,
         super(const VideoPlayerStateEntity(
           position: Duration.zero,
           duration: Duration.zero,
@@ -125,7 +136,18 @@ class VideoPlayerBloc extends Bloc<VideoPlayerEvent, VideoPlayerStateEntity> {
     VideoPlayerToggleCaptions event,
     Emitter<VideoPlayerStateEntity> emit,
   ) {
-    emit(state.copyWith(captionsEnabled: !state.captionsEnabled));
+    final wasEnabled = state.captionsEnabled;
+    emit(state.copyWith(captionsEnabled: !wasEnabled));
+
+    // AC7: Emit analytics event for caption toggle
+    if (_analyticsService != null && _storyId != null) {
+      final event = StoryCaptionToggledEvent(
+        storyId: _storyId!,
+        language: _currentLanguage,
+        wasEnabled: wasEnabled,
+      );
+      _analyticsService!.trackEvent(event);
+    }
   }
 
   void _onToggleFullscreen(
