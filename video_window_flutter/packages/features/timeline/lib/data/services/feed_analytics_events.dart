@@ -126,3 +126,30 @@ class FeedPaginationRetryEvent extends AnalyticsEvent {
   @override
   DateTime get timestamp => DateTime.now();
 }
+
+/// Feed preload complete event
+/// AC5: Track preload completion with latency metadata
+class FeedPreloadCompleteEvent extends AnalyticsEvent {
+  final int queueDepth;
+  final int latencyMs;
+  final String? networkType;
+
+  FeedPreloadCompleteEvent({
+    required this.queueDepth,
+    required this.latencyMs,
+    this.networkType,
+  });
+
+  @override
+  String get name => 'feed_preload_complete';
+
+  @override
+  Map<String, dynamic> get properties => {
+        'queue_depth': queueDepth,
+        'latency_ms': latencyMs,
+        if (networkType != null) 'network_type': networkType,
+      };
+
+  @override
+  DateTime get timestamp => DateTime.now();
+}

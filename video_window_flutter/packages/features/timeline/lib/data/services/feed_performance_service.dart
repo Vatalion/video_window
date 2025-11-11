@@ -64,7 +64,12 @@ class FeedPerformanceService {
   }
 
   /// Get performance metrics
-  Map<String, dynamic> getMetrics() {
+  /// AC5: Includes preload queue depth and cache metrics
+  Map<String, dynamic> getMetrics({
+    int? preloadQueueDepth,
+    int? cacheHitRate,
+    int? cacheEvictionCount,
+  }) {
     return {
       'fps': getCurrentFps(),
       'jankPercentage': getJankPercentage(),
@@ -73,11 +78,41 @@ class FeedPerformanceService {
           ? 0
           : _frameTimes.map((t) => t.inMicroseconds).reduce((a, b) => a + b) /
               _frameTimes.length,
+      // AC5: Preload and cache metrics
+      if (preloadQueueDepth != null) 'preloadQueueDepth': preloadQueueDepth,
+      if (cacheHitRate != null) 'cacheHitRate': cacheHitRate,
+      if (cacheEvictionCount != null) 'cacheEvictionCount': cacheEvictionCount,
     };
   }
 
   /// Reset metrics
   void reset() {
     _frameTimes.clear();
+  }
+
+  /// AC5: Emit Datadog metrics for preload and cache
+  /// TODO: Integrate Datadog SDK when available
+  void emitDatadogMetrics({
+    int? preloadQueueDepth,
+    int? cacheEvictionCount,
+    int? cacheHitRate,
+  }) {
+    // AC5: Emit Datadog gauge feed.preload.queue_depth
+    if (preloadQueueDepth != null) {
+      // TODO: Integrate Datadog SDK
+      // datadog.gauge('feed.preload.queue_depth', preloadQueueDepth);
+    }
+
+    // AC5: Emit Datadog counter feed.cache.evictions
+    if (cacheEvictionCount != null && cacheEvictionCount > 0) {
+      // TODO: Integrate Datadog SDK
+      // datadog.increment('feed.cache.evictions', cacheEvictionCount);
+    }
+
+    // AC5: Emit Datadog gauge feed.cache.hit_rate
+    if (cacheHitRate != null) {
+      // TODO: Integrate Datadog SDK
+      // datadog.gauge('feed.cache.hit_rate', cacheHitRate);
+    }
   }
 }

@@ -7,17 +7,20 @@ import 'error_boundary.dart';
 
 /// Video player widget with performance optimizations
 /// PERF-002: Video auto-play with proper resource management
-/// AC2, AC5: Video playback with lifecycle management
+/// AC1, AC2, AC5: Video playback with preloaded controllers and lifecycle management
 class VideoPlayerWidget extends StatefulWidget {
   final Video video;
   final bool isPlaying;
   final Function(bool isPlaying) onPlaybackStateChanged;
+  final VideoPlayerController?
+      preloadedController; // AC1: Optional preloaded controller
 
   const VideoPlayerWidget({
     super.key,
     required this.video,
     required this.isPlaying,
     required this.onPlaybackStateChanged,
+    this.preloadedController, // AC1: Use preloaded controller if available
   });
 
   @override
@@ -37,11 +40,23 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   Future<void> _initializePlayer() async {
     try {
-      _controller = VideoPlayerController.networkUrl(
-        Uri.parse(widget.video.videoUrl),
-      );
-
-      await _controller!.initialize();
+      // AC1: Use preloaded controller if available, otherwise create new one
+      if (widget.preloadedController != null) {
+        _controller = widget.preloadedController;
+        // Preloaded controller is already initialized
+        if (_controller!.value.isInitialized) {
+          _isInitialized = true;
+        } else {
+          await _controller!.initialize();
+          _isInitialized = true;
+        }
+      } else {
+        _controller = VideoPlayerController.networkUrl(
+          Uri.parse(widget.video.videoUrl),
+        );
+        await _controller!.initialize();
+        _isInitialized = true;
+      }
 
       // PERF-002: Set looping for feed videos
       _controller!.setLooping(true);
@@ -85,7 +100,10 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   @override
   void dispose() {
     // PERF-005: Proper disposal of VideoPlayerController
-    _controller?.dispose();
+    // AC1: Only dispose if we created it (not preloaded)
+    if (widget.preloadedController == null) {
+      _controller?.dispose();
+    }
     WakelockPlus.disable();
     super.dispose();
   }
