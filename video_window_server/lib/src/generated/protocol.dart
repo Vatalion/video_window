@@ -36,12 +36,13 @@ import 'capabilities/verification_task_type.dart' as _i24;
 import 'profile/dsar_request.dart' as _i25;
 import 'profile/media_file.dart' as _i26;
 import 'profile/notification_preferences.dart' as _i27;
-import 'profile/privacy_settings.dart' as _i28;
-import 'profile/user_profile.dart' as _i29;
+import 'profile/privacy_audit_log.dart' as _i28;
+import 'profile/privacy_settings.dart' as _i29;
+import 'profile/user_profile.dart' as _i30;
 import 'package:video_window_server/src/generated/capabilities/capability_request.dart'
-    as _i30;
-import 'package:video_window_server/src/generated/capabilities/trusted_device.dart'
     as _i31;
+import 'package:video_window_server/src/generated/capabilities/trusted_device.dart'
+    as _i32;
 export 'greeting.dart';
 export 'auth/auth_tokens.dart';
 export 'auth/otp.dart';
@@ -67,6 +68,7 @@ export 'capabilities/verification_task_type.dart';
 export 'profile/dsar_request.dart';
 export 'profile/media_file.dart';
 export 'profile/notification_preferences.dart';
+export 'profile/privacy_audit_log.dart';
 export 'profile/privacy_settings.dart';
 export 'profile/user_profile.dart';
 
@@ -674,6 +676,138 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'identifier',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'privacy_audit_log',
+      dartName: 'PrivacyAuditLog',
+      schema: 'public',
+      module: 'video_window',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'privacy_audit_log_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'actorId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'settingName',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'oldValue',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'newValue',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'changeSummary',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'auditContext',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'privacy_audit_log_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'privacy_audit_log_user_id_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'privacy_audit_log_actor_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'actorId',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'privacy_audit_log_created_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'privacy_audit_log_setting_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'settingName',
             )
           ],
           type: 'btree',
@@ -1944,11 +2078,14 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i27.NotificationPreferences) {
       return _i27.NotificationPreferences.fromJson(data) as T;
     }
-    if (t == _i28.PrivacySettings) {
-      return _i28.PrivacySettings.fromJson(data) as T;
+    if (t == _i28.PrivacyAuditLog) {
+      return _i28.PrivacyAuditLog.fromJson(data) as T;
     }
-    if (t == _i29.UserProfile) {
-      return _i29.UserProfile.fromJson(data) as T;
+    if (t == _i29.PrivacySettings) {
+      return _i29.PrivacySettings.fromJson(data) as T;
+    }
+    if (t == _i30.UserProfile) {
+      return _i30.UserProfile.fromJson(data) as T;
     }
     if (t == _i1.getType<_i3.Greeting?>()) {
       return (data != null ? _i3.Greeting.fromJson(data) : null) as T;
@@ -2034,28 +2171,31 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data != null ? _i27.NotificationPreferences.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i28.PrivacySettings?>()) {
-      return (data != null ? _i28.PrivacySettings.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i28.PrivacyAuditLog?>()) {
+      return (data != null ? _i28.PrivacyAuditLog.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i29.UserProfile?>()) {
-      return (data != null ? _i29.UserProfile.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i29.PrivacySettings?>()) {
+      return (data != null ? _i29.PrivacySettings.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i30.UserProfile?>()) {
+      return (data != null ? _i30.UserProfile.fromJson(data) : null) as T;
     }
     if (t == Map<String, String>) {
       return (data as Map).map((k, v) =>
           MapEntry(deserialize<String>(k), deserialize<String>(v))) as T;
     }
-    if (t == List<_i30.CapabilityRequest>) {
+    if (t == List<_i31.CapabilityRequest>) {
       return (data as List)
-          .map((e) => deserialize<_i30.CapabilityRequest>(e))
+          .map((e) => deserialize<_i31.CapabilityRequest>(e))
           .toList() as T;
     }
     if (t == Map<String, dynamic>) {
       return (data as Map).map((k, v) =>
           MapEntry(deserialize<String>(k), deserialize<dynamic>(v))) as T;
     }
-    if (t == List<_i31.TrustedDevice>) {
+    if (t == List<_i32.TrustedDevice>) {
       return (data as List)
-          .map((e) => deserialize<_i31.TrustedDevice>(e))
+          .map((e) => deserialize<_i32.TrustedDevice>(e))
           .toList() as T;
     }
     if (t == _i1.getType<Map<String, dynamic>?>()) {
@@ -2154,10 +2294,13 @@ class Protocol extends _i1.SerializationManagerServer {
     if (data is _i27.NotificationPreferences) {
       return 'NotificationPreferences';
     }
-    if (data is _i28.PrivacySettings) {
+    if (data is _i28.PrivacyAuditLog) {
+      return 'PrivacyAuditLog';
+    }
+    if (data is _i29.PrivacySettings) {
       return 'PrivacySettings';
     }
-    if (data is _i29.UserProfile) {
+    if (data is _i30.UserProfile) {
       return 'UserProfile';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -2248,11 +2391,14 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'NotificationPreferences') {
       return deserialize<_i27.NotificationPreferences>(data['data']);
     }
+    if (dataClassName == 'PrivacyAuditLog') {
+      return deserialize<_i28.PrivacyAuditLog>(data['data']);
+    }
     if (dataClassName == 'PrivacySettings') {
-      return deserialize<_i28.PrivacySettings>(data['data']);
+      return deserialize<_i29.PrivacySettings>(data['data']);
     }
     if (dataClassName == 'UserProfile') {
-      return deserialize<_i29.UserProfile>(data['data']);
+      return deserialize<_i30.UserProfile>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -2296,10 +2442,12 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i26.MediaFile.t;
       case _i27.NotificationPreferences:
         return _i27.NotificationPreferences.t;
-      case _i28.PrivacySettings:
-        return _i28.PrivacySettings.t;
-      case _i29.UserProfile:
-        return _i29.UserProfile.t;
+      case _i28.PrivacyAuditLog:
+        return _i28.PrivacyAuditLog.t;
+      case _i29.PrivacySettings:
+        return _i29.PrivacySettings.t;
+      case _i30.UserProfile:
+        return _i30.UserProfile.t;
     }
     return null;
   }

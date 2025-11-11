@@ -35,12 +35,13 @@ import 'capabilities/verification_task_type.dart' as _i23;
 import 'profile/dsar_request.dart' as _i24;
 import 'profile/media_file.dart' as _i25;
 import 'profile/notification_preferences.dart' as _i26;
-import 'profile/privacy_settings.dart' as _i27;
-import 'profile/user_profile.dart' as _i28;
+import 'profile/privacy_audit_log.dart' as _i27;
+import 'profile/privacy_settings.dart' as _i28;
+import 'profile/user_profile.dart' as _i29;
 import 'package:video_window_client/src/protocol/capabilities/capability_request.dart'
-    as _i29;
-import 'package:video_window_client/src/protocol/capabilities/trusted_device.dart'
     as _i30;
+import 'package:video_window_client/src/protocol/capabilities/trusted_device.dart'
+    as _i31;
 export 'greeting.dart';
 export 'auth/auth_tokens.dart';
 export 'auth/otp.dart';
@@ -66,6 +67,7 @@ export 'capabilities/verification_task_type.dart';
 export 'profile/dsar_request.dart';
 export 'profile/media_file.dart';
 export 'profile/notification_preferences.dart';
+export 'profile/privacy_audit_log.dart';
 export 'profile/privacy_settings.dart';
 export 'profile/user_profile.dart';
 export 'client.dart';
@@ -158,11 +160,14 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i26.NotificationPreferences) {
       return _i26.NotificationPreferences.fromJson(data) as T;
     }
-    if (t == _i27.PrivacySettings) {
-      return _i27.PrivacySettings.fromJson(data) as T;
+    if (t == _i27.PrivacyAuditLog) {
+      return _i27.PrivacyAuditLog.fromJson(data) as T;
     }
-    if (t == _i28.UserProfile) {
-      return _i28.UserProfile.fromJson(data) as T;
+    if (t == _i28.PrivacySettings) {
+      return _i28.PrivacySettings.fromJson(data) as T;
+    }
+    if (t == _i29.UserProfile) {
+      return _i29.UserProfile.fromJson(data) as T;
     }
     if (t == _i1.getType<_i2.Greeting?>()) {
       return (data != null ? _i2.Greeting.fromJson(data) : null) as T;
@@ -248,28 +253,31 @@ class Protocol extends _i1.SerializationManager {
       return (data != null ? _i26.NotificationPreferences.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i27.PrivacySettings?>()) {
-      return (data != null ? _i27.PrivacySettings.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i27.PrivacyAuditLog?>()) {
+      return (data != null ? _i27.PrivacyAuditLog.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i28.UserProfile?>()) {
-      return (data != null ? _i28.UserProfile.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i28.PrivacySettings?>()) {
+      return (data != null ? _i28.PrivacySettings.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i29.UserProfile?>()) {
+      return (data != null ? _i29.UserProfile.fromJson(data) : null) as T;
     }
     if (t == Map<String, String>) {
       return (data as Map).map((k, v) =>
           MapEntry(deserialize<String>(k), deserialize<String>(v))) as T;
     }
-    if (t == List<_i29.CapabilityRequest>) {
+    if (t == List<_i30.CapabilityRequest>) {
       return (data as List)
-          .map((e) => deserialize<_i29.CapabilityRequest>(e))
+          .map((e) => deserialize<_i30.CapabilityRequest>(e))
           .toList() as T;
     }
     if (t == Map<String, dynamic>) {
       return (data as Map).map((k, v) =>
           MapEntry(deserialize<String>(k), deserialize<dynamic>(v))) as T;
     }
-    if (t == List<_i30.TrustedDevice>) {
+    if (t == List<_i31.TrustedDevice>) {
       return (data as List)
-          .map((e) => deserialize<_i30.TrustedDevice>(e))
+          .map((e) => deserialize<_i31.TrustedDevice>(e))
           .toList() as T;
     }
     if (t == _i1.getType<Map<String, dynamic>?>()) {
@@ -365,10 +373,13 @@ class Protocol extends _i1.SerializationManager {
     if (data is _i26.NotificationPreferences) {
       return 'NotificationPreferences';
     }
-    if (data is _i27.PrivacySettings) {
+    if (data is _i27.PrivacyAuditLog) {
+      return 'PrivacyAuditLog';
+    }
+    if (data is _i28.PrivacySettings) {
       return 'PrivacySettings';
     }
-    if (data is _i28.UserProfile) {
+    if (data is _i29.UserProfile) {
       return 'UserProfile';
     }
     return null;
@@ -455,11 +466,14 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName == 'NotificationPreferences') {
       return deserialize<_i26.NotificationPreferences>(data['data']);
     }
+    if (dataClassName == 'PrivacyAuditLog') {
+      return deserialize<_i27.PrivacyAuditLog>(data['data']);
+    }
     if (dataClassName == 'PrivacySettings') {
-      return deserialize<_i27.PrivacySettings>(data['data']);
+      return deserialize<_i28.PrivacySettings>(data['data']);
     }
     if (dataClassName == 'UserProfile') {
-      return deserialize<_i28.UserProfile>(data['data']);
+      return deserialize<_i29.UserProfile>(data['data']);
     }
     return super.deserializeByClassName(data);
   }

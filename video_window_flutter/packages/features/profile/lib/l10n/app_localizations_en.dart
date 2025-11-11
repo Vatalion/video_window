@@ -12,6 +12,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get capabilityStatusInactive => 'Inactive';
 
   @override
+  String get capabilityStatusInProgress => 'In Progress';
+
+  @override
   String get capabilityStatusInReview => 'In Review';
 
   @override

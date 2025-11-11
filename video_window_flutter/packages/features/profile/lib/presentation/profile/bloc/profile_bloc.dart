@@ -2,7 +2,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:core/data/repositories/profile/profile_repository.dart';
 import 'package:core/data/repositories/profile/profile_media_repository.dart';
 import 'package:core/services/analytics_service.dart';
-import 'dart:io';
 import 'profile_event.dart';
 import 'profile_state.dart';
 import '../analytics/profile_analytics_events.dart';
@@ -107,18 +106,49 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     Emitter<ProfileState> emit,
   ) async {
     try {
+      // Load previous settings to track changes (AC4: analytics event format)
+      Map<String, dynamic>? previousSettings;
+      try {
+        previousSettings =
+            await _profileRepository.getPrivacySettings(event.userId);
+      } catch (_) {
+        // If we can't load previous settings, continue anyway
+      }
+
       final updatedSettings = await _profileRepository.updatePrivacySettings(
         event.userId,
         event.settingsData,
       );
 
-      // Emit analytics event for privacy settings change
-      _analyticsService?.trackEvent(
-        PrivacySettingsChangedEvent(
-          userId: event.userId,
-          changedSettings: event.settingsData,
-        ),
-      );
+      // AC4: Emit analytics event with setting_name, old_value, new_value format
+      // Emit individual events for each changed setting
+      if (_analyticsService != null && previousSettings != null) {
+        for (final entry in event.settingsData.entries) {
+          final settingName = entry.key;
+          final newValue = entry.value;
+          final oldValue = previousSettings[settingName];
+
+          // Only emit if value actually changed
+          if (oldValue != newValue) {
+            _analyticsService.trackEvent(
+              PrivacySettingsChangedEvent(
+                userId: event.userId,
+                settingName: settingName,
+                oldValue: oldValue?.toString() ?? 'null',
+                newValue: newValue?.toString() ?? 'null',
+              ),
+            );
+          }
+        }
+      } else if (_analyticsService != null) {
+        // Fallback: emit single event with all changes if we can't compare
+        _analyticsService.trackEvent(
+          PrivacySettingsChangedEvent(
+            userId: event.userId,
+            changedSettings: event.settingsData,
+          ),
+        );
+      }
 
       emit(PrivacySettingsUpdated(settings: updatedSettings));
     } catch (e) {
@@ -247,7 +277,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final mimeType = _getMimeType(fileName);
 
       // Get presigned upload URL
-      final uploadUrlData = await _mediaRepository!.getAvatarUploadUrl(
+      final uploadUrlData = await _mediaRepository.getAvatarUploadUrl(
         userId: event.userId,
         fileName: fileName,
         mimeType: mimeType,
@@ -258,7 +288,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final mediaId = uploadUrlData['mediaId'] as int;
 
       // Upload file with progress tracking
-      await _mediaRepository!.uploadToS3(
+      await _mediaRepository.uploadToS3(
         presignedUrl: presignedUrl,
         file: file,
         onProgress: (progress) {
@@ -267,7 +297,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       );
 
       // Poll for virus scan completion
-      await _mediaRepository!.pollVirusScanStatus(mediaId: mediaId);
+      await _mediaRepository.pollVirusScanStatus(mediaId: mediaId);
 
       // Reload profile to get updated avatar URL
       final profile = await _profileRepository.getMyProfile(event.userId);

@@ -25,24 +25,43 @@ class ProfileUpdatedEvent extends AnalyticsEvent {
 }
 
 /// Analytics event for privacy settings changes
+/// AC4: Emit event with setting_name, old_value, new_value
 class PrivacySettingsChangedEvent extends AnalyticsEvent {
   final int userId;
-  final Map<String, dynamic> changedSettings;
+  final String? settingName;
+  final String? oldValue;
+  final String? newValue;
+  final Map<String, dynamic>? changedSettings; // Fallback for batch updates
   final DateTime _timestamp;
 
   PrivacySettingsChangedEvent({
     required this.userId,
-    required this.changedSettings,
+    this.settingName,
+    this.oldValue,
+    this.newValue,
+    this.changedSettings,
   }) : _timestamp = DateTime.now();
 
   @override
   String get name => 'privacy_settings_changed';
 
   @override
-  Map<String, dynamic> get properties => {
+  Map<String, dynamic> get properties {
+    // AC4: Format with setting_name, old_value, new_value if available
+    if (settingName != null && oldValue != null && newValue != null) {
+      return {
         'user_id': userId,
-        'changed_settings': changedSettings,
+        'setting_name': settingName,
+        'old_value': oldValue,
+        'new_value': newValue,
       };
+    }
+    // Fallback to batch format if individual values not provided
+    return {
+      'user_id': userId,
+      'changed_settings': changedSettings ?? {},
+    };
+  }
 
   @override
   DateTime get timestamp => _timestamp;

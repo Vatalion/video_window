@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/profile_bloc.dart';
 import '../bloc/profile_event.dart';
 import '../bloc/profile_state.dart';
+import '../widgets/privacy_toggle_tile.dart';
 
 /// Privacy settings page
 /// AC3: Granular privacy settings allowing viewers to control profile visibility,
@@ -31,6 +32,17 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
   bool? _shareProfileWithPartners;
   bool _hasChanges = false;
 
+  // Store previous values for rollback on failure (AC2)
+  String? _previousProfileVisibility;
+  bool? _previousShowEmailToPublic;
+  bool? _previousShowPhoneToFriends;
+  bool? _previousAllowTagging;
+  bool? _previousAllowSearchByPhone;
+  bool? _previousAllowDataAnalytics;
+  bool? _previousAllowMarketingEmails;
+  bool? _previousAllowPushNotifications;
+  bool? _previousShareProfileWithPartners;
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +69,16 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
           if (state is PrivacySettingsUpdated) {
             setState(() {
               _hasChanges = false;
+              // Clear previous values after successful save
+              _previousProfileVisibility = null;
+              _previousShowEmailToPublic = null;
+              _previousShowPhoneToFriends = null;
+              _previousAllowTagging = null;
+              _previousAllowSearchByPhone = null;
+              _previousAllowDataAnalytics = null;
+              _previousAllowMarketingEmails = null;
+              _previousAllowPushNotifications = null;
+              _previousShareProfileWithPartners = null;
             });
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -65,10 +87,14 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
               ),
             );
           } else if (state is ProfileError) {
+            // AC2: Rollback on failure
+            _rollbackSettings();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Error: ${state.message}'),
+                content: Text(
+                    'Error: ${state.message}. Settings have been rolled back.'),
                 backgroundColor: Colors.red,
+                duration: const Duration(seconds: 5),
               ),
             );
           }
@@ -134,47 +160,60 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
 
                   // Contact Information Section
                   _buildSectionHeader('Contact Information'),
-                  _buildSwitchTile(
+                  PrivacyToggleTile(
                     title: 'Show Email to Public',
                     value: _showEmailToPublic ?? false,
                     onChanged: (value) {
+                      _savePreviousValue();
                       setState(() {
                         _showEmailToPublic = value;
                         _hasChanges = true;
                       });
                     },
                     description: 'Allow anyone to see your email address',
+                    learnMoreUrl:
+                        'https://example.com/privacy/email-visibility',
+                    learnMoreText: 'Learn more about email visibility',
                   ),
-                  _buildSwitchTile(
+                  const SizedBox(height: 8),
+                  PrivacyToggleTile(
                     title: 'Show Phone to Friends',
                     value: _showPhoneToFriends ?? false,
                     onChanged: (value) {
+                      _savePreviousValue();
                       setState(() {
                         _showPhoneToFriends = value;
                         _hasChanges = true;
                       });
                     },
                     description: 'Allow friends to see your phone number',
+                    learnMoreUrl: 'https://example.com/privacy/phone-sharing',
+                    learnMoreText: 'Learn more about phone sharing',
                   ),
                   const SizedBox(height: 24),
 
                   // Interaction Settings Section
                   _buildSectionHeader('Interaction Settings'),
-                  _buildSwitchTile(
+                  PrivacyToggleTile(
                     title: 'Allow Tagging',
                     value: _allowTagging ?? false,
                     onChanged: (value) {
+                      _savePreviousValue();
                       setState(() {
                         _allowTagging = value;
                         _hasChanges = true;
                       });
                     },
                     description: 'Allow others to tag you in content',
+                    learnMoreUrl: 'https://example.com/privacy/tagging',
+                    learnMoreText: 'Learn more about tagging',
                   ),
-                  _buildSwitchTile(
+                  const SizedBox(height: 8),
+                  PrivacyToggleTile(
                     title: 'Allow Search by Phone',
                     value: _allowSearchByPhone ?? false,
                     onChanged: (value) {
+                      _savePreviousValue();
                       setState(() {
                         _allowSearchByPhone = value;
                         _hasChanges = true;
@@ -182,15 +221,18 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
                     },
                     description:
                         'Allow others to find you using your phone number',
+                    learnMoreUrl: 'https://example.com/privacy/phone-search',
+                    learnMoreText: 'Learn more about phone search',
                   ),
                   const SizedBox(height: 24),
 
                   // Data Sharing Section
                   _buildSectionHeader('Data Sharing & Analytics'),
-                  _buildSwitchTile(
+                  PrivacyToggleTile(
                     title: 'Allow Data Analytics',
                     value: _allowDataAnalytics ?? false,
                     onChanged: (value) {
+                      _savePreviousValue();
                       setState(() {
                         _allowDataAnalytics = value;
                         _hasChanges = true;
@@ -198,11 +240,15 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
                     },
                     description:
                         'Share anonymized data for analytics and product improvement',
+                    learnMoreUrl: 'https://example.com/privacy/analytics',
+                    learnMoreText: 'Learn more about data analytics',
                   ),
-                  _buildSwitchTile(
+                  const SizedBox(height: 8),
+                  PrivacyToggleTile(
                     title: 'Share Profile with Partners',
                     value: _shareProfileWithPartners ?? false,
                     onChanged: (value) {
+                      _savePreviousValue();
                       setState(() {
                         _shareProfileWithPartners = value;
                         _hasChanges = true;
@@ -210,15 +256,18 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
                     },
                     description:
                         'Allow trusted partners to access your profile information',
+                    learnMoreUrl: 'https://example.com/privacy/partner-sharing',
+                    learnMoreText: 'Learn more about partner sharing',
                   ),
                   const SizedBox(height: 24),
 
                   // Marketing & Notifications Section
                   _buildSectionHeader('Marketing & Notifications'),
-                  _buildSwitchTile(
+                  PrivacyToggleTile(
                     title: 'Marketing Emails',
                     value: _allowMarketingEmails ?? false,
                     onChanged: (value) {
+                      _savePreviousValue();
                       setState(() {
                         _allowMarketingEmails = value;
                         _hasChanges = true;
@@ -226,22 +275,32 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
                     },
                     description:
                         'Receive marketing emails and promotional content',
+                    learnMoreUrl: 'https://example.com/privacy/marketing',
+                    learnMoreText: 'Learn more about marketing preferences',
                   ),
-                  _buildSwitchTile(
+                  const SizedBox(height: 8),
+                  PrivacyToggleTile(
                     title: 'Push Notifications',
                     value: _allowPushNotifications ?? false,
                     onChanged: (value) {
+                      _savePreviousValue();
                       setState(() {
                         _allowPushNotifications = value;
                         _hasChanges = true;
                       });
                     },
                     description: 'Receive push notifications on your device',
+                    learnMoreUrl: 'https://example.com/privacy/notifications',
+                    learnMoreText: 'Learn more about notifications',
                   ),
                   const SizedBox(height: 32),
 
                   // GDPR/CCPA Compliance Note
                   _buildComplianceNote(),
+
+                  // DSAR CTA Section (AC5)
+                  const SizedBox(height: 24),
+                  _buildDsarSection(),
                 ],
               ),
             );
@@ -308,20 +367,168 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
     );
   }
 
-  Widget _buildSwitchTile({
-    required String title,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-    required String description,
-  }) {
+  Widget _buildDsarSection() {
     return Card(
-      child: SwitchListTile(
-        title: Text(title),
-        subtitle: Text(description),
-        value: value,
-        onChanged: onChanged,
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.security,
+                    color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  'Data Rights & Privacy',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'You have the right to access, export, or delete your personal data at any time.',
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showDsarExportConfirmation(),
+                    icon: const Icon(Icons.download),
+                    label: const Text('Export My Data'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showDsarDeleteConfirmation(),
+                    icon: const Icon(Icons.delete_outline),
+                    label: const Text('Delete My Data'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  void _showDsarExportConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Export Your Data'),
+        content: const Text(
+          'This will generate a downloadable package containing all your personal data. '
+          'The export will be available within 24 hours. Continue?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<ProfileBloc>().add(
+                    ExportUserDataRequested(widget.userId),
+                  );
+            },
+            child: const Text('Export'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDsarDeleteConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Your Data'),
+        content: const Text(
+          'This will permanently delete all your personal data, including your profile, '
+          'privacy settings, and account information. This action cannot be undone. '
+          'Are you sure you want to proceed?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<ProfileBloc>().add(
+                    DeleteUserDataRequested(widget.userId),
+                  );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _savePreviousValue() {
+    // AC2: Save previous values for rollback on failure
+    if (!_hasChanges) {
+      _previousProfileVisibility = _profileVisibility;
+      _previousShowEmailToPublic = _showEmailToPublic;
+      _previousShowPhoneToFriends = _showPhoneToFriends;
+      _previousAllowTagging = _allowTagging;
+      _previousAllowSearchByPhone = _allowSearchByPhone;
+      _previousAllowDataAnalytics = _allowDataAnalytics;
+      _previousAllowMarketingEmails = _allowMarketingEmails;
+      _previousAllowPushNotifications = _allowPushNotifications;
+      _previousShareProfileWithPartners = _shareProfileWithPartners;
+    }
+  }
+
+  void _rollbackSettings() {
+    // AC2: Rollback to previous values on failure
+    setState(() {
+      if (_previousProfileVisibility != null) {
+        _profileVisibility = _previousProfileVisibility;
+      }
+      if (_previousShowEmailToPublic != null) {
+        _showEmailToPublic = _previousShowEmailToPublic;
+      }
+      if (_previousShowPhoneToFriends != null) {
+        _showPhoneToFriends = _previousShowPhoneToFriends;
+      }
+      if (_previousAllowTagging != null) {
+        _allowTagging = _previousAllowTagging;
+      }
+      if (_previousAllowSearchByPhone != null) {
+        _allowSearchByPhone = _previousAllowSearchByPhone;
+      }
+      if (_previousAllowDataAnalytics != null) {
+        _allowDataAnalytics = _previousAllowDataAnalytics;
+      }
+      if (_previousAllowMarketingEmails != null) {
+        _allowMarketingEmails = _previousAllowMarketingEmails;
+      }
+      if (_previousAllowPushNotifications != null) {
+        _allowPushNotifications = _previousAllowPushNotifications;
+      }
+      if (_previousShareProfileWithPartners != null) {
+        _shareProfileWithPartners = _previousShareProfileWithPartners;
+      }
+      _hasChanges = false;
+    });
   }
 
   Widget _buildComplianceNote() {
@@ -358,6 +565,9 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
 
   void _saveSettings() {
     if (_profileVisibility == null) return;
+
+    // AC2: Save previous values before attempting update
+    _savePreviousValue();
 
     context.read<ProfileBloc>().add(
           PrivacySettingsUpdateRequested(

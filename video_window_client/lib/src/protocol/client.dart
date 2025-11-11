@@ -499,6 +499,16 @@ class EndpointMedia extends _i1.EndpointRef {
         },
       );
 
+  /// Get media file status for polling virus scan completion
+  /// GET /media/status/{mediaId}
+  /// AC2: Allows client to poll virus scan status until is_virus_scanned=true
+  _i2.Future<Map<String, dynamic>> getMediaFileStatus(int mediaId) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'media',
+        'getMediaFileStatus',
+        {'mediaId': mediaId},
+      );
+
   /// Handle virus scan callback from AWS Lambda
   /// POST /media/virus-scan-callback
   /// AC2: Virus scanning pipeline callback - updates media status

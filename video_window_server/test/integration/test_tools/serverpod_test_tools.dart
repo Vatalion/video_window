@@ -1135,6 +1135,35 @@ class _MediaEndpoint {
     });
   }
 
+  _i3.Future<Map<String, dynamic>> getMediaFileStatus(
+    _i1.TestSessionBuilder sessionBuilder,
+    int mediaId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'media',
+        method: 'getMediaFileStatus',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'media',
+          methodName: 'getMediaFileStatus',
+          parameters: _i1.testObjectToJson({'mediaId': mediaId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<Map<String, dynamic>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _i3.Future<void> handleVirusScanCallback(
     _i1.TestSessionBuilder sessionBuilder,
     Map<String, dynamic> callbackData,

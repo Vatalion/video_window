@@ -3,6 +3,7 @@ import '../../generated/profile/user_profile.dart';
 import '../../generated/profile/privacy_settings.dart';
 import '../../generated/profile/notification_preferences.dart';
 import '../../generated/profile/dsar_request.dart';
+import '../../generated/profile/privacy_audit_log.dart';
 import '../../generated/auth/user.dart';
 import 'dart:convert';
 
@@ -142,6 +143,7 @@ class ProfileService {
   }
 
   /// Update privacy settings
+  /// AC4: Consent changes generate audit log entries and emit analytics event
   Future<PrivacySettings> updatePrivacySettings(
     int userId,
     int requestingUserId,
@@ -157,8 +159,13 @@ class ProfileService {
       where: (t) => t.userId.equals(userId),
     );
 
+    PrivacySettings updated;
     if (existing != null) {
-      final updated = existing.copyWith(
+      // AC4: Create audit log entries for each changed setting
+      await _createAuditLogs(
+          userId, requestingUserId, existing, settingsData, now);
+
+      updated = existing.copyWith(
         profileVisibility: settingsData['profileVisibility'] as String?,
         showEmailToPublic: settingsData['showEmailToPublic'] as bool?,
         showPhoneToFriends: settingsData['showPhoneToFriends'] as bool?,
@@ -173,7 +180,8 @@ class ProfileService {
       );
       return await PrivacySettings.db.updateRow(_session, updated);
     } else {
-      final newSettings = PrivacySettings(
+      // New settings - no audit log needed for initial creation
+      updated = PrivacySettings(
         userId: userId,
         profileVisibility:
             settingsData['profileVisibility'] as String? ?? 'public',
@@ -193,7 +201,91 @@ class ProfileService {
         createdAt: now,
         updatedAt: now,
       );
-      return await PrivacySettings.db.insertRow(_session, newSettings);
+      return await PrivacySettings.db.insertRow(_session, updated);
+    }
+  }
+
+  /// Create audit log entries for privacy settings changes
+  /// AC4: Record audit entries with actor, change summary, timestamp
+  Future<void> _createAuditLogs(
+    int userId,
+    int actorId,
+    PrivacySettings existing,
+    Map<String, dynamic> newSettings,
+    DateTime timestamp,
+  ) async {
+    final settingsToCheck = [
+      'profileVisibility',
+      'showEmailToPublic',
+      'showPhoneToFriends',
+      'allowTagging',
+      'allowSearchByPhone',
+      'allowDataAnalytics',
+      'allowMarketingEmails',
+      'allowPushNotifications',
+      'shareProfileWithPartners',
+    ];
+
+    for (final settingName in settingsToCheck) {
+      final oldValue = _getSettingValue(existing, settingName);
+      final newValue = newSettings[settingName];
+
+      // Only create audit log if value actually changed
+      if (oldValue != newValue && newValue != null) {
+        final auditLog = PrivacyAuditLog(
+          userId: userId,
+          actorId: actorId,
+          settingName: settingName,
+          oldValue: json.encode(oldValue),
+          newValue: json.encode(newValue),
+          changeSummary:
+              'Privacy setting "$settingName" changed from $oldValue to $newValue',
+          auditContext: json.encode({
+            'changedAt': timestamp.toIso8601String(),
+            'ipAddress':
+                '0.0.0.0', // TODO: Extract from request context when available
+          }),
+          createdAt: timestamp,
+        );
+
+        try {
+          await PrivacyAuditLog.db.insertRow(_session, auditLog);
+        } catch (e, stackTrace) {
+          _session.log(
+            'Failed to create privacy audit log: $e',
+            level: LogLevel.error,
+            exception: e,
+            stackTrace: stackTrace,
+          );
+          // Don't fail the update if audit logging fails
+        }
+      }
+    }
+  }
+
+  /// Get setting value from PrivacySettings object
+  dynamic _getSettingValue(PrivacySettings settings, String settingName) {
+    switch (settingName) {
+      case 'profileVisibility':
+        return settings.profileVisibility;
+      case 'showEmailToPublic':
+        return settings.showEmailToPublic;
+      case 'showPhoneToFriends':
+        return settings.showPhoneToFriends;
+      case 'allowTagging':
+        return settings.allowTagging;
+      case 'allowSearchByPhone':
+        return settings.allowSearchByPhone;
+      case 'allowDataAnalytics':
+        return settings.allowDataAnalytics;
+      case 'allowMarketingEmails':
+        return settings.allowMarketingEmails;
+      case 'allowPushNotifications':
+        return settings.allowPushNotifications;
+      case 'shareProfileWithPartners':
+        return settings.shareProfileWithPartners;
+      default:
+        return null;
     }
   }
 

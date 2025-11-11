@@ -100,6 +100,12 @@ abstract class AppLocalizations {
   /// **'Inactive'**
   String get capabilityStatusInactive;
 
+  /// Status label for capability request in progress
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get capabilityStatusInProgress;
+
   /// Status label for capability under review
   ///
   /// In en, this message translates to:

@@ -763,6 +763,24 @@ class Endpoints extends _i1.EndpointDispatch {
             params['fileSizeBytes'],
           ),
         ),
+        'getMediaFileStatus': _i1.MethodConnector(
+          name: 'getMediaFileStatus',
+          params: {
+            'mediaId': _i1.ParameterDescription(
+              name: 'mediaId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['media'] as _i10.MediaEndpoint).getMediaFileStatus(
+            session,
+            params['mediaId'],
+          ),
+        ),
         'handleVirusScanCallback': _i1.MethodConnector(
           name: 'handleVirusScanCallback',
           params: {

@@ -1,0 +1,43 @@
+# Privacy audit log model
+# AC4: Consent changes generate audit log entries
+class: PrivacyAuditLog
+table: privacy_audit_log
+
+fields:
+  # Unique identifier
+  id: int?
+  
+  # Foreign key to user
+  userId: int
+  
+  # Actor who made the change (user ID)
+  actorId: int
+  
+  # Setting name that changed
+  settingName: String
+  
+  # Old value (JSON string for flexibility)
+  oldValue: String
+  
+  # New value (JSON string for flexibility)
+  newValue: String
+  
+  # Change summary/description
+  changeSummary: String
+  
+  # Additional metadata (JSON)
+  auditContext: String?  # JSON string for additional context
+  
+  # Timestamp
+  createdAt: DateTime
+
+indexes:
+  privacy_audit_log_user_id_idx:
+    fields: userId
+  privacy_audit_log_actor_idx:
+    fields: actorId
+  privacy_audit_log_created_idx:
+    fields: createdAt
+  privacy_audit_log_setting_idx:
+    fields: settingName
+

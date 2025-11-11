@@ -33,6 +33,7 @@ payment:
   - createCheckoutSession:
 media:
   - createAvatarUploadUrl:
+  - getMediaFileStatus:
   - handleVirusScanCallback:
 profile:
   - getMyProfile:
