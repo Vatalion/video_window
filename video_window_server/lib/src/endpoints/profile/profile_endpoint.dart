@@ -3,6 +3,7 @@ import '../../services/profile/profile_service.dart';
 import '../../generated/profile/user_profile.dart';
 import '../../generated/profile/privacy_settings.dart';
 import '../../generated/profile/notification_preferences.dart';
+import 'dart:convert';
 
 /// Profile endpoint for managing user profiles, privacy settings, and notifications
 /// Implements Story 3-1: Viewer Profile Management
@@ -133,13 +134,42 @@ class ProfileEndpoint extends Endpoint {
 
   /// Update notification preferences
   /// PUT /profile/notifications
-  /// AC7: Notification preference matrix with granular controls
+  /// AC3: Notification preference matrix with granular controls
+  /// AC4: Enforces critical alert immutability - critical security alerts cannot be disabled
   Future<NotificationPreferences> updateNotificationPreferences(
     Session session,
     int userId,
     Map<String, dynamic> prefsData,
   ) async {
     try {
+      // AC4: Validate that critical alerts are not being disabled
+      if (prefsData['settings'] != null) {
+        Map<String, dynamic> settings;
+        if (prefsData['settings'] is String) {
+          settings = json.decode(prefsData['settings'] as String)
+              as Map<String, dynamic>;
+        } else {
+          settings = prefsData['settings'] as Map<String, dynamic>;
+        }
+
+        const criticalTypes = [
+          'security_alert',
+          'account_compromised',
+          'payment_failed',
+          'suspicious_activity'
+        ];
+        for (final type in criticalTypes) {
+          if (settings.containsKey(type)) {
+            final typeSettings = settings[type] as Map<String, dynamic>?;
+            if (typeSettings != null && typeSettings['enabled'] == false) {
+              throw Exception(
+                'Critical security alerts cannot be disabled. Type: $type',
+              );
+            }
+          }
+        }
+      }
+
       final profileService = ProfileService(session);
       return await profileService.updateNotificationPreferences(
           userId, userId, prefsData);

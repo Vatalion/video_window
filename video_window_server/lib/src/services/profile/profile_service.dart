@@ -5,6 +5,7 @@ import '../../generated/profile/notification_preferences.dart';
 import '../../generated/profile/dsar_request.dart';
 import '../../generated/profile/privacy_audit_log.dart';
 import '../../generated/auth/user.dart';
+import '../../business/profile/notification_manager.dart';
 import 'dart:convert';
 
 /// Profile service for managing user profiles, privacy settings, and notifications
@@ -296,53 +297,14 @@ class ProfileService {
       throw Exception('Unauthorized');
     }
 
-    final prefs = await NotificationPreferences.db.findFirstRow(
-      _session,
-      where: (t) => t.userId.equals(userId),
-    );
-
-    if (prefs == null) {
-      // Create default notification preferences
-      final now = DateTime.now().toUtc();
-      final defaultPrefs = NotificationPreferences(
-        userId: userId,
-        emailNotifications: true,
-        pushNotifications: true,
-        inAppNotifications: true,
-        settings: json.encode({
-          'newOffer': {
-            'enabled': true,
-            'channels': ['email', 'push', 'inApp']
-          },
-          'outbid': {
-            'enabled': true,
-            'channels': ['email', 'push']
-          },
-          'auctionEnding': {
-            'enabled': true,
-            'channels': ['push', 'inApp']
-          },
-          'orderUpdate': {
-            'enabled': true,
-            'channels': ['email', 'push']
-          },
-          'makerActivity': {
-            'enabled': true,
-            'channels': ['inApp']
-          },
-        }),
-        quietHours:
-            json.encode({'start': '22:00', 'end': '08:00', 'timezone': 'UTC'}),
-        createdAt: now,
-        updatedAt: now,
-      );
-      return await NotificationPreferences.db.insertRow(_session, defaultPrefs);
-    }
-
-    return prefs;
+    // Use NotificationManager to get preferences with defaults
+    final notificationManager = NotificationManager(_session);
+    return await notificationManager.getPreferences(userId);
   }
 
   /// Update notification preferences
+  /// AC3: Uses notification_manager.dart to persist preferences and sync external services
+  /// AC4: Enforces critical alert immutability
   Future<NotificationPreferences> updateNotificationPreferences(
     int userId,
     int requestingUserId,
@@ -352,43 +314,9 @@ class ProfileService {
       throw Exception('Unauthorized');
     }
 
-    final now = DateTime.now().toUtc();
-    final existing = await NotificationPreferences.db.findFirstRow(
-      _session,
-      where: (t) => t.userId.equals(userId),
-    );
-
-    if (existing != null) {
-      final updated = existing.copyWith(
-        emailNotifications: prefsData['emailNotifications'] as bool?,
-        pushNotifications: prefsData['pushNotifications'] as bool?,
-        inAppNotifications: prefsData['inAppNotifications'] as bool?,
-        settings: prefsData['settings'] != null
-            ? json.encode(prefsData['settings'])
-            : null,
-        quietHours: prefsData['quietHours'] != null
-            ? json.encode(prefsData['quietHours'])
-            : null,
-        updatedAt: now,
-      );
-      return await NotificationPreferences.db.updateRow(_session, updated);
-    } else {
-      final newPrefs = NotificationPreferences(
-        userId: userId,
-        emailNotifications: prefsData['emailNotifications'] as bool? ?? true,
-        pushNotifications: prefsData['pushNotifications'] as bool? ?? true,
-        inAppNotifications: prefsData['inAppNotifications'] as bool? ?? true,
-        settings: prefsData['settings'] != null
-            ? json.encode(prefsData['settings'])
-            : json.encode({}),
-        quietHours: prefsData['quietHours'] != null
-            ? json.encode(prefsData['quietHours'])
-            : json.encode({}),
-        createdAt: now,
-        updatedAt: now,
-      );
-      return await NotificationPreferences.db.insertRow(_session, newPrefs);
-    }
+    // Use NotificationManager for business logic and external service sync
+    final notificationManager = NotificationManager(_session);
+    return await notificationManager.updatePreferences(userId, prefsData);
   }
 
   /// Export user data for DSAR (Data Subject Access Request)

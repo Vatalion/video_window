@@ -84,7 +84,7 @@ development_status:
   3-1-viewer-profile-management: done
   3-2-avatar-media-upload-system: done
   3-3-privacy-settings-and-controls: done
-  3-4-notification-preferences: ready-for-dev
+  3-4-notification-preferences-matrix: done
   3-5-account-settings-management: ready-for-dev
   epic-3-retrospective: optional
 

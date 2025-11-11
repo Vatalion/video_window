@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:core/data/repositories/profile/profile_repository.dart';
 import 'package:core/data/repositories/profile/profile_media_repository.dart';
 import 'package:core/services/analytics_service.dart';
+import 'dart:convert';
 import 'profile_event.dart';
 import 'profile_state.dart';
 import '../analytics/profile_analytics_events.dart';
@@ -186,11 +187,38 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         event.prefsData,
       );
 
-      // Emit analytics event for notification preferences change
+      // AC5: Emit analytics event with channel + frequency metadata
+      final analyticsData = <String, dynamic>{
+        'emailNotifications': event.prefsData['emailNotifications'],
+        'pushNotifications': event.prefsData['pushNotifications'],
+        'inAppNotifications': event.prefsData['inAppNotifications'],
+      };
+
+      // Include channel metadata if provided
+      if (event.prefsData.containsKey('channelMetadata')) {
+        analyticsData['channelMetadata'] = event.prefsData['channelMetadata'];
+      }
+
+      // Include quiet hours info
+      if (event.prefsData.containsKey('quietHours')) {
+        try {
+          final quietHours =
+              json.decode(event.prefsData['quietHours'] as String)
+                  as Map<String, dynamic>;
+          analyticsData['quietHours'] = {
+            'enabled': quietHours['enabled'],
+            'start': quietHours['start'],
+            'end': quietHours['end'],
+          };
+        } catch (_) {
+          // Ignore parsing errors
+        }
+      }
+
       _analyticsService?.trackEvent(
         NotificationPreferencesUpdatedEvent(
           userId: event.userId,
-          changedPreferences: event.prefsData,
+          changedPreferences: analyticsData,
         ),
       );
 

@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../bloc/profile_bloc.dart';
 import '../bloc/profile_event.dart';
 import '../bloc/profile_state.dart';
+import '../widgets/notification_channel_row.dart';
 
 /// Notification preferences page
 /// AC7: Notification preference matrix with granular controls for email, push, and in-app notifications
@@ -157,35 +158,46 @@ class _NotificationPreferencesPageState
                   const SizedBox(height: 24),
 
                   // Notification Types Matrix
+                  // AC1: Matrix of notification types (offers, bids, orders, maker activity, security alerts)
                   _buildSectionHeader('Notification Types'),
-                  _buildNotificationTypeCard(
-                    'New Offers',
-                    'Get notified when you receive new offers',
-                    'new_offers',
+                  _buildNotificationTypeRow(
+                    notificationType: 'offers',
+                    title: 'Offers',
+                    description: 'Get notified when you receive new offers',
+                    isCritical: false,
                   ),
-                  _buildNotificationTypeCard(
-                    'Outbid Alerts',
-                    'Get notified when you are outbid',
-                    'outbid_alerts',
+                  const SizedBox(height: 8),
+                  _buildNotificationTypeRow(
+                    notificationType: 'bids',
+                    title: 'Bids',
+                    description: 'Get notified about bid activity',
+                    isCritical: false,
                   ),
-                  _buildNotificationTypeCard(
-                    'Auction Ending Reminders',
-                    'Get reminded when auctions are ending',
-                    'auction_ending',
+                  const SizedBox(height: 8),
+                  _buildNotificationTypeRow(
+                    notificationType: 'orders',
+                    title: 'Orders',
+                    description: 'Get notified about order status changes',
+                    isCritical: false,
                   ),
-                  _buildNotificationTypeCard(
-                    'Order Updates',
-                    'Get notified about order status changes',
-                    'order_updates',
+                  const SizedBox(height: 8),
+                  _buildNotificationTypeRow(
+                    notificationType: 'maker_activity',
+                    title: 'Maker Activity',
+                    description: 'Get notified about maker activity',
+                    isCritical: false,
                   ),
-                  _buildNotificationTypeCard(
-                    'Maker Activity',
-                    'Get notified about maker activity',
-                    'maker_activity',
+                  const SizedBox(height: 8),
+                  _buildNotificationTypeRow(
+                    notificationType: 'security_alert',
+                    title: 'Security Alerts',
+                    description: 'Critical security and account notifications',
+                    isCritical: true, // AC4: Critical alerts cannot be disabled
                   ),
                   const SizedBox(height: 24),
 
                   // Quiet Hours Section
+                  // AC2: Quiet hours editor with modal
                   _buildSectionHeader('Quiet Hours'),
                   _buildQuietHoursCard(),
                   const SizedBox(height: 32),
@@ -229,104 +241,52 @@ class _NotificationPreferencesPageState
     );
   }
 
-  Widget _buildNotificationTypeCard(
-    String title,
-    String description,
-    String typeKey,
-  ) {
-    final typeSettings = _settings[typeKey] as Map<String, dynamic>? ?? {};
-    final emailEnabled = typeSettings['email'] as bool? ?? true;
-    final pushEnabled = typeSettings['push'] as bool? ?? true;
-    final inAppEnabled = typeSettings['inApp'] as bool? ?? true;
+  Widget _buildNotificationTypeRow({
+    required String notificationType,
+    required String title,
+    required String description,
+    required bool isCritical,
+  }) {
+    final typeSettings =
+        _settings[notificationType] as Map<String, dynamic>? ?? {};
+    final channels = typeSettings['channels'] as List<dynamic>? ??
+        ['email', 'push', 'inApp'];
+    final emailEnabled = channels.contains('email');
+    final pushEnabled = channels.contains('push');
+    final inAppEnabled = channels.contains('inApp');
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              description,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: CheckboxListTile(
-                    title: const Text('Email'),
-                    value: emailEnabled && (_emailNotifications ?? true),
-                    onChanged: (_emailNotifications ?? true)
-                        ? (value) {
-                            setState(() {
-                              _settings[typeKey] = {
-                                ...typeSettings,
-                                'email': value ?? false,
-                              };
-                              _hasChanges = true;
-                            });
-                          }
-                        : null,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    dense: true,
-                  ),
-                ),
-                Expanded(
-                  child: CheckboxListTile(
-                    title: const Text('Push'),
-                    value: pushEnabled && (_pushNotifications ?? true),
-                    onChanged: (_pushNotifications ?? true)
-                        ? (value) {
-                            setState(() {
-                              _settings[typeKey] = {
-                                ...typeSettings,
-                                'push': value ?? false,
-                              };
-                              _hasChanges = true;
-                            });
-                          }
-                        : null,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    dense: true,
-                  ),
-                ),
-                Expanded(
-                  child: CheckboxListTile(
-                    title: const Text('In-App'),
-                    value: inAppEnabled && (_inAppNotifications ?? true),
-                    onChanged: (_inAppNotifications ?? true)
-                        ? (value) {
-                            setState(() {
-                              _settings[typeKey] = {
-                                ...typeSettings,
-                                'inApp': value ?? false,
-                              };
-                              _hasChanges = true;
-                            });
-                          }
-                        : null,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    dense: true,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+    return NotificationChannelRow(
+      notificationType: notificationType,
+      title: title,
+      description: description,
+      emailEnabled: emailEnabled,
+      pushEnabled: pushEnabled,
+      inAppEnabled: inAppEnabled,
+      emailGlobalEnabled: _emailNotifications ?? true,
+      pushGlobalEnabled: _pushNotifications ?? true,
+      inAppGlobalEnabled: _inAppNotifications ?? true,
+      isCritical: isCritical,
+      onChannelsChanged: (channels) {
+        setState(() {
+          final enabledChannels = <String>[];
+          if (channels['email'] == true) enabledChannels.add('email');
+          if (channels['push'] == true) enabledChannels.add('push');
+          if (channels['inApp'] == true) enabledChannels.add('inApp');
+
+          _settings[notificationType] = {
+            'enabled': enabledChannels.isNotEmpty,
+            'channels': enabledChannels,
+          };
+          _hasChanges = true;
+        });
+      },
     );
   }
 
   Widget _buildQuietHoursCard() {
-    final startHour = _quietHours['startHour'] as int? ?? 22;
-    final endHour = _quietHours['endHour'] as int? ?? 8;
+    // AC2: Parse quiet hours from format { start: "22:00", end: "07:00" }
+    final startTime = _quietHours['start'] as String? ?? '22:00';
+    final endTime = _quietHours['end'] as String? ?? '07:00';
     final enabled = _quietHours['enabled'] as bool? ?? false;
 
     return Card(
@@ -338,7 +298,7 @@ class _NotificationPreferencesPageState
             SwitchListTile(
               title: const Text('Enable Quiet Hours'),
               subtitle: const Text(
-                'Disable push and email notifications during specified hours',
+                'Disable push and email notifications during specified hours (local timezone)',
               ),
               value: enabled,
               onChanged: (value) {
@@ -358,24 +318,28 @@ class _NotificationPreferencesPageState
                       children: [
                         const Text('Start Time'),
                         const SizedBox(height: 8),
-                        DropdownButton<int>(
-                          value: startHour,
-                          isExpanded: true,
-                          items: List.generate(24, (i) => i)
-                              .map((hour) => DropdownMenuItem(
-                                    value: hour,
-                                    child: Text(
-                                        '${hour.toString().padLeft(2, '0')}:00'),
-                                  ))
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() {
-                                _quietHours['startHour'] = value;
-                                _hasChanges = true;
-                              });
-                            }
-                          },
+                        InkWell(
+                          onTap: () => _showQuietHoursTimePicker(true),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 16,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  startTime,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                                const Icon(Icons.access_time),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -387,24 +351,28 @@ class _NotificationPreferencesPageState
                       children: [
                         const Text('End Time'),
                         const SizedBox(height: 8),
-                        DropdownButton<int>(
-                          value: endHour,
-                          isExpanded: true,
-                          items: List.generate(24, (i) => i)
-                              .map((hour) => DropdownMenuItem(
-                                    value: hour,
-                                    child: Text(
-                                        '${hour.toString().padLeft(2, '0')}:00'),
-                                  ))
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() {
-                                _quietHours['endHour'] = value;
-                                _hasChanges = true;
-                              });
-                            }
-                          },
+                        InkWell(
+                          onTap: () => _showQuietHoursTimePicker(false),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 16,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  endTime,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                                const Icon(Icons.access_time),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -416,6 +384,47 @@ class _NotificationPreferencesPageState
         ),
       ),
     );
+  }
+
+  // AC2: Quiet hours modal for time selection
+  void _showQuietHoursTimePicker(bool isStartTime) {
+    final currentTime = isStartTime
+        ? (_quietHours['start'] as String? ?? '22:00')
+        : (_quietHours['end'] as String? ?? '07:00');
+    final parts = currentTime.split(':');
+    final currentHour = int.parse(parts[0]);
+    final currentMinute = int.parse(parts[1]);
+
+    showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(
+        hour: currentHour,
+        minute: currentMinute,
+      ),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    ).then((selectedTime) {
+      if (selectedTime != null) {
+        setState(() {
+          final timeString =
+              '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}';
+          if (isStartTime) {
+            _quietHours['start'] = timeString;
+          } else {
+            _quietHours['end'] = timeString;
+          }
+          _hasChanges = true;
+        });
+      }
+    });
   }
 
   Widget _buildCriticalNote() {
@@ -460,6 +469,24 @@ class _NotificationPreferencesPageState
       return;
     }
 
+    // AC2: Format quiet hours as { start: "22:00", end: "07:00" }
+    final formattedQuietHours = {
+      'enabled': _quietHours['enabled'] ?? false,
+      'start': _quietHours['start'] ?? '22:00',
+      'end': _quietHours['end'] ?? '07:00',
+    };
+
+    // AC5: Prepare analytics metadata with channel + frequency info
+    final channelMetadata = <String, dynamic>{};
+    for (final entry in _settings.entries) {
+      final typeSettings = entry.value as Map<String, dynamic>? ?? {};
+      final channels = typeSettings['channels'] as List<dynamic>? ?? [];
+      channelMetadata[entry.key] = {
+        'channels': channels,
+        'enabled': typeSettings['enabled'] ?? true,
+      };
+    }
+
     context.read<ProfileBloc>().add(
           NotificationPreferencesUpdateRequested(
             widget.userId,
@@ -468,7 +495,9 @@ class _NotificationPreferencesPageState
               'pushNotifications': _pushNotifications!,
               'inAppNotifications': _inAppNotifications!,
               'settings': jsonEncode(_settings),
-              'quietHours': jsonEncode(_quietHours),
+              'quietHours': jsonEncode(formattedQuietHours),
+              // AC5: Include channel metadata for analytics
+              'channelMetadata': channelMetadata,
             },
           ),
         );
