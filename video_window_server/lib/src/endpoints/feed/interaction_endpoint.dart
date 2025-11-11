@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:serverpod/serverpod.dart';
+import '../../generated/feed/user_interaction.dart';
 
 /// Interaction endpoint for recording feed interactions
 /// AC3: Streams events to Kafka topic feed.interactions.v1 with schema
@@ -46,19 +47,39 @@ class InteractionEndpoint extends Endpoint {
         level: LogLevel.info,
       );
 
-      // Persist to user_interactions table
-      // TODO: Implement database insert when table schema is ready
-      // await session.db.insert(
-      //   'user_interactions',
-      //   {
-      //     'user_id': userId,
-      //     'video_id': videoId,
-      //     'interaction_type': interactionType,
-      //     'watch_time': watchTime,
-      //     'timestamp': timestamp,
-      //     'recommendation_score': metadata?['recommendation_score'],
-      //   },
-      // );
+      // AC3: Persist to user_interactions table
+      try {
+        // Convert userId from String to int (assuming it's numeric)
+        final userIdInt = int.tryParse(userId) ?? 0;
+        if (userIdInt == 0) {
+          session.log(
+            'Invalid userId format: $userId',
+            level: LogLevel.warning,
+          );
+        }
+
+        final interaction = UserInteraction(
+          userId: userIdInt,
+          videoId: videoId,
+          interactionType: interactionType,
+          watchTimeSeconds: watchTime,
+          metadata: metadata != null ? jsonEncode(metadata) : null,
+          createdAt: DateTime.now().toUtc(),
+        );
+
+        await UserInteraction.db.insertRow(session, interaction);
+
+        session.log(
+          'Interaction persisted to database: $interactionType for video $videoId',
+          level: LogLevel.info,
+        );
+      } catch (e) {
+        // Log error but don't fail the request - Kafka logging is more critical
+        session.log(
+          'Failed to persist interaction to database: $e',
+          level: LogLevel.warning,
+        );
+      }
 
       session.log(
         'Interaction recorded: $interactionType for video $videoId by user $userId',

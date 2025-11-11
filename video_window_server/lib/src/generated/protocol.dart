@@ -33,16 +33,17 @@ import 'capabilities/user_capabilities.dart' as _i21;
 import 'capabilities/verification_task.dart' as _i22;
 import 'capabilities/verification_task_status.dart' as _i23;
 import 'capabilities/verification_task_type.dart' as _i24;
-import 'profile/dsar_request.dart' as _i25;
-import 'profile/media_file.dart' as _i26;
-import 'profile/notification_preferences.dart' as _i27;
-import 'profile/privacy_audit_log.dart' as _i28;
-import 'profile/privacy_settings.dart' as _i29;
-import 'profile/user_profile.dart' as _i30;
+import 'feed/user_interaction.dart' as _i25;
+import 'profile/dsar_request.dart' as _i26;
+import 'profile/media_file.dart' as _i27;
+import 'profile/notification_preferences.dart' as _i28;
+import 'profile/privacy_audit_log.dart' as _i29;
+import 'profile/privacy_settings.dart' as _i30;
+import 'profile/user_profile.dart' as _i31;
 import 'package:video_window_server/src/generated/capabilities/capability_request.dart'
-    as _i31;
-import 'package:video_window_server/src/generated/capabilities/trusted_device.dart'
     as _i32;
+import 'package:video_window_server/src/generated/capabilities/trusted_device.dart'
+    as _i33;
 export 'greeting.dart';
 export 'auth/auth_tokens.dart';
 export 'auth/otp.dart';
@@ -65,6 +66,7 @@ export 'capabilities/user_capabilities.dart';
 export 'capabilities/verification_task.dart';
 export 'capabilities/verification_task_status.dart';
 export 'capabilities/verification_task_type.dart';
+export 'feed/user_interaction.dart';
 export 'profile/dsar_request.dart';
 export 'profile/media_file.dart';
 export 'profile/notification_preferences.dart';
@@ -1430,6 +1432,150 @@ class Protocol extends _i1.SerializationManagerServer {
       managed: true,
     ),
     _i2.TableDefinition(
+      name: 'user_interactions',
+      dartName: 'UserInteraction',
+      schema: 'public',
+      module: 'video_window',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'user_interactions_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'videoId',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'interactionType',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'watchTimeSeconds',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'metadata',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'user_interactions_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'interaction_user_id_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'interaction_video_id_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'videoId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'interaction_type_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'interactionType',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'interaction_composite_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'videoId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'interactionType',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
       name: 'user_notification_preferences',
       dartName: 'NotificationPreferences',
       schema: 'public',
@@ -2069,23 +2215,26 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i24.VerificationTaskType) {
       return _i24.VerificationTaskType.fromJson(data) as T;
     }
-    if (t == _i25.DsarRequest) {
-      return _i25.DsarRequest.fromJson(data) as T;
+    if (t == _i25.UserInteraction) {
+      return _i25.UserInteraction.fromJson(data) as T;
     }
-    if (t == _i26.MediaFile) {
-      return _i26.MediaFile.fromJson(data) as T;
+    if (t == _i26.DsarRequest) {
+      return _i26.DsarRequest.fromJson(data) as T;
     }
-    if (t == _i27.NotificationPreferences) {
-      return _i27.NotificationPreferences.fromJson(data) as T;
+    if (t == _i27.MediaFile) {
+      return _i27.MediaFile.fromJson(data) as T;
     }
-    if (t == _i28.PrivacyAuditLog) {
-      return _i28.PrivacyAuditLog.fromJson(data) as T;
+    if (t == _i28.NotificationPreferences) {
+      return _i28.NotificationPreferences.fromJson(data) as T;
     }
-    if (t == _i29.PrivacySettings) {
-      return _i29.PrivacySettings.fromJson(data) as T;
+    if (t == _i29.PrivacyAuditLog) {
+      return _i29.PrivacyAuditLog.fromJson(data) as T;
     }
-    if (t == _i30.UserProfile) {
-      return _i30.UserProfile.fromJson(data) as T;
+    if (t == _i30.PrivacySettings) {
+      return _i30.PrivacySettings.fromJson(data) as T;
+    }
+    if (t == _i31.UserProfile) {
+      return _i31.UserProfile.fromJson(data) as T;
     }
     if (t == _i1.getType<_i3.Greeting?>()) {
       return (data != null ? _i3.Greeting.fromJson(data) : null) as T;
@@ -2161,42 +2310,50 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data != null ? _i24.VerificationTaskType.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i25.DsarRequest?>()) {
-      return (data != null ? _i25.DsarRequest.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i25.UserInteraction?>()) {
+      return (data != null ? _i25.UserInteraction.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i26.MediaFile?>()) {
-      return (data != null ? _i26.MediaFile.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i26.DsarRequest?>()) {
+      return (data != null ? _i26.DsarRequest.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i27.NotificationPreferences?>()) {
-      return (data != null ? _i27.NotificationPreferences.fromJson(data) : null)
+    if (t == _i1.getType<_i27.MediaFile?>()) {
+      return (data != null ? _i27.MediaFile.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i28.NotificationPreferences?>()) {
+      return (data != null ? _i28.NotificationPreferences.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i28.PrivacyAuditLog?>()) {
-      return (data != null ? _i28.PrivacyAuditLog.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i29.PrivacyAuditLog?>()) {
+      return (data != null ? _i29.PrivacyAuditLog.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i29.PrivacySettings?>()) {
-      return (data != null ? _i29.PrivacySettings.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i30.PrivacySettings?>()) {
+      return (data != null ? _i30.PrivacySettings.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i30.UserProfile?>()) {
-      return (data != null ? _i30.UserProfile.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i31.UserProfile?>()) {
+      return (data != null ? _i31.UserProfile.fromJson(data) : null) as T;
     }
     if (t == Map<String, String>) {
       return (data as Map).map((k, v) =>
           MapEntry(deserialize<String>(k), deserialize<String>(v))) as T;
     }
-    if (t == List<_i31.CapabilityRequest>) {
+    if (t == List<_i32.CapabilityRequest>) {
       return (data as List)
-          .map((e) => deserialize<_i31.CapabilityRequest>(e))
+          .map((e) => deserialize<_i32.CapabilityRequest>(e))
           .toList() as T;
     }
     if (t == Map<String, dynamic>) {
       return (data as Map).map((k, v) =>
           MapEntry(deserialize<String>(k), deserialize<dynamic>(v))) as T;
     }
-    if (t == List<_i32.TrustedDevice>) {
+    if (t == List<_i33.TrustedDevice>) {
       return (data as List)
-          .map((e) => deserialize<_i32.TrustedDevice>(e))
+          .map((e) => deserialize<_i33.TrustedDevice>(e))
           .toList() as T;
+    }
+    if (t == _i1.getType<List<String>?>()) {
+      return (data != null
+          ? (data as List).map((e) => deserialize<String>(e)).toList()
+          : null) as T;
     }
     if (t == _i1.getType<Map<String, dynamic>?>()) {
       return (data != null
@@ -2285,22 +2442,25 @@ class Protocol extends _i1.SerializationManagerServer {
     if (data is _i24.VerificationTaskType) {
       return 'VerificationTaskType';
     }
-    if (data is _i25.DsarRequest) {
+    if (data is _i25.UserInteraction) {
+      return 'UserInteraction';
+    }
+    if (data is _i26.DsarRequest) {
       return 'DsarRequest';
     }
-    if (data is _i26.MediaFile) {
+    if (data is _i27.MediaFile) {
       return 'MediaFile';
     }
-    if (data is _i27.NotificationPreferences) {
+    if (data is _i28.NotificationPreferences) {
       return 'NotificationPreferences';
     }
-    if (data is _i28.PrivacyAuditLog) {
+    if (data is _i29.PrivacyAuditLog) {
       return 'PrivacyAuditLog';
     }
-    if (data is _i29.PrivacySettings) {
+    if (data is _i30.PrivacySettings) {
       return 'PrivacySettings';
     }
-    if (data is _i30.UserProfile) {
+    if (data is _i31.UserProfile) {
       return 'UserProfile';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -2382,23 +2542,26 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'VerificationTaskType') {
       return deserialize<_i24.VerificationTaskType>(data['data']);
     }
+    if (dataClassName == 'UserInteraction') {
+      return deserialize<_i25.UserInteraction>(data['data']);
+    }
     if (dataClassName == 'DsarRequest') {
-      return deserialize<_i25.DsarRequest>(data['data']);
+      return deserialize<_i26.DsarRequest>(data['data']);
     }
     if (dataClassName == 'MediaFile') {
-      return deserialize<_i26.MediaFile>(data['data']);
+      return deserialize<_i27.MediaFile>(data['data']);
     }
     if (dataClassName == 'NotificationPreferences') {
-      return deserialize<_i27.NotificationPreferences>(data['data']);
+      return deserialize<_i28.NotificationPreferences>(data['data']);
     }
     if (dataClassName == 'PrivacyAuditLog') {
-      return deserialize<_i28.PrivacyAuditLog>(data['data']);
+      return deserialize<_i29.PrivacyAuditLog>(data['data']);
     }
     if (dataClassName == 'PrivacySettings') {
-      return deserialize<_i29.PrivacySettings>(data['data']);
+      return deserialize<_i30.PrivacySettings>(data['data']);
     }
     if (dataClassName == 'UserProfile') {
-      return deserialize<_i30.UserProfile>(data['data']);
+      return deserialize<_i31.UserProfile>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -2436,18 +2599,20 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i21.UserCapabilities.t;
       case _i22.VerificationTask:
         return _i22.VerificationTask.t;
-      case _i25.DsarRequest:
-        return _i25.DsarRequest.t;
-      case _i26.MediaFile:
-        return _i26.MediaFile.t;
-      case _i27.NotificationPreferences:
-        return _i27.NotificationPreferences.t;
-      case _i28.PrivacyAuditLog:
-        return _i28.PrivacyAuditLog.t;
-      case _i29.PrivacySettings:
-        return _i29.PrivacySettings.t;
-      case _i30.UserProfile:
-        return _i30.UserProfile.t;
+      case _i25.UserInteraction:
+        return _i25.UserInteraction.t;
+      case _i26.DsarRequest:
+        return _i26.DsarRequest.t;
+      case _i27.MediaFile:
+        return _i27.MediaFile.t;
+      case _i28.NotificationPreferences:
+        return _i28.NotificationPreferences.t;
+      case _i29.PrivacyAuditLog:
+        return _i29.PrivacyAuditLog.t;
+      case _i30.PrivacySettings:
+        return _i30.PrivacySettings.t;
+      case _i31.UserProfile:
+        return _i31.UserProfile.t;
     }
     return null;
   }

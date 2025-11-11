@@ -189,6 +189,107 @@ class EndpointDevice extends _i1.EndpointRef {
       );
 }
 
+/// Feed endpoint for video feed operations
+/// AC1, AC2: Feed pagination and video retrieval
+/// {@category Endpoint}
+class EndpointFeed extends _i1.EndpointRef {
+  EndpointFeed(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'feed';
+
+  /// Get feed videos with pagination
+  /// AC1, AC2: Cursor-based pagination with max page size enforcement
+  _i2.Future<Map<String, dynamic>> getFeedVideos({
+    String? userId,
+    required String algorithm,
+    required int limit,
+    String? cursor,
+    List<String>? excludeVideoIds,
+    List<String>? preferredTags,
+  }) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'feed',
+        'getFeedVideos',
+        {
+          'userId': userId,
+          'algorithm': algorithm,
+          'limit': limit,
+          'cursor': cursor,
+          'excludeVideoIds': excludeVideoIds,
+          'preferredTags': preferredTags,
+        },
+      );
+
+  /// Record video interaction
+  /// AC3 (Story 4-5): Delegates to interaction endpoint for Kafka streaming
+  /// AC8: Track engagement metrics
+  _i2.Future<Map<String, dynamic>> recordInteraction({
+    required String userId,
+    required String videoId,
+    required String interaction,
+    int? watchTime,
+    Map<String, dynamic>? metadata,
+  }) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'feed',
+        'recordInteraction',
+        {
+          'userId': userId,
+          'videoId': videoId,
+          'interaction': interaction,
+          'watchTime': watchTime,
+          'metadata': metadata,
+        },
+      );
+
+  /// Update feed preferences
+  _i2.Future<Map<String, dynamic>> updatePreferences({
+    required String userId,
+    required Map<String, dynamic> configuration,
+  }) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'feed',
+        'updatePreferences',
+        {
+          'userId': userId,
+          'configuration': configuration,
+        },
+      );
+}
+
+/// Interaction endpoint for recording feed interactions
+/// AC3: Streams events to Kafka topic feed.interactions.v1 with schema
+/// {userId, videoId, interactionType, watchTime, timestamp}
+/// {@category Endpoint}
+class EndpointInteraction extends _i1.EndpointRef {
+  EndpointInteraction(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'interaction';
+
+  /// Record video interaction and stream to Kafka
+  /// AC3: Enqueues Kafka messages and persists to user_interactions table
+  _i2.Future<Map<String, dynamic>> recordInteraction({
+    required String userId,
+    required String videoId,
+    required String interactionType,
+    int? watchTime,
+    Map<String, dynamic>? metadata,
+  }) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'interaction',
+        'recordInteraction',
+        {
+          'userId': userId,
+          'videoId': videoId,
+          'interactionType': interactionType,
+          'watchTime': watchTime,
+          'metadata': metadata,
+        },
+      );
+}
+
 /// Health check endpoint for monitoring and smoke tests
 /// {@category Endpoint}
 class EndpointHealth extends _i1.EndpointRef {
@@ -597,7 +698,8 @@ class EndpointProfile extends _i1.EndpointRef {
 
   /// Update notification preferences
   /// PUT /profile/notifications
-  /// AC7: Notification preference matrix with granular controls
+  /// AC3: Notification preference matrix with granular controls
+  /// AC4: Enforces critical alert immutability - critical security alerts cannot be disabled
   _i2.Future<_i10.NotificationPreferences> updateNotificationPreferences(
     int userId,
     Map<String, dynamic> prefsData,
@@ -628,6 +730,66 @@ class EndpointProfile extends _i1.EndpointRef {
       caller.callServerEndpoint<void>(
         'profile',
         'deleteUserData',
+        {'userId': userId},
+      );
+
+  /// Request DSAR export (Story 3-5)
+  /// GET /profile/dsar/export
+  /// AC2: DSAR export generates downloadable package within 24 hours
+  /// AC4: Requires re-authentication (OTP) if last auth > 10 minutes
+  _i2.Future<Map<String, dynamic>> requestDSARExport(
+    int userId, {
+    String? otpCode,
+  }) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'profile',
+        'requestDSARExport',
+        {
+          'userId': userId,
+          'otpCode': otpCode,
+        },
+      );
+
+  /// Get DSAR export status (Story 3-5)
+  /// GET /profile/dsar/export/{exportId}
+  /// AC2: Surfaces status/progress in UI with polling
+  _i2.Future<Map<String, dynamic>> getDSARExportStatus(
+    int userId,
+    String exportId,
+  ) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'profile',
+        'getDSARExportStatus',
+        {
+          'userId': userId,
+          'exportId': exportId,
+        },
+      );
+
+  /// Delete account (Story 3-5)
+  /// DELETE /profile/account
+  /// AC3: Account deletion workflow anonymizes profile, revokes tokens, deletes media, and queues background cleanup
+  /// AC4: Requires re-authentication (OTP) if last auth > 10 minutes
+  _i2.Future<void> deleteAccount(
+    int userId, {
+    String? otpCode,
+  }) =>
+      caller.callServerEndpoint<void>(
+        'profile',
+        'deleteAccount',
+        {
+          'userId': userId,
+          'otpCode': otpCode,
+        },
+      );
+
+  /// Revoke all sessions (Story 3-5)
+  /// POST /profile/sessions/revoke-all
+  /// AC1: Account settings tab offers session revocation
+  _i2.Future<void> revokeAllSessions(int userId) =>
+      caller.callServerEndpoint<void>(
+        'profile',
+        'revokeAllSessions',
         {'userId': userId},
       );
 }
@@ -737,6 +899,8 @@ class Client extends _i1.ServerpodClientShared {
         ) {
     capability = EndpointCapability(this);
     device = EndpointDevice(this);
+    feed = EndpointFeed(this);
+    interaction = EndpointInteraction(this);
     health = EndpointHealth(this);
     auth = EndpointAuth(this);
     metrics = EndpointMetrics(this);
@@ -753,6 +917,10 @@ class Client extends _i1.ServerpodClientShared {
   late final EndpointCapability capability;
 
   late final EndpointDevice device;
+
+  late final EndpointFeed feed;
+
+  late final EndpointInteraction interaction;
 
   late final EndpointHealth health;
 
@@ -780,6 +948,8 @@ class Client extends _i1.ServerpodClientShared {
   Map<String, _i1.EndpointRef> get endpointRefLookup => {
         'capability': capability,
         'device': device,
+        'feed': feed,
+        'interaction': interaction,
         'health': health,
         'auth': auth,
         'metrics': metrics,

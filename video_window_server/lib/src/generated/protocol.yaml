@@ -9,6 +9,12 @@ device:
   - registerDevice:
   - getDevices:
   - revokeDevice:
+feed:
+  - getFeedVideos:
+  - recordInteraction:
+  - updatePreferences:
+interaction:
+  - recordInteraction:
 health:
   - check:
 auth:
@@ -44,6 +50,10 @@ profile:
   - updateNotificationPreferences:
   - exportUserData:
   - deleteUserData:
+  - requestDSARExport:
+  - getDSARExportStatus:
+  - deleteAccount:
+  - revokeAllSessions:
 story:
   - getFeed:
   - getStory:

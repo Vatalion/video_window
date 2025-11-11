@@ -121,6 +121,10 @@ class TestEndpoints {
 
   late final _DeviceEndpoint device;
 
+  late final _FeedEndpoint feed;
+
+  late final _InteractionEndpoint interaction;
+
   late final _HealthEndpoint health;
 
   late final _AuthEndpoint auth;
@@ -156,6 +160,14 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     device = _DeviceEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    feed = _FeedEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    interaction = _InteractionEndpoint(
       endpoints,
       serializationManager,
     );
@@ -509,6 +521,180 @@ class _DeviceEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _i3.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _FeedEndpoint {
+  _FeedEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<Map<String, dynamic>> getFeedVideos(
+    _i1.TestSessionBuilder sessionBuilder, {
+    String? userId,
+    required String algorithm,
+    required int limit,
+    String? cursor,
+    List<String>? excludeVideoIds,
+    List<String>? preferredTags,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'feed',
+        method: 'getFeedVideos',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'feed',
+          methodName: 'getFeedVideos',
+          parameters: _i1.testObjectToJson({
+            'userId': userId,
+            'algorithm': algorithm,
+            'limit': limit,
+            'cursor': cursor,
+            'excludeVideoIds': excludeVideoIds,
+            'preferredTags': preferredTags,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<Map<String, dynamic>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<Map<String, dynamic>> recordInteraction(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String userId,
+    required String videoId,
+    required String interaction,
+    int? watchTime,
+    Map<String, dynamic>? metadata,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'feed',
+        method: 'recordInteraction',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'feed',
+          methodName: 'recordInteraction',
+          parameters: _i1.testObjectToJson({
+            'userId': userId,
+            'videoId': videoId,
+            'interaction': interaction,
+            'watchTime': watchTime,
+            'metadata': metadata,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<Map<String, dynamic>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<Map<String, dynamic>> updatePreferences(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String userId,
+    required Map<String, dynamic> configuration,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'feed',
+        method: 'updatePreferences',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'feed',
+          methodName: 'updatePreferences',
+          parameters: _i1.testObjectToJson({
+            'userId': userId,
+            'configuration': configuration,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<Map<String, dynamic>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _InteractionEndpoint {
+  _InteractionEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<Map<String, dynamic>> recordInteraction(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String userId,
+    required String videoId,
+    required String interactionType,
+    int? watchTime,
+    Map<String, dynamic>? metadata,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'interaction',
+        method: 'recordInteraction',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'interaction',
+          methodName: 'recordInteraction',
+          parameters: _i1.testObjectToJson({
+            'userId': userId,
+            'videoId': videoId,
+            'interactionType': interactionType,
+            'watchTime': watchTime,
+            'metadata': metadata,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<Map<String, dynamic>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1434,6 +1620,134 @@ class _ProfileEndpoint {
           createSessionCallback: (_) => _localUniqueSession,
           endpointPath: 'profile',
           methodName: 'deleteUserData',
+          parameters: _i1.testObjectToJson({'userId': userId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<Map<String, dynamic>> requestDSARExport(
+    _i1.TestSessionBuilder sessionBuilder,
+    int userId, {
+    String? otpCode,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'profile',
+        method: 'requestDSARExport',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'profile',
+          methodName: 'requestDSARExport',
+          parameters: _i1.testObjectToJson({
+            'userId': userId,
+            'otpCode': otpCode,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<Map<String, dynamic>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<Map<String, dynamic>> getDSARExportStatus(
+    _i1.TestSessionBuilder sessionBuilder,
+    int userId,
+    String exportId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'profile',
+        method: 'getDSARExportStatus',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'profile',
+          methodName: 'getDSARExportStatus',
+          parameters: _i1.testObjectToJson({
+            'userId': userId,
+            'exportId': exportId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<Map<String, dynamic>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<void> deleteAccount(
+    _i1.TestSessionBuilder sessionBuilder,
+    int userId, {
+    String? otpCode,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'profile',
+        method: 'deleteAccount',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'profile',
+          methodName: 'deleteAccount',
+          parameters: _i1.testObjectToJson({
+            'userId': userId,
+            'otpCode': otpCode,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<void> revokeAllSessions(
+    _i1.TestSessionBuilder sessionBuilder,
+    int userId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'profile',
+        method: 'revokeAllSessions',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'profile',
+          methodName: 'revokeAllSessions',
           parameters: _i1.testObjectToJson({'userId': userId}),
           serializationManager: _serializationManager,
         );

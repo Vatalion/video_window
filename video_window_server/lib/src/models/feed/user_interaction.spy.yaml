@@ -1,0 +1,20 @@
+class: UserInteraction
+table: user_interactions
+fields:
+  id: int?
+  userId: int
+  videoId: String
+  interactionType: String
+  watchTimeSeconds: int?
+  metadata: String? # JSONB stored as String
+  createdAt: DateTime
+indexes:
+  interaction_user_id_idx:
+    fields: userId, createdAt
+  interaction_video_id_idx:
+    fields: videoId, createdAt
+  interaction_type_idx:
+    fields: interactionType, createdAt
+  interaction_composite_idx:
+    fields: userId, videoId, interactionType, createdAt
+
