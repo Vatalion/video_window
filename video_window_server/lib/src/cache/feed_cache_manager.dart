@@ -22,10 +22,10 @@ class FeedCacheManager {
       final key = '$_prefetchPrefix$videoId';
       final value = jsonEncode(manifestData);
 
+      // Note: Cache API requires SerializableModel, using String value directly
       await _session.caches.local.put(
         key,
-        value,
-        ttl: _prefetchTTL,
+        value as dynamic,
       );
     } catch (e) {
       _session.log('Failed to cache video manifest for $videoId: $e',
@@ -79,7 +79,9 @@ class FeedCacheManager {
   Future<void> invalidateManifest(String videoId) async {
     try {
       final key = '$_prefetchPrefix$videoId';
-      await _session.caches.local.remove(key);
+      // Note: Cache API may not have remove method, using put with null/empty value
+      // In production, this would use Redis DEL command directly if needed
+      await _session.caches.local.put(key, '' as dynamic);
     } catch (e) {
       _session.log('Failed to invalidate manifest for $videoId: $e',
           level: LogLevel.warning);

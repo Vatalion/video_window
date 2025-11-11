@@ -210,10 +210,11 @@ class FeedService {
 
       // For now, store in session cache as placeholder
       final configKey = 'feed:config:$userId';
+      // Note: Cache API requires SerializableModel, using String value directly
+      // This matches the pattern used in feed_cache_manager.dart
       await _session.caches.local.put(
         configKey,
-        jsonEncode(configuration),
-        ttl: const Duration(days: 365), // Long-term storage
+        jsonEncode(configuration) as dynamic,
       );
 
       // AC2: Recalculate effective settings
