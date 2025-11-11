@@ -72,3 +72,31 @@ class FeedVideoPlaybackStateChanged extends FeedEvent {
   @override
   List<Object?> get props => [videoId, isPlaying];
 }
+
+/// Toggle like status for a video
+class FeedToggleLike extends FeedEvent {
+  final String videoId;
+  final bool isLiked;
+
+  const FeedToggleLike({
+    required this.videoId,
+    required this.isLiked,
+  });
+
+  @override
+  List<Object?> get props => [videoId, isLiked];
+}
+
+/// Toggle wishlist status for a video
+class FeedToggleWishlist extends FeedEvent {
+  final String videoId;
+  final bool isInWishlist;
+
+  const FeedToggleWishlist({
+    required this.videoId,
+    required this.isInWishlist,
+  });
+
+  @override
+  List<Object?> get props => [videoId, isInWishlist];
+}

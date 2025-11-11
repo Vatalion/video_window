@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/repositories/feed_repository.dart';
 import '../../domain/entities/video.dart';
+import '../../domain/entities/video_interaction.dart';
 import 'feed_event.dart';
 import 'feed_state.dart';
 
@@ -26,6 +27,8 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     on<FeedVideoInteraction>(_onVideoInteraction);
     on<FeedVideoVisibilityChanged>(_onVideoVisibilityChanged);
     on<FeedVideoPlaybackStateChanged>(_onVideoPlaybackStateChanged);
+    on<FeedToggleLike>(_onToggleLike);
+    on<FeedToggleWishlist>(_onToggleWishlist);
   }
 
   @override
@@ -174,5 +177,66 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     emit(currentState.copyWith(
       videoPlaybackStates: newPlaybackStates,
     ));
+  }
+
+  Future<void> _onToggleLike(
+    FeedToggleLike event,
+    Emitter<FeedState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! FeedLoaded) return;
+
+    // Optimistic update
+    final newLikedVideos = Map<String, bool>.from(currentState.likedVideos);
+    newLikedVideos[event.videoId] = event.isLiked;
+
+    emit(currentState.copyWith(likedVideos: newLikedVideos));
+
+    // Record interaction asynchronously
+    try {
+      await _repository.recordInteraction(
+        userId: _userId ?? 'anonymous',
+        videoId: event.videoId,
+        type: event.isLiked
+            ? InteractionType.like
+            : InteractionType.skip, // Use skip as unlike
+      );
+    } catch (e) {
+      // Rollback on failure
+      final rollbackLikedVideos =
+          Map<String, bool>.from(currentState.likedVideos);
+      rollbackLikedVideos[event.videoId] = !event.isLiked;
+      emit(currentState.copyWith(likedVideos: rollbackLikedVideos));
+    }
+  }
+
+  Future<void> _onToggleWishlist(
+    FeedToggleWishlist event,
+    Emitter<FeedState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! FeedLoaded) return;
+
+    // Optimistic update
+    final newWishlistedVideos =
+        Map<String, bool>.from(currentState.wishlistedVideos);
+    newWishlistedVideos[event.videoId] = event.isInWishlist;
+
+    emit(currentState.copyWith(wishlistedVideos: newWishlistedVideos));
+
+    // Record interaction asynchronously
+    try {
+      await _repository.recordInteraction(
+        userId: _userId ?? 'anonymous',
+        videoId: event.videoId,
+        type: InteractionType.follow, // Use follow for wishlist
+      );
+    } catch (e) {
+      // Rollback on failure
+      final rollbackWishlistedVideos =
+          Map<String, bool>.from(currentState.wishlistedVideos);
+      rollbackWishlistedVideos[event.videoId] = !event.isInWishlist;
+      emit(currentState.copyWith(wishlistedVideos: rollbackWishlistedVideos));
+    }
   }
 }

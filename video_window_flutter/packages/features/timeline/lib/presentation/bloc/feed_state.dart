@@ -27,6 +27,8 @@ class FeedLoaded extends FeedState {
   final bool isLoadingMore;
   final Map<String, bool> videoPlaybackStates; // videoId -> isPlaying
   final String? currentVisibleVideoId;
+  final Map<String, bool> likedVideos; // videoId -> isLiked
+  final Map<String, bool> wishlistedVideos; // videoId -> isInWishlist
 
   const FeedLoaded({
     required this.videos,
@@ -35,6 +37,8 @@ class FeedLoaded extends FeedState {
     this.isLoadingMore = false,
     this.videoPlaybackStates = const {},
     this.currentVisibleVideoId,
+    this.likedVideos = const {},
+    this.wishlistedVideos = const {},
   });
 
   FeedLoaded copyWith({
@@ -44,6 +48,8 @@ class FeedLoaded extends FeedState {
     bool? isLoadingMore,
     Map<String, bool>? videoPlaybackStates,
     String? currentVisibleVideoId,
+    Map<String, bool>? likedVideos,
+    Map<String, bool>? wishlistedVideos,
   }) {
     return FeedLoaded(
       videos: videos ?? this.videos,
@@ -53,8 +59,13 @@ class FeedLoaded extends FeedState {
       videoPlaybackStates: videoPlaybackStates ?? this.videoPlaybackStates,
       currentVisibleVideoId:
           currentVisibleVideoId ?? this.currentVisibleVideoId,
+      likedVideos: likedVideos ?? this.likedVideos,
+      wishlistedVideos: wishlistedVideos ?? this.wishlistedVideos,
     );
   }
+
+  bool isLiked(String videoId) => likedVideos[videoId] ?? false;
+  bool isWishlisted(String videoId) => wishlistedVideos[videoId] ?? false;
 
   @override
   List<Object?> get props => [
@@ -64,6 +75,8 @@ class FeedLoaded extends FeedState {
         isLoadingMore,
         videoPlaybackStates,
         currentVisibleVideoId,
+        likedVideos,
+        wishlistedVideos,
       ];
 }
 

@@ -1,8 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import '../../domain/entities/video.dart';
 import '../../domain/entities/video_interaction.dart';
+import '../bloc/feed_bloc.dart';
+import '../bloc/feed_event.dart';
+import '../bloc/feed_state.dart';
 import 'video_player_widget.dart';
 import 'video_overlay_controls.dart';
 import 'engagement_widget.dart';
@@ -72,41 +76,64 @@ class _VideoFeedItemState extends State<VideoFeedItem> {
                 },
               ),
               // Overlay controls
-              VideoOverlayControls(
-                video: widget.video,
-                isLiked: false, // TODO: Get from state
-                onLike: () {
-                  widget.onInteraction(
-                    InteractionType.like,
-                    null,
-                    {},
+              BlocBuilder<FeedBloc, FeedState>(
+                builder: (context, state) {
+                  final isLiked = state is FeedLoaded
+                      ? state.isLiked(widget.video.id)
+                      : false;
+                  return VideoOverlayControls(
+                    video: widget.video,
+                    isLiked: isLiked,
+                    onLike: () {
+                      if (state is FeedLoaded) {
+                        context.read<FeedBloc>().add(FeedToggleLike(
+                              videoId: widget.video.id,
+                              isLiked: !isLiked,
+                            ));
+                      }
+                      widget.onInteraction(
+                        InteractionType.like,
+                        null,
+                        {},
+                      );
+                    },
+                    onViewStory: () {
+                      widget.onInteraction(
+                        InteractionType.view,
+                        null,
+                        {'action': 'view_story'},
+                      );
+                    },
+                    onShare: () {
+                      widget.onInteraction(
+                        InteractionType.share,
+                        null,
+                        {},
+                      );
+                    },
+                    onLongPress: () {
+                      // Show action menu
+                    },
                   );
-                },
-                onViewStory: () {
-                  widget.onInteraction(
-                    InteractionType.view,
-                    null,
-                    {'action': 'view_story'},
-                  );
-                },
-                onShare: () {
-                  widget.onInteraction(
-                    InteractionType.share,
-                    null,
-                    {},
-                  );
-                },
-                onLongPress: () {
-                  // Show action menu
                 },
               ),
               // Engagement widget (AC7, AC8)
-              EngagementWidget(
-                video: widget.video,
-                isLiked: false, // TODO: Get from state
-                isInWishlist: false, // TODO: Get from state
-                onInteraction: (type) {
-                  widget.onInteraction(type, null, {});
+              BlocBuilder<FeedBloc, FeedState>(
+                builder: (context, state) {
+                  final isLiked = state is FeedLoaded
+                      ? state.isLiked(widget.video.id)
+                      : false;
+                  final isInWishlist = state is FeedLoaded
+                      ? state.isWishlisted(widget.video.id)
+                      : false;
+                  return EngagementWidget(
+                    video: widget.video,
+                    isLiked: isLiked,
+                    isInWishlist: isInWishlist,
+                    onInteraction: (type) {
+                      widget.onInteraction(type, null, {});
+                    },
+                  );
                 },
               ),
             ],

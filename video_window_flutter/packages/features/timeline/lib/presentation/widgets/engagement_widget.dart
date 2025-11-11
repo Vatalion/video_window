@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/video.dart';
 import '../../domain/entities/video_interaction.dart';
+import '../bloc/feed_bloc.dart';
+import '../bloc/feed_event.dart';
 
 /// Engagement widget with reactions, wishlist, and share
 /// AC7, AC8: Engagement features with optimistic UI updates
@@ -40,9 +43,16 @@ class _EngagementWidgetState extends State<EngagementWidget> {
     });
     HapticFeedback.mediumImpact();
 
-    widget.onInteraction(InteractionType.like);
+    // Update BLoC state (handles rollback on failure)
+    final context = this.context;
+    if (context.mounted) {
+      context.read<FeedBloc>().add(FeedToggleLike(
+            videoId: widget.video.id,
+            isLiked: _optimisticLiked,
+          ));
+    }
 
-    // TODO: Rollback on failure
+    widget.onInteraction(InteractionType.like);
   }
 
   void _handleWishlist() {
@@ -51,9 +61,16 @@ class _EngagementWidgetState extends State<EngagementWidget> {
     });
     HapticFeedback.lightImpact();
 
-    widget.onInteraction(InteractionType.follow);
+    // Update BLoC state (handles rollback on failure)
+    final context = this.context;
+    if (context.mounted) {
+      context.read<FeedBloc>().add(FeedToggleWishlist(
+            videoId: widget.video.id,
+            isInWishlist: _optimisticWishlist,
+          ));
+    }
 
-    // TODO: Rollback on failure
+    widget.onInteraction(InteractionType.follow);
   }
 
   void _handleShare() {
