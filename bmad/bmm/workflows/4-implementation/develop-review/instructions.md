@@ -72,6 +72,10 @@ This workflow will continuously develop and review until the story is approved o
       - {{dev_completion_status}}: Success or failure
       - {{tasks_completed}}: Count of tasks completed
     </action>
+    
+    <action>Read the story file at {{current_story_path}} to extract story title</action>
+    <action>Extract {{story_title}} from the first line of the story file (format: "# Story XX-X: Title" or "## Story" section)</action>
+    <action>If title format not found, extract from "## User Story" section or use story_key as fallback</action>
 
     <check if="dev_completion_status == failure">
       <output>❌ **Development Phase Failed**
@@ -168,7 +172,8 @@ Commit: feat({{current_story_key}}): Story complete
           </output>
           
           <check if="{{commit_and_push}} == true">
-            <action>Get current branch name</action>
+            <action>Get current branch name by running: git branch --show-current</action>
+            <action>Store result as {{current_branch}}</action>
             <action>Run: git push origin {{current_branch}}</action>
             <check if="push successful">
               <output>✅ Changes pushed to remote repository</output>
