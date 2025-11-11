@@ -1,8 +1,12 @@
 import 'package:serverpod/serverpod.dart';
 import '../../services/profile/profile_service.dart';
+import '../../services/profile/profile_dsar_service.dart';
+import '../../services/auth/otp_service.dart';
 import '../../generated/profile/user_profile.dart';
 import '../../generated/profile/privacy_settings.dart';
 import '../../generated/profile/notification_preferences.dart';
+import '../../generated/auth/user.dart';
+import '../../generated/auth/session.dart' as auth_session;
 import 'dart:convert';
 
 /// Profile endpoint for managing user profiles, privacy settings, and notifications
@@ -223,6 +227,189 @@ class ProfileEndpoint extends Endpoint {
         stackTrace: stackTrace,
       );
       rethrow;
+    }
+  }
+
+  /// Request DSAR export (Story 3-5)
+  /// GET /profile/dsar/export
+  /// AC2: DSAR export generates downloadable package within 24 hours
+  /// AC4: Requires re-authentication (OTP) if last auth > 10 minutes
+  Future<Map<String, dynamic>> requestDSARExport(
+    Session session,
+    int userId, {
+    String? otpCode,
+  }) async {
+    try {
+      // AC4: Check if re-authentication is required
+      final requiresReAuth = await _requiresReAuthentication(session, userId);
+      if (requiresReAuth) {
+        if (otpCode == null || otpCode.isEmpty) {
+          throw Exception('OTP verification required for DSAR export');
+        }
+        // Verify OTP
+        final otpService = OtpService(session);
+        final user = await User.db.findById(session, userId);
+        if (user == null || user.email == null) {
+          throw Exception('User not found or email not available');
+        }
+        final verificationResult =
+            await otpService.verifyOTP(user.email!, otpCode);
+        if (!verificationResult.success) {
+          throw Exception('Invalid OTP code');
+        }
+      }
+
+      final dsarService = ProfileDSARService(session);
+      final result = await dsarService.initiateExport(userId);
+      return result;
+    } catch (e, stackTrace) {
+      session.log(
+        'Failed to request DSAR export for user $userId: $e',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// Get DSAR export status (Story 3-5)
+  /// GET /profile/dsar/export/{exportId}
+  /// AC2: Surfaces status/progress in UI with polling
+  Future<Map<String, dynamic>> getDSARExportStatus(
+    Session session,
+    int userId,
+    String exportId,
+  ) async {
+    try {
+      final dsarService = ProfileDSARService(session);
+      return await dsarService.getExportStatus(userId, exportId);
+    } catch (e, stackTrace) {
+      session.log(
+        'Failed to get DSAR export status for user $userId: $e',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// Delete account (Story 3-5)
+  /// DELETE /profile/account
+  /// AC3: Account deletion workflow anonymizes profile, revokes tokens, deletes media, and queues background cleanup
+  /// AC4: Requires re-authentication (OTP) if last auth > 10 minutes
+  Future<void> deleteAccount(
+    Session session,
+    int userId, {
+    String? otpCode,
+  }) async {
+    try {
+      // AC4: Check if re-authentication is required
+      final requiresReAuth = await _requiresReAuthentication(session, userId);
+      if (requiresReAuth) {
+        if (otpCode == null || otpCode.isEmpty) {
+          throw Exception('OTP verification required for account deletion');
+        }
+        // Verify OTP
+        final otpService = OtpService(session);
+        final user = await User.db.findById(session, userId);
+        if (user == null || user.email == null) {
+          throw Exception('User not found or email not available');
+        }
+        final verificationResult =
+            await otpService.verifyOTP(user.email!, otpCode);
+        if (!verificationResult.success) {
+          throw Exception('Invalid OTP code');
+        }
+      }
+
+      final profileService = ProfileService(session);
+      await profileService.deleteAccount(userId, userId);
+    } catch (e, stackTrace) {
+      session.log(
+        'Failed to delete account for user $userId: $e',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// Revoke all sessions (Story 3-5)
+  /// POST /profile/sessions/revoke-all
+  /// AC1: Account settings tab offers session revocation
+  Future<void> revokeAllSessions(
+    Session session,
+    int userId,
+  ) async {
+    try {
+      // Find current session to exclude it from revocation
+      final currentSession = await auth_session.UserSession.db.findFirstRow(
+        session,
+        where: (t) => t.userId.equals(userId) & t.isRevoked.equals(false),
+        orderBy: (t) => t.lastUsedAt,
+        orderDescending: true,
+      );
+
+      // Revoke all sessions except current one (if found)
+      if (currentSession != null && currentSession.id != null) {
+        await auth_session.UserSession.db.deleteWhere(
+          session,
+          where: (t) =>
+              t.userId.equals(userId) & t.id.notEquals(currentSession.id!),
+        );
+      } else {
+        // If no current session found, revoke all
+        await auth_session.UserSession.db.deleteWhere(
+          session,
+          where: (t) => t.userId.equals(userId),
+        );
+      }
+
+      session.log(
+        'All sessions revoked for user $userId',
+        level: LogLevel.info,
+      );
+    } catch (e, stackTrace) {
+      session.log(
+        'Failed to revoke sessions for user $userId: $e',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// Check if re-authentication is required
+  /// AC4: All DSAR and deletion actions require re-authentication (OTP) if last auth > 10 minutes
+  Future<bool> _requiresReAuthentication(
+    Session session,
+    int userId,
+  ) async {
+    try {
+      // Get most recent session for user
+      final userSessions = await auth_session.UserSession.db.find(
+        session,
+        where: (t) => t.userId.equals(userId),
+        orderBy: (t) => t.createdAt,
+        orderDescending: true,
+        limit: 1,
+      );
+
+      if (userSessions.isEmpty) return true;
+
+      final mostRecentSession = userSessions.first;
+
+      // Check session age based on lastUsedAt (required field)
+      final lastAuthTime = mostRecentSession.lastUsedAt;
+      final sessionAge = DateTime.now().difference(lastAuthTime);
+      return sessionAge.inMinutes > 10;
+    } catch (e) {
+      // If we can't determine, require re-auth for safety
+      return true;
     }
   }
 }

@@ -113,3 +113,33 @@ class AvatarUploadProgressed extends ProfileEvent {
   @override
   List<Object?> get props => [userId, progress];
 }
+
+/// Request DSAR export (Story 3-5)
+class DSARExportRequested extends ProfileEvent {
+  final int userId;
+
+  const DSARExportRequested(this.userId);
+
+  @override
+  List<Object?> get props => [userId];
+}
+
+/// Request account deletion (Story 3-5)
+class AccountDeletionRequested extends ProfileEvent {
+  final int userId;
+
+  const AccountDeletionRequested(this.userId);
+
+  @override
+  List<Object?> get props => [userId];
+}
+
+/// Revoke all sessions (Story 3-5)
+class RevokeAllSessionsRequested extends ProfileEvent {
+  final int userId;
+
+  const RevokeAllSessionsRequested(this.userId);
+
+  @override
+  List<Object?> get props => [userId];
+}

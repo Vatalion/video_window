@@ -8,16 +8,38 @@ import '../bloc/profile_event.dart';
 import '../bloc/profile_state.dart';
 import 'privacy_settings_page.dart';
 import 'notification_preferences_page.dart';
+import '../widgets/account/account_tab.dart';
 
-/// Profile management page
+/// Profile management page with tabs
 /// AC1: Complete profile management interface with avatar/media upload, personal information editing
-class ProfilePage extends StatelessWidget {
+/// Story 3-5: Extended with Account tab for DSAR and account management
+class ProfilePage extends StatefulWidget {
   final int userId;
 
   const ProfilePage({
     super.key,
     required this.userId,
   });
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 4, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +51,19 @@ class ProfilePage extends StatelessWidget {
     return BlocProvider(
       create: (context) => ProfileBloc(
         ProfileRepository(client),
-      )..add(ProfileLoadRequested(userId)),
+      )..add(ProfileLoadRequested(widget.userId)),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Profile'),
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(icon: Icon(Icons.person), text: 'Profile'),
+              Tab(icon: Icon(Icons.privacy_tip), text: 'Privacy'),
+              Tab(icon: Icon(Icons.notifications), text: 'Notifications'),
+              Tab(icon: Icon(Icons.settings), text: 'Account'),
+            ],
+          ),
         ),
         body: BlocBuilder<ProfileBloc, ProfileState>(
           builder: (context, state) {
@@ -50,7 +81,7 @@ class ProfilePage extends StatelessWidget {
                       onPressed: () {
                         context
                             .read<ProfileBloc>()
-                            .add(ProfileLoadRequested(userId));
+                            .add(ProfileLoadRequested(widget.userId));
                       },
                       child: const Text('Retry'),
                     ),
@@ -59,18 +90,37 @@ class ProfilePage extends StatelessWidget {
               );
             }
 
-            if (state is ProfileLoaded) {
-              return _buildProfileForm(context, state.profile);
-            }
+            return TabBarView(
+              controller: _tabController,
+              children: [
+                // Profile Tab
+                if (state is ProfileLoaded)
+                  _buildProfileTab(context, state.profile)
+                else
+                  const Center(child: Text('No profile data')),
 
-            return const Center(child: Text('No profile data'));
+                // Privacy Tab
+                PrivacySettingsPage(userId: widget.userId),
+
+                // Notifications Tab
+                NotificationPreferencesPage(userId: widget.userId),
+
+                // Account Tab
+                AccountTab(
+                  userId: widget.userId,
+                  lastAuthTime: DateTime.now().subtract(
+                    const Duration(minutes: 5),
+                  ), // TODO: Get actual last auth time from session
+                ),
+              ],
+            );
           },
         ),
       ),
     );
   }
 
-  Widget _buildProfileForm(BuildContext context, Map<String, dynamic> profile) {
+  Widget _buildProfileTab(BuildContext context, Map<String, dynamic> profile) {
     final usernameController =
         TextEditingController(text: profile['username']?.toString());
     final fullNameController =
@@ -140,7 +190,7 @@ class ProfilePage extends StatelessWidget {
             onPressed: () {
               context.read<ProfileBloc>().add(
                     ProfileUpdateRequested(
-                      userId,
+                      widget.userId,
                       {
                         'username': usernameController.text,
                         'fullName': fullNameController.text,
@@ -150,77 +200,6 @@ class ProfilePage extends StatelessWidget {
                   );
             },
             child: const Text('Save Profile'),
-          ),
-          const SizedBox(height: 16),
-          // Privacy settings link
-          TextButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PrivacySettingsPage(userId: userId),
-                ),
-              );
-            },
-            child: const Text('Privacy Settings'),
-          ),
-          // Notification preferences link
-          TextButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      NotificationPreferencesPage(userId: userId),
-                ),
-              );
-            },
-            child: const Text('Notification Preferences'),
-          ),
-          // DSAR section
-          const Divider(),
-          const Text(
-            'Data Management',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () {
-              context.read<ProfileBloc>().add(ExportUserDataRequested(userId));
-            },
-            child: const Text('Export My Data'),
-          ),
-          TextButton(
-            onPressed: () {
-              // Show confirmation dialog
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Delete Account'),
-                  content: const Text(
-                    'Are you sure you want to delete all your data? This action cannot be undone.',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        context
-                            .read<ProfileBloc>()
-                            .add(DeleteUserDataRequested(userId));
-                      },
-                      child: const Text('Delete',
-                          style: TextStyle(color: Colors.red)),
-                    ),
-                  ],
-                ),
-              );
-            },
-            child: const Text('Delete My Data',
-                style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

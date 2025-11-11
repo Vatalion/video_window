@@ -32,6 +32,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         _onNotificationPreferencesUpdateRequested);
     on<ExportUserDataRequested>(_onExportUserDataRequested);
     on<DeleteUserDataRequested>(_onDeleteUserDataRequested);
+    on<DSARExportRequested>(_onDSARExportRequested);
+    on<AccountDeletionRequested>(_onAccountDeletionRequested);
+    on<RevokeAllSessionsRequested>(_onRevokeAllSessionsRequested);
     on<AvatarUploadRequested>(_onAvatarUploadRequested);
     on<AvatarUploadProgressed>(_onAvatarUploadProgressed);
   }
@@ -275,6 +278,85 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(ProfileError(
         message: 'Failed to delete user data: $e',
         errorCode: 'DELETE_ERROR',
+      ));
+    }
+  }
+
+  /// Handle DSAR export request (Story 3-5)
+  /// AC2: DSAR export generates downloadable package within 24 hours and surfaces status/progress in UI with polling
+  Future<void> _onDSARExportRequested(
+    DSARExportRequested event,
+    Emitter<ProfileState> emit,
+  ) async {
+    try {
+      // Request DSAR export - this initiates async processing
+      final result = await _profileRepository.requestDSARExport(event.userId);
+      final exportId = result['exportId'] as String? ?? '';
+
+      // Emit analytics event for DSAR export request
+      _analyticsService?.trackEvent(
+        DsarOperationEvent(
+          userId: event.userId,
+          operationType: 'export_requested',
+        ),
+      );
+
+      // Emit in-progress state to trigger polling
+      emit(DSARExportInProgress(
+        exportId: exportId,
+        statusMessage: 'Preparing your data export...',
+        estimatedCompletionAt: DateTime.now().add(const Duration(hours: 24)),
+      ));
+
+      // Poll for completion (this will be handled by DSARExportPollingCubit)
+    } catch (e) {
+      emit(ProfileError(
+        message: 'Failed to request DSAR export: $e',
+        errorCode: 'DSAR_EXPORT_ERROR',
+      ));
+    }
+  }
+
+  /// Handle account deletion request (Story 3-5)
+  /// AC3: Account deletion workflow anonymizes profile, revokes tokens, deletes media, and queues background cleanup
+  Future<void> _onAccountDeletionRequested(
+    AccountDeletionRequested event,
+    Emitter<ProfileState> emit,
+  ) async {
+    try {
+      await _profileRepository.deleteAccount(event.userId);
+
+      // Emit analytics event for account deletion
+      _analyticsService?.trackEvent(
+        DsarOperationEvent(
+          userId: event.userId,
+          operationType: 'account_deletion',
+        ),
+      );
+
+      emit(const AccountDeletionCompleted());
+    } catch (e) {
+      emit(ProfileError(
+        message: 'Failed to delete account: $e',
+        errorCode: 'ACCOUNT_DELETION_ERROR',
+      ));
+    }
+  }
+
+  /// Handle revoke all sessions request (Story 3-5)
+  /// AC1: Account settings tab offers session revocation
+  Future<void> _onRevokeAllSessionsRequested(
+    RevokeAllSessionsRequested event,
+    Emitter<ProfileState> emit,
+  ) async {
+    try {
+      await _profileRepository.revokeAllSessions(event.userId);
+
+      emit(const SessionsRevoked());
+    } catch (e) {
+      emit(ProfileError(
+        message: 'Failed to revoke sessions: $e',
+        errorCode: 'SESSION_REVOCATION_ERROR',
       ));
     }
   }

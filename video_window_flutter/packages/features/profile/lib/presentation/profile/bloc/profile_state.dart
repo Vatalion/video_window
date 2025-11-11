@@ -113,3 +113,43 @@ class AvatarUploadCompleted extends ProfileState {
   @override
   List<Object?> get props => [avatarUrl];
 }
+
+/// DSAR export in progress state (Story 3-5)
+class DSARExportInProgress extends ProfileState {
+  final String exportId;
+  final String? statusMessage;
+  final DateTime? estimatedCompletionAt;
+
+  const DSARExportInProgress({
+    required this.exportId,
+    this.statusMessage,
+    this.estimatedCompletionAt,
+  });
+
+  @override
+  List<Object?> get props => [exportId, statusMessage, estimatedCompletionAt];
+}
+
+/// DSAR export completed state (Story 3-5)
+class DSARExportCompleted extends ProfileState {
+  final String? downloadUrl;
+  final DateTime? expiresAt;
+
+  const DSARExportCompleted({
+    this.downloadUrl,
+    this.expiresAt,
+  });
+
+  @override
+  List<Object?> get props => [downloadUrl, expiresAt];
+}
+
+/// Account deletion completed state (Story 3-5)
+class AccountDeletionCompleted extends ProfileState {
+  const AccountDeletionCompleted();
+}
+
+/// Sessions revoked state (Story 3-5)
+class SessionsRevoked extends ProfileState {
+  const SessionsRevoked();
+}

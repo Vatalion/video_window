@@ -210,6 +210,47 @@ class ProfileRepository {
       throw ProfileRepositoryException('Failed to delete user data: $e');
     }
   }
+
+  /// Request DSAR export (Story 3-5)
+  /// AC2: DSAR export generates downloadable package within 24 hours
+  Future<Map<String, dynamic>> requestDSARExport(int userId) async {
+    try {
+      // TODO: Call new endpoint when available
+      // For now, use existing export endpoint
+      final result = await _client.profile.exportUserData(userId);
+      return {
+        'exportId': result['exportId'] ?? '',
+        'status': result['status'] ?? 'processing',
+      };
+    } catch (e) {
+      throw ProfileRepositoryException('Failed to request DSAR export: $e');
+    }
+  }
+
+  /// Delete account (Story 3-5)
+  /// AC3: Account deletion workflow
+  Future<void> deleteAccount(int userId) async {
+    try {
+      // TODO: Call new account deletion endpoint when available
+      // For now, use existing deleteUserData
+      await _client.profile.deleteUserData(userId);
+    } catch (e) {
+      throw ProfileRepositoryException('Failed to delete account: $e');
+    }
+  }
+
+  /// Revoke all sessions (Story 3-5)
+  /// AC1: Account settings tab offers session revocation
+  Future<void> revokeAllSessions(int userId) async {
+    try {
+      // TODO: Call new session revocation endpoint when available
+      // Placeholder for now
+      throw ProfileRepositoryException(
+          'Session revocation not yet implemented');
+    } catch (e) {
+      throw ProfileRepositoryException('Failed to revoke sessions: $e');
+    }
+  }
 }
 
 /// Exception for profile repository errors
