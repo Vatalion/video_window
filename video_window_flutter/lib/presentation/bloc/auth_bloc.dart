@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../src/services/secure_token_storage.dart';
 import 'package:core/data/repositories/auth_repository.dart';
+import 'package:core/data/services/auth/session_service.dart';
 
 /// Global authentication BLoC
 /// Manages authentication state including:
@@ -148,12 +150,15 @@ class AuthAccountLocked extends AuthState {
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository _authRepository;
   final SecureTokenStorage _tokenStorage;
+  final SessionService? _sessionService; // Optional for backward compatibility
 
   AuthBloc({
     required AuthRepository authRepository,
     required SecureTokenStorage tokenStorage,
+    SessionService? sessionService,
   })  : _authRepository = authRepository,
         _tokenStorage = tokenStorage,
+        _sessionService = sessionService,
         super(const AuthInitial()) {
     on<AuthCheckRequested>(_onCheckRequested);
     on<AuthOtpSendRequested>(_onOtpSendRequested);
@@ -162,6 +167,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignOutRequested>(_onSignOutRequested);
     on<AuthAppleSignInRequested>(_onAppleSignInRequested);
     on<AuthGoogleSignInRequested>(_onGoogleSignInRequested);
+
+    // Initialize session service if provided (Story 1-3)
+    if (_sessionService != null) {
+      _initializeSessionService();
+    }
+  }
+
+  /// Initialize session service and resume refresh schedule
+  Future<void> _initializeSessionService() async {
+    try {
+      final hasSession = await _sessionService!.initialize();
+      if (hasSession) {
+        // Session service will handle automatic refresh
+        debugPrint('Session service initialized with active session');
+      }
+    } catch (e) {
+      debugPrint('Failed to initialize session service: $e');
+    }
+  }
+
+  @override
+  Future<void> close() {
+    _sessionService?.dispose();
+    return super.close();
   }
 
   Future<void> _onCheckRequested(
@@ -251,6 +280,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           sessionId: result.session!.sessionId,
         );
 
+        // Start session refresh scheduler (Story 1-3)
+        await _sessionService?.storeSession(
+          accessToken: result.tokens!.accessToken,
+          refreshToken: result.tokens!.refreshToken,
+          expiresIn: result.tokens!.expiresIn,
+        );
+
         emit(AuthAuthenticated(user: result.user!));
       } else {
         if (result.error == 'ACCOUNT_LOCKED') {
@@ -317,19 +353,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
-      // Get tokens before clearing
-      final accessToken = await _tokenStorage.getAccessToken();
-      final refreshToken = await _tokenStorage.getRefreshToken();
+      // Stop session refresh scheduler and revoke tokens (Story 1-3)
+      await _sessionService?.forceLogout();
 
-      if (accessToken != null && refreshToken != null) {
-        // Notify backend to blacklist tokens
-        await _authRepository.logout(
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-        );
-      }
-
-      // Clear local storage
+      // Also clear token storage (for backward compatibility)
       await _tokenStorage.clearSession();
 
       emit(const AuthUnauthenticated());
@@ -359,6 +386,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           userId: result.user!.id,
           deviceId: result.session!.deviceId,
           sessionId: result.session!.sessionId,
+        );
+
+        // Start session refresh scheduler (Story 1-3)
+        await _sessionService?.storeSession(
+          accessToken: result.tokens!.accessToken,
+          refreshToken: result.tokens!.refreshToken,
+          expiresIn: result.tokens!.expiresIn,
         );
 
         emit(AuthAuthenticated(user: result.user!));
@@ -392,6 +426,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           userId: result.user!.id,
           deviceId: result.session!.deviceId,
           sessionId: result.session!.sessionId,
+        );
+
+        // Start session refresh scheduler (Story 1-3)
+        await _sessionService?.storeSession(
+          accessToken: result.tokens!.accessToken,
+          refreshToken: result.tokens!.refreshToken,
+          expiresIn: result.tokens!.expiresIn,
         );
 
         emit(AuthAuthenticated(user: result.user!));
