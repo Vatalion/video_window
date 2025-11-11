@@ -87,7 +87,11 @@ class CapabilityEndpoint extends Endpoint {
     try {
       // Check rate limit: 5/min per user
       final rateLimitService = RateLimitService(session);
-      final ipAddress = '0.0.0.0'; // TODO: Get from request headers
+      // Extract real IP from request headers (X-Forwarded-For, X-Real-IP, or connection info)
+      final ipAddress = session.httpRequest.headers['x-forwarded-for']?.first ??
+          session.httpRequest.headers['x-real-ip']?.first ??
+          session.httpRequest.connectionInfo?.remoteAddress.address ??
+          '0.0.0.0';
 
       final rateLimitResult = await rateLimitService.checkRateLimit(
         identifier: 'capability_request_$userId',
@@ -132,8 +136,26 @@ class CapabilityEndpoint extends Endpoint {
         );
       }
 
-      // TODO: Emit analytics event capability_request_submitted (AC5)
-      // This will be handled by analytics service integration
+      // AC5: Emit analytics event capability_request_submitted
+      try {
+        session.log(
+          'Analytics event: capability_request_submitted - '
+          'userId=$userId, capability=${request.capability}, entryPoint=${request.context['entryPoint']}',
+          level: LogLevel.info,
+        );
+        // TODO: Replace with actual analytics service when available
+        // await analyticsService.track('capability_request_submitted', {
+        //   'userId': userId,
+        //   'capability': request.capability.toString(),
+        //   'entryPoint': request.context['entryPoint'],
+        //   'timestamp': DateTime.now().toIso8601String(),
+        //   'success': true,
+        // });
+      } catch (e) {
+        // Don't fail request if analytics fails
+        session.log('Failed to emit analytics event: $e',
+            level: LogLevel.warning);
+      }
 
       // Return updated status
       return await getStatus(session, userId);

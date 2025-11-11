@@ -4,7 +4,7 @@ import 'package:shared/design_system/tokens.dart';
 /// Widget displaying a capability card with status badge and CTA button
 ///
 /// AC1: Capability Center displays capability cards with status badges and CTAs
-class CapabilityCard extends Widget {
+class CapabilityCard extends StatelessWidget {
   final String title;
   final String description;
   final CapabilityStatus status;
@@ -32,7 +32,7 @@ class CapabilityCard extends Widget {
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
+        side: BorderSide(
           color: _getStatusColor().withOpacity(0.3),
           width: 2,
         ),

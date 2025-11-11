@@ -1,0 +1,105 @@
+{
+  "@@locale": "en",
+  "@@context": "Capability Center Localization",
+  
+  "capabilityStatusInactive": "Inactive",
+  "@capabilityStatusInactive": {
+    "description": "Status label when a capability is not yet enabled"
+  },
+  
+  "capabilityStatusInReview": "In Review",
+  "@capabilityStatusInReview": {
+    "description": "Status label when a capability request is being reviewed"
+  },
+  
+  "capabilityStatusReady": "Ready",
+  "@capabilityStatusReady": {
+    "description": "Status label when a capability is enabled and ready to use"
+  },
+  
+  "capabilityStatusBlocked": "Blocked",
+  "@capabilityStatusBlocked": {
+    "description": "Status label when a capability cannot be enabled due to blockers"
+  },
+  
+  "capabilityPageTitle": "Capabilities",
+  "@capabilityPageTitle": {
+    "description": "Title for the Capability Center page"
+  },
+  
+  "capabilityPageHeadline": "Manage Your Capabilities",
+  "@capabilityPageHeadline": {
+    "description": "Headline text for capability center"
+  },
+  
+  "capabilityPageDescription": "Enable capabilities to unlock publishing, payments, and fulfillment features.",
+  "@capabilityPageDescription": {
+    "description": "Description text explaining the capability center purpose"
+  },
+  
+  "capabilityPublishTitle": "Publish Stories",
+  "@capabilityPublishTitle": {
+    "description": "Title for the publish capability card"
+  },
+  
+  "capabilityPublishDescription": "Share your video stories with the community",
+  "@capabilityPublishDescription": {
+    "description": "Description for the publish capability"
+  },
+  
+  "capabilityPaymentsTitle": "Collect Payments",
+  "@capabilityPaymentsTitle": {
+    "description": "Title for the collect payments capability card"
+  },
+  
+  "capabilityPaymentsDescription": "Accept payments from buyers through secure checkout",
+  "@capabilityPaymentsDescription": {
+    "description": "Description for the collect payments capability"
+  },
+  
+  "capabilityFulfillmentTitle": "Fulfill Orders",
+  "@capabilityFulfillmentTitle": {
+    "description": "Title for the fulfill orders capability card"
+  },
+  
+  "capabilityFulfillmentDescription": "Manage order fulfillment and shipping tracking",
+  "@capabilityFulfillmentDescription": {
+    "description": "Description for the fulfill orders capability"
+  },
+  
+  "capabilityActionEnabled": "Enabled",
+  "@capabilityActionEnabled": {
+    "description": "Button label when capability is already enabled"
+  },
+  
+  "capabilityActionEnablePublishing": "Enable Publishing",
+  "@capabilityActionEnablePublishing": {
+    "description": "Button label to enable publishing capability"
+  },
+  
+  "capabilityActionEnablePayments": "Enable Payments",
+  "@capabilityActionEnablePayments": {
+    "description": "Button label to enable payments capability"
+  },
+  
+  "capabilityActionEnableFulfillment": "Enable Fulfillment",
+  "@capabilityActionEnableFulfillment": {
+    "description": "Button label to enable fulfillment capability"
+  },
+  
+  "capabilityPollingMessage": "Checking for updates...",
+  "@capabilityPollingMessage": {
+    "description": "Message shown when polling for capability status updates"
+  },
+  
+  "capabilityErrorTitle": "Failed to Load Capabilities",
+  "@capabilityErrorTitle": {
+    "description": "Error title when capability loading fails"
+  },
+  
+  "capabilityErrorRetry": "Retry",
+  "@capabilityErrorRetry": {
+    "description": "Button label to retry loading capabilities"
+  }
+}
+
