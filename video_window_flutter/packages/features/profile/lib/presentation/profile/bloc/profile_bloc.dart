@@ -1,14 +1,21 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:core/data/repositories/profile/profile_repository.dart';
+import 'package:core/services/analytics_service.dart';
 import 'profile_event.dart';
 import 'profile_state.dart';
+import '../analytics/profile_analytics_events.dart';
 
 /// BLoC for managing profile state
 /// Implements Story 3-1: Viewer Profile Management
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final ProfileRepository _profileRepository;
+  final AnalyticsService? _analyticsService;
 
-  ProfileBloc(this._profileRepository) : super(const ProfileInitial()) {
+  ProfileBloc(
+    this._profileRepository, {
+    AnalyticsService? analyticsService,
+  })  : _analyticsService = analyticsService,
+        super(const ProfileInitial()) {
     on<ProfileLoadRequested>(_onProfileLoadRequested);
     on<ProfileUpdateRequested>(_onProfileUpdateRequested);
     on<PrivacySettingsLoadRequested>(_onPrivacySettingsLoadRequested);
@@ -53,6 +60,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         event.profileData,
       );
 
+      // Emit analytics event for profile update
+      final changedFields = event.profileData.keys.toList();
+      _analyticsService?.trackEvent(
+        ProfileUpdatedEvent(
+          userId: event.userId,
+          changedFields: changedFields,
+        ),
+      );
+
       emit(ProfileUpdated(profile: updatedProfile));
     } catch (e) {
       emit(ProfileError(
@@ -86,6 +102,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final updatedSettings = await _profileRepository.updatePrivacySettings(
         event.userId,
         event.settingsData,
+      );
+
+      // Emit analytics event for privacy settings change
+      _analyticsService?.trackEvent(
+        PrivacySettingsChangedEvent(
+          userId: event.userId,
+          changedSettings: event.settingsData,
+        ),
       );
 
       emit(PrivacySettingsUpdated(settings: updatedSettings));
@@ -124,6 +148,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         event.prefsData,
       );
 
+      // Emit analytics event for notification preferences change
+      _analyticsService?.trackEvent(
+        NotificationPreferencesUpdatedEvent(
+          userId: event.userId,
+          changedPreferences: event.prefsData,
+        ),
+      );
+
       emit(NotificationPreferencesUpdated(preferences: updatedPrefs));
     } catch (e) {
       emit(ProfileError(
@@ -139,6 +171,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ) async {
     try {
       final exportData = await _profileRepository.exportUserData(event.userId);
+
+      // Emit analytics event for DSAR export
+      _analyticsService?.trackEvent(
+        DsarOperationEvent(
+          userId: event.userId,
+          operationType: 'export',
+        ),
+      );
+
       emit(UserDataExported(exportData: exportData));
     } catch (e) {
       emit(ProfileError(
@@ -154,6 +195,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ) async {
     try {
       await _profileRepository.deleteUserData(event.userId);
+
+      // Emit analytics event for DSAR deletion
+      _analyticsService?.trackEvent(
+        DsarOperationEvent(
+          userId: event.userId,
+          operationType: 'delete',
+        ),
+      );
+
       emit(const UserDataDeleted());
     } catch (e) {
       emit(ProfileError(

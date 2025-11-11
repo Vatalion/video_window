@@ -6,6 +6,8 @@ import 'package:serverpod_flutter/serverpod_flutter.dart';
 import '../bloc/profile_bloc.dart';
 import '../bloc/profile_event.dart';
 import '../bloc/profile_state.dart';
+import 'privacy_settings_page.dart';
+import 'notification_preferences_page.dart';
 
 /// Profile management page
 /// AC1: Complete profile management interface with avatar/media upload, personal information editing
@@ -153,10 +155,11 @@ class ProfilePage extends StatelessWidget {
           // Privacy settings link
           TextButton(
             onPressed: () {
-              // TODO: Navigate to privacy settings page
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Privacy settings not yet implemented')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PrivacySettingsPage(userId: userId),
+                ),
               );
             },
             child: const Text('Privacy Settings'),
@@ -164,11 +167,12 @@ class ProfilePage extends StatelessWidget {
           // Notification preferences link
           TextButton(
             onPressed: () {
-              // TODO: Navigate to notification preferences page
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content:
-                        Text('Notification preferences not yet implemented')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      NotificationPreferencesPage(userId: userId),
+                ),
               );
             },
             child: const Text('Notification Preferences'),
