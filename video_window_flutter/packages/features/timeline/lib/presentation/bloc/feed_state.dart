@@ -25,6 +25,7 @@ class FeedLoaded extends FeedState {
   final String? nextCursor;
   final bool hasMore;
   final bool isLoadingMore;
+  final String? paginationError; // AC3: Error message for pagination failures
   final Map<String, bool> videoPlaybackStates; // videoId -> isPlaying
   final String? currentVisibleVideoId;
   final Map<String, bool> likedVideos; // videoId -> isLiked
@@ -35,6 +36,7 @@ class FeedLoaded extends FeedState {
     this.nextCursor,
     required this.hasMore,
     this.isLoadingMore = false,
+    this.paginationError,
     this.videoPlaybackStates = const {},
     this.currentVisibleVideoId,
     this.likedVideos = const {},
@@ -46,6 +48,7 @@ class FeedLoaded extends FeedState {
     String? nextCursor,
     bool? hasMore,
     bool? isLoadingMore,
+    String? paginationError,
     Map<String, bool>? videoPlaybackStates,
     String? currentVisibleVideoId,
     Map<String, bool>? likedVideos,
@@ -56,6 +59,7 @@ class FeedLoaded extends FeedState {
       nextCursor: nextCursor ?? this.nextCursor,
       hasMore: hasMore ?? this.hasMore,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      paginationError: paginationError ?? this.paginationError,
       videoPlaybackStates: videoPlaybackStates ?? this.videoPlaybackStates,
       currentVisibleVideoId:
           currentVisibleVideoId ?? this.currentVisibleVideoId,
@@ -73,6 +77,7 @@ class FeedLoaded extends FeedState {
         nextCursor,
         hasMore,
         isLoadingMore,
+        paginationError,
         videoPlaybackStates,
         currentVisibleVideoId,
         likedVideos,

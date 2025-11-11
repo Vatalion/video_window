@@ -24,6 +24,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     on<FeedLoadInitial>(_onLoadInitial);
     on<FeedLoadNextPage>(_onLoadNextPage);
     on<FeedRefresh>(_onRefresh);
+    on<FeedRetryPagination>(_onRetryPagination);
     on<FeedVideoInteraction>(_onVideoInteraction);
     on<FeedVideoVisibilityChanged>(_onVideoVisibilityChanged);
     on<FeedVideoPlaybackStateChanged>(_onVideoPlaybackStateChanged);
@@ -76,7 +77,10 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       return;
     }
 
-    emit(currentState.copyWith(isLoadingMore: true));
+    emit(currentState.copyWith(
+      isLoadingMore: true,
+      paginationError: null, // Clear previous error
+    ));
 
     try {
       final result = await _repository.fetchFeedPage(
@@ -91,11 +95,28 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
         nextCursor: result.nextCursor,
         hasMore: result.hasMore,
         isLoadingMore: false,
+        paginationError: null,
       ));
     } catch (e) {
-      emit(currentState.copyWith(isLoadingMore: false));
-      // Don't emit error, just stop loading more
+      // AC3: Set error state for retry capability
+      emit(currentState.copyWith(
+        isLoadingMore: false,
+        paginationError: 'Failed to load more videos: ${e.toString()}',
+      ));
     }
+  }
+
+  /// AC3: Retry pagination after error
+  Future<void> _onRetryPagination(
+    FeedRetryPagination event,
+    Emitter<FeedState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! FeedLoaded) return;
+
+    // Clear error and retry loading next page
+    emit(currentState.copyWith(paginationError: null));
+    add(const FeedLoadNextPage());
   }
 
   Future<void> _onRefresh(

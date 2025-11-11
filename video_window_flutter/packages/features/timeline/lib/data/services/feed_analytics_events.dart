@@ -67,3 +67,62 @@ class FeedLikeEvent extends AnalyticsEvent {
   @override
   DateTime get timestamp => DateTime.now();
 }
+
+/// Feed page loaded event
+/// AC8: Track pagination events with cursor metadata and latency
+class FeedPageLoadedEvent extends AnalyticsEvent {
+  final String? cursor;
+  final int loadTimeMs;
+  final bool cacheHit;
+
+  FeedPageLoadedEvent({
+    this.cursor,
+    required this.loadTimeMs,
+    required this.cacheHit,
+  });
+
+  @override
+  String get name => 'feed_page_loaded';
+
+  @override
+  Map<String, dynamic> get properties => {
+        if (cursor != null) 'cursor': cursor,
+        'load_time_ms': loadTimeMs,
+        'cache_hit': cacheHit,
+        'latency_bucket': _getLatencyBucket(loadTimeMs),
+      };
+
+  @override
+  DateTime get timestamp => DateTime.now();
+
+  String _getLatencyBucket(int ms) {
+    if (ms < 200) return 'fast';
+    if (ms < 500) return 'normal';
+    if (ms < 1000) return 'slow';
+    return 'very_slow';
+  }
+}
+
+/// Feed pagination retry event
+/// AC3: Track retry attempts for pagination failures
+class FeedPaginationRetryEvent extends AnalyticsEvent {
+  final String? cursor;
+  final int attempt;
+
+  FeedPaginationRetryEvent({
+    this.cursor,
+    required this.attempt,
+  });
+
+  @override
+  String get name => 'feed_pagination_retry';
+
+  @override
+  Map<String, dynamic> get properties => {
+        if (cursor != null) 'cursor': cursor,
+        'attempt': attempt,
+      };
+
+  @override
+  DateTime get timestamp => DateTime.now();
+}

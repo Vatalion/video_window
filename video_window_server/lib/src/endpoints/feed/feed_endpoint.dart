@@ -8,7 +8,7 @@ class FeedEndpoint extends Endpoint {
   String get name => 'feed';
 
   /// Get feed videos with pagination
-  /// AC1, AC2: Cursor-based pagination
+  /// AC1, AC2: Cursor-based pagination with max page size enforcement
   Future<Map<String, dynamic>> getFeedVideos(
     Session session, {
     String? userId,
@@ -19,21 +19,26 @@ class FeedEndpoint extends Endpoint {
     List<String>? preferredTags,
   }) async {
     try {
+      // AC2: Enforce max page size <= 50
+      final effectiveLimit = limit > 50 ? 50 : limit;
+
       final feedService = FeedService(session);
       final result = await feedService.getFeedVideos(
         userId: userId,
         algorithm: algorithm,
-        limit: limit,
+        limit: effectiveLimit,
         cursor: cursor,
         excludeVideoIds: excludeVideoIds,
         preferredTags: preferredTags,
       );
 
+      // AC2: Ensure feedSessionId is included (feedId)
       return {
         'videos': result.videos,
         'nextCursor': result.nextCursor,
         'hasMore': result.hasMore,
-        'feedId': result.feedId,
+        'feedSessionId': result.feedId, // AC2: Return as feedSessionId
+        'feedId': result.feedId, // Keep for backward compatibility
       };
     } catch (e) {
       session.log(

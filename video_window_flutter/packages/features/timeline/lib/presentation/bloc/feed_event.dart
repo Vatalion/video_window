@@ -100,3 +100,9 @@ class FeedToggleWishlist extends FeedEvent {
   @override
   List<Object?> get props => [videoId, isInWishlist];
 }
+
+/// Retry pagination after error
+/// AC3: Retry capability for pagination failures
+class FeedRetryPagination extends FeedEvent {
+  const FeedRetryPagination();
+}
