@@ -1,0 +1,7 @@
+# Capability review state enumeration
+enum: CapabilityReviewState
+values:
+  - none
+  - pending
+  - manualReview
+

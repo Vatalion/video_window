@@ -21,6 +21,20 @@ import 'auth/session.dart' as _i9;
 import 'auth/token_blacklist.dart' as _i10;
 import 'auth/user.dart' as _i11;
 import 'auth/verify_otp_request.dart' as _i12;
+import 'capabilities/capability_audit_event.dart' as _i13;
+import 'capabilities/capability_request.dart' as _i14;
+import 'capabilities/capability_request_dto.dart' as _i15;
+import 'capabilities/capability_request_status.dart' as _i16;
+import 'capabilities/capability_review_state.dart' as _i17;
+import 'capabilities/capability_status_response.dart' as _i18;
+import 'capabilities/capability_type.dart' as _i19;
+import 'capabilities/trusted_device.dart' as _i20;
+import 'capabilities/user_capabilities.dart' as _i21;
+import 'capabilities/verification_task.dart' as _i22;
+import 'capabilities/verification_task_status.dart' as _i23;
+import 'capabilities/verification_task_type.dart' as _i24;
+import 'package:video_window_server/src/generated/capabilities/capability_request.dart'
+    as _i25;
 export 'greeting.dart';
 export 'auth/auth_tokens.dart';
 export 'auth/otp.dart';
@@ -31,6 +45,18 @@ export 'auth/session.dart';
 export 'auth/token_blacklist.dart';
 export 'auth/user.dart';
 export 'auth/verify_otp_request.dart';
+export 'capabilities/capability_audit_event.dart';
+export 'capabilities/capability_request.dart';
+export 'capabilities/capability_request_dto.dart';
+export 'capabilities/capability_request_status.dart';
+export 'capabilities/capability_review_state.dart';
+export 'capabilities/capability_status_response.dart';
+export 'capabilities/capability_type.dart';
+export 'capabilities/trusted_device.dart';
+export 'capabilities/user_capabilities.dart';
+export 'capabilities/verification_task.dart';
+export 'capabilities/verification_task_status.dart';
+export 'capabilities/verification_task_type.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
   Protocol._();
@@ -40,6 +66,250 @@ class Protocol extends _i1.SerializationManagerServer {
   static final Protocol _instance = Protocol._();
 
   static final List<_i2.TableDefinition> targetTableDefinitions = [
+    _i2.TableDefinition(
+      name: 'capability_audit_events',
+      dartName: 'CapabilityAuditEvent',
+      schema: 'public',
+      module: 'video_window',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault:
+              'nextval(\'capability_audit_events_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'eventType',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'capability',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'protocol:CapabilityType?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'entryPoint',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'deviceFingerprint',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'metadata',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'capability_audit_events_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'capability_audit_event_user_id_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'capability_audit_event_type_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'eventType',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'capability_audit_event_created_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'capability_audit_event_capability_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'capability',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'capability_requests',
+      dartName: 'CapabilityRequest',
+      schema: 'public',
+      module: 'video_window',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'capability_requests_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'capability',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'protocol:CapabilityType',
+        ),
+        _i2.ColumnDefinition(
+          name: 'status',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'protocol:CapabilityRequestStatus',
+        ),
+        _i2.ColumnDefinition(
+          name: 'metadata',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'resolvedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'capability_requests_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'capability_request_user_capability_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'capability',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'capability_request_status_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'status',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'capability_request_created_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
     _i2.TableDefinition(
       name: 'otps',
       dartName: 'Otp',
@@ -506,6 +776,246 @@ class Protocol extends _i1.SerializationManagerServer {
       managed: true,
     ),
     _i2.TableDefinition(
+      name: 'trusted_devices',
+      dartName: 'TrustedDevice',
+      schema: 'public',
+      module: 'video_window',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'trusted_devices_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'deviceId',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'deviceType',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'platform',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'trustScore',
+          columnType: _i2.ColumnType.doublePrecision,
+          isNullable: false,
+          dartType: 'double',
+        ),
+        _i2.ColumnDefinition(
+          name: 'telemetry',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'lastSeenAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'revokedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'trusted_devices_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'trusted_device_user_device_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'deviceId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'trusted_device_user_id_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'trusted_device_last_seen_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'lastSeenAt',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'user_capabilities',
+      dartName: 'UserCapabilities',
+      schema: 'public',
+      module: 'video_window',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'user_capabilities_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'canPublish',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'canCollectPayments',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'canFulfillOrders',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'identityVerifiedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'payoutConfiguredAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'fulfillmentEnabledAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'reviewState',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'protocol:CapabilityReviewState',
+        ),
+        _i2.ColumnDefinition(
+          name: 'blockers',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'user_capabilities_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'user_capabilities_user_id_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
       name: 'users',
       dartName: 'User',
       schema: 'public',
@@ -635,6 +1145,125 @@ class Protocol extends _i1.SerializationManagerServer {
       ],
       managed: true,
     ),
+    _i2.TableDefinition(
+      name: 'verification_tasks',
+      dartName: 'VerificationTask',
+      schema: 'public',
+      module: 'video_window',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'verification_tasks_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'capability',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'protocol:CapabilityType',
+        ),
+        _i2.ColumnDefinition(
+          name: 'taskType',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'protocol:VerificationTaskType',
+        ),
+        _i2.ColumnDefinition(
+          name: 'status',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'protocol:VerificationTaskStatus',
+        ),
+        _i2.ColumnDefinition(
+          name: 'payload',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'completedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'verification_tasks_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'verification_task_user_id_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'verification_task_status_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'status',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'verification_task_capability_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'capability',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
     ..._i2.Protocol.targetTableDefinitions,
   ];
 
@@ -674,6 +1303,42 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i12.VerifyOtpRequest) {
       return _i12.VerifyOtpRequest.fromJson(data) as T;
     }
+    if (t == _i13.CapabilityAuditEvent) {
+      return _i13.CapabilityAuditEvent.fromJson(data) as T;
+    }
+    if (t == _i14.CapabilityRequest) {
+      return _i14.CapabilityRequest.fromJson(data) as T;
+    }
+    if (t == _i15.CapabilityRequestDto) {
+      return _i15.CapabilityRequestDto.fromJson(data) as T;
+    }
+    if (t == _i16.CapabilityRequestStatus) {
+      return _i16.CapabilityRequestStatus.fromJson(data) as T;
+    }
+    if (t == _i17.CapabilityReviewState) {
+      return _i17.CapabilityReviewState.fromJson(data) as T;
+    }
+    if (t == _i18.CapabilityStatusResponse) {
+      return _i18.CapabilityStatusResponse.fromJson(data) as T;
+    }
+    if (t == _i19.CapabilityType) {
+      return _i19.CapabilityType.fromJson(data) as T;
+    }
+    if (t == _i20.TrustedDevice) {
+      return _i20.TrustedDevice.fromJson(data) as T;
+    }
+    if (t == _i21.UserCapabilities) {
+      return _i21.UserCapabilities.fromJson(data) as T;
+    }
+    if (t == _i22.VerificationTask) {
+      return _i22.VerificationTask.fromJson(data) as T;
+    }
+    if (t == _i23.VerificationTaskStatus) {
+      return _i23.VerificationTaskStatus.fromJson(data) as T;
+    }
+    if (t == _i24.VerificationTaskType) {
+      return _i24.VerificationTaskType.fromJson(data) as T;
+    }
     if (t == _i1.getType<_i3.Greeting?>()) {
       return (data != null ? _i3.Greeting.fromJson(data) : null) as T;
     }
@@ -703,6 +1368,59 @@ class Protocol extends _i1.SerializationManagerServer {
     }
     if (t == _i1.getType<_i12.VerifyOtpRequest?>()) {
       return (data != null ? _i12.VerifyOtpRequest.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i13.CapabilityAuditEvent?>()) {
+      return (data != null ? _i13.CapabilityAuditEvent.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i14.CapabilityRequest?>()) {
+      return (data != null ? _i14.CapabilityRequest.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i15.CapabilityRequestDto?>()) {
+      return (data != null ? _i15.CapabilityRequestDto.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i16.CapabilityRequestStatus?>()) {
+      return (data != null ? _i16.CapabilityRequestStatus.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i17.CapabilityReviewState?>()) {
+      return (data != null ? _i17.CapabilityReviewState.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i18.CapabilityStatusResponse?>()) {
+      return (data != null
+          ? _i18.CapabilityStatusResponse.fromJson(data)
+          : null) as T;
+    }
+    if (t == _i1.getType<_i19.CapabilityType?>()) {
+      return (data != null ? _i19.CapabilityType.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i20.TrustedDevice?>()) {
+      return (data != null ? _i20.TrustedDevice.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i21.UserCapabilities?>()) {
+      return (data != null ? _i21.UserCapabilities.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i22.VerificationTask?>()) {
+      return (data != null ? _i22.VerificationTask.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i23.VerificationTaskStatus?>()) {
+      return (data != null ? _i23.VerificationTaskStatus.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i24.VerificationTaskType?>()) {
+      return (data != null ? _i24.VerificationTaskType.fromJson(data) : null)
+          as T;
+    }
+    if (t == Map<String, String>) {
+      return (data as Map).map((k, v) =>
+          MapEntry(deserialize<String>(k), deserialize<String>(v))) as T;
+    }
+    if (t == List<_i25.CapabilityRequest>) {
+      return (data as List)
+          .map((e) => deserialize<_i25.CapabilityRequest>(e))
+          .toList() as T;
     }
     if (t == Map<String, dynamic>) {
       return (data as Map).map((k, v) =>
@@ -759,6 +1477,42 @@ class Protocol extends _i1.SerializationManagerServer {
     if (data is _i12.VerifyOtpRequest) {
       return 'VerifyOtpRequest';
     }
+    if (data is _i13.CapabilityAuditEvent) {
+      return 'CapabilityAuditEvent';
+    }
+    if (data is _i14.CapabilityRequest) {
+      return 'CapabilityRequest';
+    }
+    if (data is _i15.CapabilityRequestDto) {
+      return 'CapabilityRequestDto';
+    }
+    if (data is _i16.CapabilityRequestStatus) {
+      return 'CapabilityRequestStatus';
+    }
+    if (data is _i17.CapabilityReviewState) {
+      return 'CapabilityReviewState';
+    }
+    if (data is _i18.CapabilityStatusResponse) {
+      return 'CapabilityStatusResponse';
+    }
+    if (data is _i19.CapabilityType) {
+      return 'CapabilityType';
+    }
+    if (data is _i20.TrustedDevice) {
+      return 'TrustedDevice';
+    }
+    if (data is _i21.UserCapabilities) {
+      return 'UserCapabilities';
+    }
+    if (data is _i22.VerificationTask) {
+      return 'VerificationTask';
+    }
+    if (data is _i23.VerificationTaskStatus) {
+      return 'VerificationTaskStatus';
+    }
+    if (data is _i24.VerificationTaskType) {
+      return 'VerificationTaskType';
+    }
     className = _i2.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod.$className';
@@ -802,6 +1556,42 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'VerifyOtpRequest') {
       return deserialize<_i12.VerifyOtpRequest>(data['data']);
     }
+    if (dataClassName == 'CapabilityAuditEvent') {
+      return deserialize<_i13.CapabilityAuditEvent>(data['data']);
+    }
+    if (dataClassName == 'CapabilityRequest') {
+      return deserialize<_i14.CapabilityRequest>(data['data']);
+    }
+    if (dataClassName == 'CapabilityRequestDto') {
+      return deserialize<_i15.CapabilityRequestDto>(data['data']);
+    }
+    if (dataClassName == 'CapabilityRequestStatus') {
+      return deserialize<_i16.CapabilityRequestStatus>(data['data']);
+    }
+    if (dataClassName == 'CapabilityReviewState') {
+      return deserialize<_i17.CapabilityReviewState>(data['data']);
+    }
+    if (dataClassName == 'CapabilityStatusResponse') {
+      return deserialize<_i18.CapabilityStatusResponse>(data['data']);
+    }
+    if (dataClassName == 'CapabilityType') {
+      return deserialize<_i19.CapabilityType>(data['data']);
+    }
+    if (dataClassName == 'TrustedDevice') {
+      return deserialize<_i20.TrustedDevice>(data['data']);
+    }
+    if (dataClassName == 'UserCapabilities') {
+      return deserialize<_i21.UserCapabilities>(data['data']);
+    }
+    if (dataClassName == 'VerificationTask') {
+      return deserialize<_i22.VerificationTask>(data['data']);
+    }
+    if (dataClassName == 'VerificationTaskStatus') {
+      return deserialize<_i23.VerificationTaskStatus>(data['data']);
+    }
+    if (dataClassName == 'VerificationTaskType') {
+      return deserialize<_i24.VerificationTaskType>(data['data']);
+    }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
       return _i2.Protocol().deserializeByClassName(data);
@@ -828,6 +1618,16 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i10.TokenBlacklist.t;
       case _i11.User:
         return _i11.User.t;
+      case _i13.CapabilityAuditEvent:
+        return _i13.CapabilityAuditEvent.t;
+      case _i14.CapabilityRequest:
+        return _i14.CapabilityRequest.t;
+      case _i20.TrustedDevice:
+        return _i20.TrustedDevice.t;
+      case _i21.UserCapabilities:
+        return _i21.UserCapabilities.t;
+      case _i22.VerificationTask:
+        return _i22.VerificationTask.t;
     }
     return null;
   }

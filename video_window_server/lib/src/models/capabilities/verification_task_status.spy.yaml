@@ -1,0 +1,8 @@
+# Verification task status enumeration
+enum: VerificationTaskStatus
+values:
+  - pending
+  - inProgress
+  - completed
+  - failed
+

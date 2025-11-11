@@ -1,3 +1,7 @@
+capability:
+  - getStatus:
+  - requestCapability:
+  - getRequests:
 health:
   - check:
 auth:

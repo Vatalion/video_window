@@ -1,0 +1,38 @@
+# Trusted device model
+class: TrustedDevice
+table: trusted_devices
+
+fields:
+  # Unique identifier
+  id: int?
+  
+  # Foreign key to user
+  userId: int
+  
+  # Device identifier
+  deviceId: String
+  
+  # Device metadata
+  deviceType: String
+  platform: String
+  
+  # Trust score (0.0 to 1.0)
+  trustScore: double
+  
+  # Device telemetry (JSON)
+  telemetry: String  # JSON string
+  
+  # Timestamps
+  lastSeenAt: DateTime
+  createdAt: DateTime
+  revokedAt: DateTime?
+
+indexes:
+  trusted_device_user_device_idx:
+    fields: userId, deviceId
+    unique: true
+  trusted_device_user_id_idx:
+    fields: userId
+  trusted_device_last_seen_idx:
+    fields: lastSeenAt
+

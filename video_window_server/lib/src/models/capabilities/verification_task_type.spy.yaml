@@ -1,0 +1,8 @@
+# Verification task type enumeration
+enum: VerificationTaskType
+values:
+  - personaIdentity
+  - stripePayout
+  - complianceDoc
+  - deviceTrust
+

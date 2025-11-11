@@ -1,0 +1,7 @@
+# Capability type enumeration
+enum: CapabilityType
+values:
+  - publish
+  - collectPayments
+  - fulfillOrders
+

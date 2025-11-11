@@ -20,6 +20,20 @@ import 'auth/session.dart' as _i8;
 import 'auth/token_blacklist.dart' as _i9;
 import 'auth/user.dart' as _i10;
 import 'auth/verify_otp_request.dart' as _i11;
+import 'capabilities/capability_audit_event.dart' as _i12;
+import 'capabilities/capability_request.dart' as _i13;
+import 'capabilities/capability_request_dto.dart' as _i14;
+import 'capabilities/capability_request_status.dart' as _i15;
+import 'capabilities/capability_review_state.dart' as _i16;
+import 'capabilities/capability_status_response.dart' as _i17;
+import 'capabilities/capability_type.dart' as _i18;
+import 'capabilities/trusted_device.dart' as _i19;
+import 'capabilities/user_capabilities.dart' as _i20;
+import 'capabilities/verification_task.dart' as _i21;
+import 'capabilities/verification_task_status.dart' as _i22;
+import 'capabilities/verification_task_type.dart' as _i23;
+import 'package:video_window_client/src/protocol/capabilities/capability_request.dart'
+    as _i24;
 export 'greeting.dart';
 export 'auth/auth_tokens.dart';
 export 'auth/otp.dart';
@@ -30,6 +44,18 @@ export 'auth/session.dart';
 export 'auth/token_blacklist.dart';
 export 'auth/user.dart';
 export 'auth/verify_otp_request.dart';
+export 'capabilities/capability_audit_event.dart';
+export 'capabilities/capability_request.dart';
+export 'capabilities/capability_request_dto.dart';
+export 'capabilities/capability_request_status.dart';
+export 'capabilities/capability_review_state.dart';
+export 'capabilities/capability_status_response.dart';
+export 'capabilities/capability_type.dart';
+export 'capabilities/trusted_device.dart';
+export 'capabilities/user_capabilities.dart';
+export 'capabilities/verification_task.dart';
+export 'capabilities/verification_task_status.dart';
+export 'capabilities/verification_task_type.dart';
 export 'client.dart';
 
 class Protocol extends _i1.SerializationManager {
@@ -75,6 +101,42 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i11.VerifyOtpRequest) {
       return _i11.VerifyOtpRequest.fromJson(data) as T;
     }
+    if (t == _i12.CapabilityAuditEvent) {
+      return _i12.CapabilityAuditEvent.fromJson(data) as T;
+    }
+    if (t == _i13.CapabilityRequest) {
+      return _i13.CapabilityRequest.fromJson(data) as T;
+    }
+    if (t == _i14.CapabilityRequestDto) {
+      return _i14.CapabilityRequestDto.fromJson(data) as T;
+    }
+    if (t == _i15.CapabilityRequestStatus) {
+      return _i15.CapabilityRequestStatus.fromJson(data) as T;
+    }
+    if (t == _i16.CapabilityReviewState) {
+      return _i16.CapabilityReviewState.fromJson(data) as T;
+    }
+    if (t == _i17.CapabilityStatusResponse) {
+      return _i17.CapabilityStatusResponse.fromJson(data) as T;
+    }
+    if (t == _i18.CapabilityType) {
+      return _i18.CapabilityType.fromJson(data) as T;
+    }
+    if (t == _i19.TrustedDevice) {
+      return _i19.TrustedDevice.fromJson(data) as T;
+    }
+    if (t == _i20.UserCapabilities) {
+      return _i20.UserCapabilities.fromJson(data) as T;
+    }
+    if (t == _i21.VerificationTask) {
+      return _i21.VerificationTask.fromJson(data) as T;
+    }
+    if (t == _i22.VerificationTaskStatus) {
+      return _i22.VerificationTaskStatus.fromJson(data) as T;
+    }
+    if (t == _i23.VerificationTaskType) {
+      return _i23.VerificationTaskType.fromJson(data) as T;
+    }
     if (t == _i1.getType<_i2.Greeting?>()) {
       return (data != null ? _i2.Greeting.fromJson(data) : null) as T;
     }
@@ -104,6 +166,59 @@ class Protocol extends _i1.SerializationManager {
     }
     if (t == _i1.getType<_i11.VerifyOtpRequest?>()) {
       return (data != null ? _i11.VerifyOtpRequest.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i12.CapabilityAuditEvent?>()) {
+      return (data != null ? _i12.CapabilityAuditEvent.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i13.CapabilityRequest?>()) {
+      return (data != null ? _i13.CapabilityRequest.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i14.CapabilityRequestDto?>()) {
+      return (data != null ? _i14.CapabilityRequestDto.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i15.CapabilityRequestStatus?>()) {
+      return (data != null ? _i15.CapabilityRequestStatus.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i16.CapabilityReviewState?>()) {
+      return (data != null ? _i16.CapabilityReviewState.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i17.CapabilityStatusResponse?>()) {
+      return (data != null
+          ? _i17.CapabilityStatusResponse.fromJson(data)
+          : null) as T;
+    }
+    if (t == _i1.getType<_i18.CapabilityType?>()) {
+      return (data != null ? _i18.CapabilityType.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i19.TrustedDevice?>()) {
+      return (data != null ? _i19.TrustedDevice.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i20.UserCapabilities?>()) {
+      return (data != null ? _i20.UserCapabilities.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i21.VerificationTask?>()) {
+      return (data != null ? _i21.VerificationTask.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i22.VerificationTaskStatus?>()) {
+      return (data != null ? _i22.VerificationTaskStatus.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i23.VerificationTaskType?>()) {
+      return (data != null ? _i23.VerificationTaskType.fromJson(data) : null)
+          as T;
+    }
+    if (t == Map<String, String>) {
+      return (data as Map).map((k, v) =>
+          MapEntry(deserialize<String>(k), deserialize<String>(v))) as T;
+    }
+    if (t == List<_i24.CapabilityRequest>) {
+      return (data as List)
+          .map((e) => deserialize<_i24.CapabilityRequest>(e))
+          .toList() as T;
     }
     if (t == Map<String, dynamic>) {
       return (data as Map).map((k, v) =>
@@ -157,6 +272,42 @@ class Protocol extends _i1.SerializationManager {
     if (data is _i11.VerifyOtpRequest) {
       return 'VerifyOtpRequest';
     }
+    if (data is _i12.CapabilityAuditEvent) {
+      return 'CapabilityAuditEvent';
+    }
+    if (data is _i13.CapabilityRequest) {
+      return 'CapabilityRequest';
+    }
+    if (data is _i14.CapabilityRequestDto) {
+      return 'CapabilityRequestDto';
+    }
+    if (data is _i15.CapabilityRequestStatus) {
+      return 'CapabilityRequestStatus';
+    }
+    if (data is _i16.CapabilityReviewState) {
+      return 'CapabilityReviewState';
+    }
+    if (data is _i17.CapabilityStatusResponse) {
+      return 'CapabilityStatusResponse';
+    }
+    if (data is _i18.CapabilityType) {
+      return 'CapabilityType';
+    }
+    if (data is _i19.TrustedDevice) {
+      return 'TrustedDevice';
+    }
+    if (data is _i20.UserCapabilities) {
+      return 'UserCapabilities';
+    }
+    if (data is _i21.VerificationTask) {
+      return 'VerificationTask';
+    }
+    if (data is _i22.VerificationTaskStatus) {
+      return 'VerificationTaskStatus';
+    }
+    if (data is _i23.VerificationTaskType) {
+      return 'VerificationTaskType';
+    }
     return null;
   }
 
@@ -195,6 +346,42 @@ class Protocol extends _i1.SerializationManager {
     }
     if (dataClassName == 'VerifyOtpRequest') {
       return deserialize<_i11.VerifyOtpRequest>(data['data']);
+    }
+    if (dataClassName == 'CapabilityAuditEvent') {
+      return deserialize<_i12.CapabilityAuditEvent>(data['data']);
+    }
+    if (dataClassName == 'CapabilityRequest') {
+      return deserialize<_i13.CapabilityRequest>(data['data']);
+    }
+    if (dataClassName == 'CapabilityRequestDto') {
+      return deserialize<_i14.CapabilityRequestDto>(data['data']);
+    }
+    if (dataClassName == 'CapabilityRequestStatus') {
+      return deserialize<_i15.CapabilityRequestStatus>(data['data']);
+    }
+    if (dataClassName == 'CapabilityReviewState') {
+      return deserialize<_i16.CapabilityReviewState>(data['data']);
+    }
+    if (dataClassName == 'CapabilityStatusResponse') {
+      return deserialize<_i17.CapabilityStatusResponse>(data['data']);
+    }
+    if (dataClassName == 'CapabilityType') {
+      return deserialize<_i18.CapabilityType>(data['data']);
+    }
+    if (dataClassName == 'TrustedDevice') {
+      return deserialize<_i19.TrustedDevice>(data['data']);
+    }
+    if (dataClassName == 'UserCapabilities') {
+      return deserialize<_i20.UserCapabilities>(data['data']);
+    }
+    if (dataClassName == 'VerificationTask') {
+      return deserialize<_i21.VerificationTask>(data['data']);
+    }
+    if (dataClassName == 'VerificationTaskStatus') {
+      return deserialize<_i22.VerificationTaskStatus>(data['data']);
+    }
+    if (dataClassName == 'VerificationTaskType') {
+      return deserialize<_i23.VerificationTaskType>(data['data']);
     }
     return super.deserializeByClassName(data);
   }

@@ -23,6 +23,214 @@ Status: v0.2 — Comprehensive development standards enforced alongside architec
 - **API Calls:** Use repositories in `packages/core/` which wrap the generated Serverpod client (`video_window_shared/`). No direct REST calls.
 - **Error Surfaces:** Friendly errors with retry actions. Log via analytics with correlation IDs.
 
+### Design System Token Usage
+
+The `packages/shared/` design system provides centralized tokens for colors, typography, spacing, and other design elements. **Always use these tokens instead of hard-coded values** to ensure consistency, maintainability, and proper theme support.
+
+#### Color Tokens
+
+Use `AppColors` from `package:shared/design_system/tokens.dart` for all color values:
+
+```dart
+// ✅ CORRECT: Use semantic color tokens
+import 'package:shared/design_system/tokens.dart';
+
+Container(
+  color: AppColors.primary,        // Brand colors
+  child: Text(
+    'Hello',
+    style: TextStyle(color: AppColors.onPrimary),  // Proper contrast
+  ),
+)
+
+// State colors
+Container(color: AppColors.success)  // For success states
+Container(color: AppColors.error)    // For error states
+Container(color: AppColors.warning)  // For warning states
+Container(color: AppColors.info)     // For informational states
+
+// Neutral colors for backgrounds and borders
+Container(
+  color: AppColors.neutral100,
+  decoration: BoxDecoration(
+    border: Border.all(color: AppColors.neutral300),
+  ),
+)
+
+// Theme-aware surfaces
+Container(
+  color: Theme.of(context).brightness == Brightness.dark
+    ? AppColors.surfaceDark
+    : AppColors.surface,
+)
+
+// ❌ INCORRECT: Hard-coded color values
+Container(color: Color(0xFF6366F1))  // Don't hard-code hex values
+Container(color: Colors.blue)         // Don't use Material colors directly
+```
+
+#### Typography Tokens
+
+Use `AppTypography` for all text styles:
+
+```dart
+// ✅ CORRECT: Use typography tokens
+Text('Display Heading', style: AppTypography.displayLarge)
+Text('Section Title', style: AppTypography.headlineMedium)
+Text('Body content here', style: AppTypography.bodyLarge)
+Text('Button Label', style: AppTypography.labelLarge)
+
+// Override color while preserving token style
+Text(
+  'Custom colored text',
+  style: AppTypography.bodyMedium.copyWith(
+    color: AppColors.primary,
+  ),
+)
+
+// ❌ INCORRECT: Hard-coded text styles
+Text('Hello', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400))
+Text('Title', style: Theme.of(context).textTheme.headline6)  // Don't use deprecated Material text themes
+```
+
+#### Spacing Tokens
+
+Use `AppSpacing` for padding, margins, and gaps:
+
+```dart
+// ✅ CORRECT: Use spacing tokens
+Padding(padding: EdgeInsets.all(AppSpacing.md))
+SizedBox(height: AppSpacing.lg)
+Gap(AppSpacing.xs)  // For flex layouts
+
+// Common patterns
+Column(
+  spacing: AppSpacing.md,  // Flutter 3.16+
+  children: [...],
+)
+
+Container(
+  padding: EdgeInsets.symmetric(
+    horizontal: AppSpacing.md,
+    vertical: AppSpacing.sm,
+  ),
+)
+
+// ❌ INCORRECT: Magic numbers
+Padding(padding: EdgeInsets.all(16))  // Use AppSpacing.md instead
+SizedBox(height: 24.0)                 // Use AppSpacing.lg instead
+```
+
+#### Border Radius Tokens
+
+Use `AppRadius` for consistent corner rounding:
+
+```dart
+// ✅ CORRECT: Use radius tokens
+Container(
+  decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(AppRadius.md),  // Cards, buttons
+  ),
+)
+
+// Circular elements
+Container(
+  decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(AppRadius.full),  // Avatars, pills
+  ),
+)
+
+// ❌ INCORRECT: Magic numbers
+BorderRadius.circular(12)  // Use AppRadius.md instead
+```
+
+#### Elevation Tokens
+
+Use `AppElevation` for consistent shadow depth:
+
+```dart
+// ✅ CORRECT: Use elevation tokens
+Card(
+  elevation: AppElevation.sm,  // Cards at rest
+)
+
+Material(
+  elevation: AppElevation.xl,  // Dialogs, modals
+  child: ...,
+)
+
+// ❌ INCORRECT: Arbitrary elevation values
+Card(elevation: 2)  // Use AppElevation.sm instead
+```
+
+#### Animation Duration Tokens
+
+Use `AppDuration` for consistent timing:
+
+```dart
+// ✅ CORRECT: Use duration tokens
+AnimatedOpacity(
+  duration: AppDuration.normal,
+  opacity: isVisible ? 1.0 : 0.0,
+)
+
+AnimatedContainer(
+  duration: AppDuration.fast,  // Quick transitions
+  color: isSelected ? AppColors.primary : AppColors.neutral200,
+)
+
+// ❌ INCORRECT: Hard-coded durations
+AnimatedOpacity(duration: Duration(milliseconds: 200))  // Use AppDuration.normal
+```
+
+#### Migration from Legacy Widgets
+
+When updating existing widgets to use tokens:
+
+1. **Replace hard-coded colors** with `AppColors` tokens
+2. **Replace TextStyle constructors** with `AppTypography` styles
+3. **Replace magic number spacing** with `AppSpacing` constants
+4. **Test both light and dark themes** after migration
+5. **Verify accessibility** - token pairings maintain WCAG AA contrast
+
+```dart
+// BEFORE: Legacy widget with hard-coded values
+Container(
+  padding: EdgeInsets.all(16),
+  decoration: BoxDecoration(
+    color: Color(0xFFFFFFFF),
+    borderRadius: BorderRadius.circular(12),
+    border: Border.all(color: Color(0xFFE5E5E5)),
+  ),
+  child: Text(
+    'Title',
+    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+  ),
+)
+
+// AFTER: Migrated to use design tokens
+Container(
+  padding: EdgeInsets.all(AppSpacing.md),
+  decoration: BoxDecoration(
+    color: AppColors.surface,
+    borderRadius: BorderRadius.circular(AppRadius.md),
+    border: Border.all(color: AppColors.neutral200),
+  ),
+  child: Text(
+    'Title',
+    style: AppTypography.titleMedium,
+  ),
+)
+```
+
+#### Token Testing Requirements
+
+All new widgets using design tokens must:
+- **Include widget tests** verifying token usage
+- **Test both light and dark theme** rendering
+- **Verify accessibility** with `flutter test --update-goldens` for visual regression
+- **Document token choices** in code comments when non-obvious
+
 ### Data Transformation Standards
 
 #### Layer Boundary Rules

@@ -1,0 +1,39 @@
+# Capability audit event model
+class: CapabilityAuditEvent
+table: capability_audit_events
+
+fields:
+  # Unique identifier
+  id: int?
+  
+  # Foreign key to user
+  userId: int
+  
+  # Event type (e.g., capability.requested, capability.approved)
+  eventType: String
+  
+  # Capability involved (nullable for device events)
+  capability: CapabilityType?
+  
+  # Entry point where event originated
+  entryPoint: String?
+  
+  # Device fingerprint
+  deviceFingerprint: String?
+  
+  # Additional metadata (JSON)
+  metadata: String  # JSON string
+  
+  # Timestamp
+  createdAt: DateTime
+
+indexes:
+  capability_audit_event_user_id_idx:
+    fields: userId
+  capability_audit_event_type_idx:
+    fields: eventType
+  capability_audit_event_created_idx:
+    fields: createdAt
+  capability_audit_event_capability_idx:
+    fields: capability
+

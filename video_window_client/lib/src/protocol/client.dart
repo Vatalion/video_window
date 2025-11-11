@@ -11,8 +11,63 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'dart:async' as _i2;
-import 'package:video_window_client/src/protocol/greeting.dart' as _i3;
-import 'protocol.dart' as _i4;
+import 'package:video_window_client/src/protocol/capabilities/capability_status_response.dart'
+    as _i3;
+import 'package:video_window_client/src/protocol/capabilities/capability_request_dto.dart'
+    as _i4;
+import 'package:video_window_client/src/protocol/capabilities/capability_request.dart'
+    as _i5;
+import 'package:video_window_client/src/protocol/greeting.dart' as _i6;
+import 'protocol.dart' as _i7;
+
+/// Capability endpoint for managing user capability requests and status
+/// Implements Story 2-1: Capability Enablement Request Flow
+/// {@category Endpoint}
+class EndpointCapability extends _i1.EndpointRef {
+  EndpointCapability(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'capability';
+
+  /// Get current capability status for user
+  /// Cached for ≤10 seconds per user
+  ///
+  /// AC1: Capability Center screen surfaces current capability status, blockers, and CTAs
+  _i2.Future<_i3.CapabilityStatusResponse> getStatus(int userId) =>
+      caller.callServerEndpoint<_i3.CapabilityStatusResponse>(
+        'capability',
+        'getStatus',
+        {'userId': userId},
+      );
+
+  /// Request a capability (idempotent)
+  /// Rate limited: 5 requests per minute per user
+  ///
+  /// AC2: Inline prompts detect missing capability and open guided checklist
+  /// AC3: Submitting a request calls POST /capabilities/request, persists metadata, idempotent
+  /// AC4: Audit event capability.requested is emitted
+  /// AC5: Analytics event capability_request_submitted is recorded
+  _i2.Future<_i3.CapabilityStatusResponse> requestCapability(
+    int userId,
+    _i4.CapabilityRequestDto request,
+  ) =>
+      caller.callServerEndpoint<_i3.CapabilityStatusResponse>(
+        'capability',
+        'requestCapability',
+        {
+          'userId': userId,
+          'request': request,
+        },
+      );
+
+  /// Get capability request history for user
+  _i2.Future<List<_i5.CapabilityRequest>> getRequests(int userId) =>
+      caller.callServerEndpoint<List<_i5.CapabilityRequest>>(
+        'capability',
+        'getRequests',
+        {'userId': userId},
+      );
+}
 
 /// Health check endpoint for monitoring and smoke tests
 /// {@category Endpoint}
@@ -323,8 +378,8 @@ class EndpointGreeting extends _i1.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i2.Future<_i3.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i3.Greeting>(
+  _i2.Future<_i6.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i6.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -347,7 +402,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i4.Protocol(),
+          _i7.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,
@@ -357,6 +412,7 @@ class Client extends _i1.ServerpodClientShared {
           disconnectStreamsOnLostInternetConnection:
               disconnectStreamsOnLostInternetConnection,
         ) {
+    capability = EndpointCapability(this);
     health = EndpointHealth(this);
     auth = EndpointAuth(this);
     metrics = EndpointMetrics(this);
@@ -366,6 +422,8 @@ class Client extends _i1.ServerpodClientShared {
     story = EndpointStory(this);
     greeting = EndpointGreeting(this);
   }
+
+  late final EndpointCapability capability;
 
   late final EndpointHealth health;
 
@@ -385,6 +443,7 @@ class Client extends _i1.ServerpodClientShared {
 
   @override
   Map<String, _i1.EndpointRef> get endpointRefLookup => {
+        'capability': capability,
         'health': health,
         'auth': auth,
         'metrics': metrics,

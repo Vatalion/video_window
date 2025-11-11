@@ -1,0 +1,10 @@
+# Capability request DTO
+class: CapabilityRequestDto
+
+fields:
+  # Capability to request
+  capability: CapabilityType
+  
+  # Context data
+  context: Map<String, String>  # entryPoint, draftId, etc.
+

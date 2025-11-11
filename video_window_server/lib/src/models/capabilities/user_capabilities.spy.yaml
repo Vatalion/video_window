@@ -1,0 +1,33 @@
+# User capabilities snapshot model
+class: UserCapabilities
+table: user_capabilities
+
+fields:
+  # Foreign key to user
+  userId: int
+  
+  # Capability flags
+  canPublish: bool
+  canCollectPayments: bool
+  canFulfillOrders: bool
+  
+  # Verification timestamps
+  identityVerifiedAt: DateTime?
+  payoutConfiguredAt: DateTime?
+  fulfillmentEnabledAt: DateTime?
+  
+  # Review state
+  reviewState: CapabilityReviewState
+  
+  # Blockers map (capability -> message)
+  blockers: String  # JSON string
+  
+  # Timestamps
+  updatedAt: DateTime
+  createdAt: DateTime
+
+indexes:
+  user_capabilities_user_id_idx:
+    fields: userId
+    unique: true
+

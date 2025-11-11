@@ -1,0 +1,8 @@
+# Capability request status enumeration
+enum: CapabilityRequestStatus
+values:
+  - requested
+  - inReview
+  - approved
+  - blocked
+

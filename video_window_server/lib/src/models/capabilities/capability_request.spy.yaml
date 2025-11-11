@@ -1,0 +1,34 @@
+# Capability request model
+class: CapabilityRequest
+table: capability_requests
+
+fields:
+  # Unique identifier
+  id: int?
+  
+  # Foreign key to user
+  userId: int
+  
+  # Capability being requested
+  capability: CapabilityType
+  
+  # Request status
+  status: CapabilityRequestStatus
+  
+  # Context metadata (JSON: entryPoint, draftId, deviceFingerprint)
+  metadata: String  # JSON string
+  
+  # Timestamps
+  createdAt: DateTime
+  updatedAt: DateTime
+  resolvedAt: DateTime?
+
+indexes:
+  capability_request_user_capability_idx:
+    fields: userId, capability
+    unique: true
+  capability_request_status_idx:
+    fields: status
+  capability_request_created_idx:
+    fields: createdAt
+

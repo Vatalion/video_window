@@ -1,0 +1,36 @@
+# Verification task model
+class: VerificationTask
+table: verification_tasks
+
+fields:
+  # Unique identifier
+  id: int?
+  
+  # Foreign key to user
+  userId: int
+  
+  # Related capability
+  capability: CapabilityType
+  
+  # Task type
+  taskType: VerificationTaskType
+  
+  # Task status
+  status: VerificationTaskStatus
+  
+  # Task-specific payload (JSON)
+  payload: String  # JSON string
+  
+  # Timestamps
+  createdAt: DateTime
+  updatedAt: DateTime
+  completedAt: DateTime?
+
+indexes:
+  verification_task_user_id_idx:
+    fields: userId
+  verification_task_status_idx:
+    fields: status
+  verification_task_capability_idx:
+    fields: capability
+
