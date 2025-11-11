@@ -74,6 +74,28 @@ class AuthGoogleSignInRequested extends AuthEvent {
   List<Object?> get props => [idToken];
 }
 
+class AuthRecoverySendRequested extends AuthEvent {
+  final String email;
+
+  const AuthRecoverySendRequested({required this.email});
+
+  @override
+  List<Object?> get props => [email];
+}
+
+class AuthRecoveryVerifyRequested extends AuthEvent {
+  final String email;
+  final String token;
+
+  const AuthRecoveryVerifyRequested({
+    required this.email,
+    required this.token,
+  });
+
+  @override
+  List<Object?> get props => [email, token];
+}
+
 // States
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -120,17 +142,28 @@ class AuthUnauthenticated extends AuthState {
 
 class AuthError extends AuthState {
   final String message;
-  final String? errorCode;
+  final String? error;
   final int? retryAfter;
+  final int? attemptsRemaining;
 
   const AuthError({
     required this.message,
-    this.errorCode,
+    this.error,
     this.retryAfter,
+    this.attemptsRemaining,
   });
 
   @override
-  List<Object?> get props => [message, errorCode, retryAfter];
+  List<Object?> get props => [message, error, retryAfter, attemptsRemaining];
+}
+
+class AuthRecoverySent extends AuthState {
+  final String email;
+
+  const AuthRecoverySent({required this.email});
+
+  @override
+  List<Object?> get props => [email];
 }
 
 class AuthAccountLocked extends AuthState {
@@ -167,6 +200,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignOutRequested>(_onSignOutRequested);
     on<AuthAppleSignInRequested>(_onAppleSignInRequested);
     on<AuthGoogleSignInRequested>(_onGoogleSignInRequested);
+    on<AuthRecoverySendRequested>(_onRecoverySendRequested);
+    on<AuthRecoveryVerifyRequested>(_onRecoveryVerifyRequested);
 
     // Initialize session service if provided (Story 1-3)
     if (_sessionService != null) {
@@ -439,11 +474,107 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       } else {
         emit(AuthError(
           message: result.message ?? 'Failed to sign in with Google',
-          errorCode: result.error,
+          error: result.error,
         ));
       }
     } catch (e) {
       emit(AuthError(message: 'Failed to sign in with Google: $e'));
+    }
+  }
+
+  Future<void> _onRecoverySendRequested(
+    AuthRecoverySendRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+
+    try {
+      // Emit analytics event: recovery send initiated
+      debugPrint('ANALYTICS: auth_recovery_send_initiated');
+
+      final result = await _authRepository.sendRecovery(email: event.email);
+
+      if (result['success'] == true) {
+        // Emit analytics event: recovery email sent successfully
+        debugPrint('ANALYTICS: auth_recovery_send_success');
+
+        emit(AuthRecoverySent(email: event.email));
+      } else {
+        // Emit analytics event: recovery send failed
+        debugPrint('ANALYTICS: auth_recovery_send_failed - ${result['error']}');
+
+        emit(AuthError(
+          message:
+              result['message'] as String? ?? 'Failed to send recovery email',
+          error: result['error'] as String?,
+          retryAfter: result['retryAfter'] as int?,
+        ));
+      }
+    } catch (e) {
+      emit(AuthError(message: 'Failed to send recovery email: $e'));
+    }
+  }
+
+  Future<void> _onRecoveryVerifyRequested(
+    AuthRecoveryVerifyRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+
+    try {
+      // Emit analytics event: recovery verify initiated
+      debugPrint('ANALYTICS: auth_recovery_verify_initiated');
+
+      final result = await _authRepository.verifyRecovery(
+        email: event.email,
+        token: event.token,
+      );
+
+      if (result['success'] == true) {
+        final tokens = result['tokens'] as Map<String, dynamic>;
+        final user = result['user'] as Map<String, dynamic>;
+
+        // Store tokens securely
+        await _tokenStorage.saveAuthSession(
+          accessToken: tokens['accessToken'] as String,
+          refreshToken: tokens['refreshToken'] as String,
+          userId: user['id'] as int,
+          deviceId: result['session']['deviceId'] as String,
+          sessionId: result['session']['sessionId'] as String,
+        );
+
+        // Start session refresh scheduler
+        await _sessionService?.storeSession(
+          accessToken: tokens['accessToken'] as String,
+          refreshToken: tokens['refreshToken'] as String,
+          expiresIn: tokens['expiresIn'] as int,
+        );
+
+        // Emit analytics event: recovery verification successful
+        debugPrint('ANALYTICS: auth_recovery_verify_success');
+
+        emit(AuthAuthenticated(
+          user: AuthUser(
+            id: user['id'] as int,
+            email: user['email'] as String,
+            createdAt: user['createdAt'] as String,
+          ),
+        ));
+      } else {
+        // Emit analytics event: recovery verification failed
+        debugPrint(
+            'ANALYTICS: auth_recovery_verify_failed - ${result['error']}');
+
+        emit(AuthError(
+          message:
+              result['message'] as String? ?? 'Failed to verify recovery token',
+          error: result['error'] as String?,
+          attemptsRemaining: result['attemptsRemaining'] as int?,
+          retryAfter: result['remainingSeconds'] as int?,
+        ));
+      }
+    } catch (e) {
+      emit(AuthError(message: 'Failed to verify recovery token: $e'));
     }
   }
 }

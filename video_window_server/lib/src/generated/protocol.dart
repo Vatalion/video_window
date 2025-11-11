@@ -16,15 +16,17 @@ import 'auth/auth_tokens.dart' as _i4;
 import 'auth/otp.dart' as _i5;
 import 'auth/otp_request.dart' as _i6;
 import 'auth/otp_response.dart' as _i7;
-import 'auth/session.dart' as _i8;
-import 'auth/token_blacklist.dart' as _i9;
-import 'auth/user.dart' as _i10;
-import 'auth/verify_otp_request.dart' as _i11;
+import 'auth/recovery_token.dart' as _i8;
+import 'auth/session.dart' as _i9;
+import 'auth/token_blacklist.dart' as _i10;
+import 'auth/user.dart' as _i11;
+import 'auth/verify_otp_request.dart' as _i12;
 export 'greeting.dart';
 export 'auth/auth_tokens.dart';
 export 'auth/otp.dart';
 export 'auth/otp_request.dart';
 export 'auth/otp_response.dart';
+export 'auth/recovery_token.dart';
 export 'auth/session.dart';
 export 'auth/token_blacklist.dart';
 export 'auth/user.dart';
@@ -122,6 +124,167 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'identifier',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'recovery_tokens',
+      dartName: 'RecoveryToken',
+      schema: 'public',
+      module: 'video_window',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'recovery_tokens_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'email',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'tokenHash',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'salt',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'deviceInfo',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'ipAddress',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userAgent',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'location',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'attempts',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'used',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'revoked',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'expiresAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'usedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'revokedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'recovery_tokens_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'recovery_user_id_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'recovery_email_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'email',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'recovery_used_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'used',
             )
           ],
           type: 'btree',
@@ -496,17 +659,20 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i7.OtpResponse) {
       return _i7.OtpResponse.fromJson(data) as T;
     }
-    if (t == _i8.UserSession) {
-      return _i8.UserSession.fromJson(data) as T;
+    if (t == _i8.RecoveryToken) {
+      return _i8.RecoveryToken.fromJson(data) as T;
     }
-    if (t == _i9.TokenBlacklist) {
-      return _i9.TokenBlacklist.fromJson(data) as T;
+    if (t == _i9.UserSession) {
+      return _i9.UserSession.fromJson(data) as T;
     }
-    if (t == _i10.User) {
-      return _i10.User.fromJson(data) as T;
+    if (t == _i10.TokenBlacklist) {
+      return _i10.TokenBlacklist.fromJson(data) as T;
     }
-    if (t == _i11.VerifyOtpRequest) {
-      return _i11.VerifyOtpRequest.fromJson(data) as T;
+    if (t == _i11.User) {
+      return _i11.User.fromJson(data) as T;
+    }
+    if (t == _i12.VerifyOtpRequest) {
+      return _i12.VerifyOtpRequest.fromJson(data) as T;
     }
     if (t == _i1.getType<_i3.Greeting?>()) {
       return (data != null ? _i3.Greeting.fromJson(data) : null) as T;
@@ -523,17 +689,20 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i7.OtpResponse?>()) {
       return (data != null ? _i7.OtpResponse.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i8.UserSession?>()) {
-      return (data != null ? _i8.UserSession.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i8.RecoveryToken?>()) {
+      return (data != null ? _i8.RecoveryToken.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i9.TokenBlacklist?>()) {
-      return (data != null ? _i9.TokenBlacklist.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i9.UserSession?>()) {
+      return (data != null ? _i9.UserSession.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i10.User?>()) {
-      return (data != null ? _i10.User.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i10.TokenBlacklist?>()) {
+      return (data != null ? _i10.TokenBlacklist.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i11.VerifyOtpRequest?>()) {
-      return (data != null ? _i11.VerifyOtpRequest.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i11.User?>()) {
+      return (data != null ? _i11.User.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i12.VerifyOtpRequest?>()) {
+      return (data != null ? _i12.VerifyOtpRequest.fromJson(data) : null) as T;
     }
     if (t == Map<String, dynamic>) {
       return (data as Map).map((k, v) =>
@@ -575,16 +744,19 @@ class Protocol extends _i1.SerializationManagerServer {
     if (data is _i7.OtpResponse) {
       return 'OtpResponse';
     }
-    if (data is _i8.UserSession) {
+    if (data is _i8.RecoveryToken) {
+      return 'RecoveryToken';
+    }
+    if (data is _i9.UserSession) {
       return 'UserSession';
     }
-    if (data is _i9.TokenBlacklist) {
+    if (data is _i10.TokenBlacklist) {
       return 'TokenBlacklist';
     }
-    if (data is _i10.User) {
+    if (data is _i11.User) {
       return 'User';
     }
-    if (data is _i11.VerifyOtpRequest) {
+    if (data is _i12.VerifyOtpRequest) {
       return 'VerifyOtpRequest';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -615,17 +787,20 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'OtpResponse') {
       return deserialize<_i7.OtpResponse>(data['data']);
     }
+    if (dataClassName == 'RecoveryToken') {
+      return deserialize<_i8.RecoveryToken>(data['data']);
+    }
     if (dataClassName == 'UserSession') {
-      return deserialize<_i8.UserSession>(data['data']);
+      return deserialize<_i9.UserSession>(data['data']);
     }
     if (dataClassName == 'TokenBlacklist') {
-      return deserialize<_i9.TokenBlacklist>(data['data']);
+      return deserialize<_i10.TokenBlacklist>(data['data']);
     }
     if (dataClassName == 'User') {
-      return deserialize<_i10.User>(data['data']);
+      return deserialize<_i11.User>(data['data']);
     }
     if (dataClassName == 'VerifyOtpRequest') {
-      return deserialize<_i11.VerifyOtpRequest>(data['data']);
+      return deserialize<_i12.VerifyOtpRequest>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -645,12 +820,14 @@ class Protocol extends _i1.SerializationManagerServer {
     switch (t) {
       case _i5.Otp:
         return _i5.Otp.t;
-      case _i8.UserSession:
-        return _i8.UserSession.t;
-      case _i9.TokenBlacklist:
-        return _i9.TokenBlacklist.t;
-      case _i10.User:
-        return _i10.User.t;
+      case _i8.RecoveryToken:
+        return _i8.RecoveryToken.t;
+      case _i9.UserSession:
+        return _i9.UserSession.t;
+      case _i10.TokenBlacklist:
+        return _i10.TokenBlacklist.t;
+      case _i11.User:
+        return _i11.User.t;
     }
     return null;
   }

@@ -77,7 +77,8 @@ void main() {
         ),
       );
 
-      when(mockSecureStorage.write(key: anyNamed('key'), value: anyNamed('value')))
+      when(mockSecureStorage.write(
+              key: anyNamed('key'), value: anyNamed('value')))
           .thenAnswer((_) async => {});
 
       final result = await sessionService.initialize();
@@ -89,7 +90,8 @@ void main() {
 
   group('SessionService - Token Storage', () {
     test('storeSession saves tokens and schedules refresh', () async {
-      when(mockSecureStorage.write(key: anyNamed('key'), value: anyNamed('value')))
+      when(mockSecureStorage.write(
+              key: anyNamed('key'), value: anyNamed('value')))
           .thenAnswer((_) async => {});
 
       await sessionService.storeSession(
@@ -117,7 +119,8 @@ void main() {
     });
 
     test('storeSession resets failure streak', () async {
-      when(mockSecureStorage.write(key: anyNamed('key'), value: anyNamed('value')))
+      when(mockSecureStorage.write(
+              key: anyNamed('key'), value: anyNamed('value')))
           .thenAnswer((_) async => {});
 
       await sessionService.storeSession(
@@ -150,7 +153,8 @@ void main() {
         ),
       );
 
-      when(mockSecureStorage.write(key: anyNamed('key'), value: anyNamed('value')))
+      when(mockSecureStorage.write(
+              key: anyNamed('key'), value: anyNamed('value')))
           .thenAnswer((_) async => {});
 
       final result = await sessionService.manualRefresh();
@@ -180,7 +184,8 @@ void main() {
         ),
       );
 
-      when(mockSecureStorage.write(key: anyNamed('key'), value: anyNamed('value')))
+      when(mockSecureStorage.write(
+              key: anyNamed('key'), value: anyNamed('value')))
           .thenAnswer((_) async => {});
 
       final result = await sessionService.manualRefresh();
@@ -202,7 +207,8 @@ void main() {
         ),
       );
 
-      when(mockSecureStorage.write(key: anyNamed('key'), value: anyNamed('value')))
+      when(mockSecureStorage.write(
+              key: anyNamed('key'), value: anyNamed('value')))
           .thenAnswer((_) async => {});
 
       // First failure
@@ -285,4 +291,3 @@ void main() {
     });
   });
 }
-

@@ -229,6 +229,96 @@ class Endpoints extends _i1.EndpointDispatch {
             deviceId: params['deviceId'],
           ),
         ),
+        'sendRecovery': _i1.MethodConnector(
+          name: 'sendRecovery',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'deviceInfo': _i1.ParameterDescription(
+              name: 'deviceInfo',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'userAgent': _i1.ParameterDescription(
+              name: 'userAgent',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'location': _i1.ParameterDescription(
+              name: 'location',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint).sendRecovery(
+            session,
+            params['email'],
+            deviceInfo: params['deviceInfo'],
+            userAgent: params['userAgent'],
+            location: params['location'],
+          ),
+        ),
+        'verifyRecovery': _i1.MethodConnector(
+          name: 'verifyRecovery',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'token': _i1.ParameterDescription(
+              name: 'token',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'deviceId': _i1.ParameterDescription(
+              name: 'deviceId',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint).verifyRecovery(
+            session,
+            params['email'],
+            params['token'],
+            deviceId: params['deviceId'],
+          ),
+        ),
+        'revokeRecovery': _i1.MethodConnector(
+          name: 'revokeRecovery',
+          params: {
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'token': _i1.ParameterDescription(
+              name: 'token',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint).revokeRecovery(
+            session,
+            params['email'],
+            params['token'],
+          ),
+        ),
       },
     );
     connectors['metrics'] = _i1.EndpointConnector(

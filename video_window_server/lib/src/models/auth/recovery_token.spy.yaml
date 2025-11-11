@@ -1,0 +1,43 @@
+# Recovery token storage model for account recovery
+# Implements AC1: One-time recovery token with 15-minute expiry
+# Implements AC4: Brute force protection and lockout tracking
+class: RecoveryToken
+table: recovery_tokens
+
+fields:
+  # Unique identifier
+  id: int?
+  
+  # User identification
+  userId: int
+  email: String
+  
+  # Hashed token with user-specific salt (SHA-256)
+  tokenHash: String
+  salt: String
+  
+  # Security metadata (AC2: device + location metadata)
+  deviceInfo: String?
+  ipAddress: String
+  userAgent: String?
+  location: String?
+  
+  # One-time use enforcement (AC1, AC3)
+  attempts: int
+  used: bool
+  revoked: bool  # For "Not You?" link (AC2)
+  
+  # Expiry and timestamps (AC1: 15 minutes)
+  expiresAt: DateTime
+  createdAt: DateTime
+  usedAt: DateTime?
+  revokedAt: DateTime?
+
+indexes:
+  recovery_user_id_idx:
+    fields: userId
+  recovery_email_idx:
+    fields: email
+  recovery_used_idx:
+    fields: used
+

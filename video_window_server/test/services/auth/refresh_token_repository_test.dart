@@ -39,7 +39,8 @@ void main() {
       // 6. Return token metadata
     });
 
-    test('verifyAndConsumeToken rejects already-used token (reuse detection)', () async {
+    test('verifyAndConsumeToken rejects already-used token (reuse detection)',
+        () async {
       // GIVEN a token that has last_used_at set
       // WHEN verifying the token again
       // THEN it should:
@@ -132,7 +133,8 @@ void main() {
       // with severity=info
     });
 
-    test('emits auth.session.all_revoked event when all tokens revoked', () async {
+    test('emits auth.session.all_revoked event when all tokens revoked',
+        () async {
       // GIVEN all user tokens being revoked
       // WHEN revokeAllUserTokens is called
       // THEN auth.session.all_revoked event should be created
@@ -207,4 +209,3 @@ void main() {
  *    - Run cleanup
  *    - Verify only expired removed
  */
-

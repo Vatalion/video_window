@@ -188,6 +188,68 @@ class AuthRepository {
       );
     }
   }
+
+  /// Send recovery token to email address
+  /// Story 1-4: Account Recovery
+  Future<Map<String, dynamic>> sendRecovery({
+    required String email,
+  }) async {
+    try {
+      final result = await _client.auth.sendRecovery(
+        email,
+        deviceInfo: null,
+        userAgent: null,
+        location: null,
+      );
+      return result;
+    } catch (e) {
+      return {
+        'success': false,
+        'error': 'NETWORK_ERROR',
+        'message': 'Network error: ${e.toString()}',
+      };
+    }
+  }
+
+  /// Verify recovery token and authenticate user
+  /// Story 1-4: Account Recovery
+  Future<Map<String, dynamic>> verifyRecovery({
+    required String email,
+    required String token,
+  }) async {
+    try {
+      final result = await _client.auth.verifyRecovery(
+        email,
+        token,
+        deviceId: null,
+      );
+      return result;
+    } catch (e) {
+      return {
+        'success': false,
+        'error': 'NETWORK_ERROR',
+        'message': 'Network error: ${e.toString()}',
+      };
+    }
+  }
+
+  /// Revoke recovery token
+  /// Story 1-4: Account Recovery - "Not You?" link
+  Future<Map<String, dynamic>> revokeRecovery({
+    required String email,
+    required String token,
+  }) async {
+    try {
+      final result = await _client.auth.revokeRecovery(email, token);
+      return result;
+    } catch (e) {
+      return {
+        'success': false,
+        'error': 'NETWORK_ERROR',
+        'message': 'Network error: ${e.toString()}',
+      };
+    }
+  }
 }
 
 // Result classes

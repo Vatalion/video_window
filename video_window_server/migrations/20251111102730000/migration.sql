@@ -17,14 +17,14 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
   last_used_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-  revoked BOOLEAN DEFAULT FALSE,
-  
-  -- Indexes for performance
-  INDEX idx_refresh_tokens_jti ON refresh_tokens(jti),
-  INDEX idx_refresh_tokens_user_id ON refresh_tokens(user_id),
-  INDEX idx_refresh_tokens_expires_at ON refresh_tokens(expires_at),
-  INDEX idx_refresh_tokens_revoked ON refresh_tokens(revoked) WHERE revoked = false
+  revoked BOOLEAN DEFAULT FALSE
 );
+
+-- Indexes for refresh_tokens
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_jti ON refresh_tokens(jti);
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_revoked ON refresh_tokens(revoked) WHERE revoked = false;
 
 -- Create security_events table for audit trail
 CREATE TABLE IF NOT EXISTS security_events (
@@ -33,14 +33,14 @@ CREATE TABLE IF NOT EXISTS security_events (
   user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
   severity TEXT NOT NULL CHECK (severity IN ('info', 'warning', 'error', 'critical')),
   metadata JSONB,
-  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-  
-  -- Indexes for querying
-  INDEX idx_security_events_event_type ON security_events(event_type),
-  INDEX idx_security_events_user_id ON security_events(user_id),
-  INDEX idx_security_events_severity ON security_events(severity),
-  INDEX idx_security_events_created_at ON security_events(created_at DESC)
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+
+-- Indexes for security_events
+CREATE INDEX IF NOT EXISTS idx_security_events_event_type ON security_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_security_events_user_id ON security_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_security_events_severity ON security_events(severity);
+CREATE INDEX IF NOT EXISTS idx_security_events_created_at ON security_events(created_at DESC);
 
 -- Add comments for documentation
 COMMENT ON TABLE refresh_tokens IS 'Stores refresh tokens with rotation and reuse detection for SEC-003 compliance';

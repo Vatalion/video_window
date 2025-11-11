@@ -118,6 +118,60 @@ class EndpointAuth extends _i1.EndpointRef {
           'deviceId': deviceId,
         },
       );
+
+  /// Send account recovery email
+  /// AC1: Issues one-time recovery token with 15-minute expiry
+  /// AC2: Email includes device + location metadata
+  _i2.Future<Map<String, dynamic>> sendRecovery(
+    String email, {
+    String? deviceInfo,
+    String? userAgent,
+    String? location,
+  }) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'auth',
+        'sendRecovery',
+        {
+          'email': email,
+          'deviceInfo': deviceInfo,
+          'userAgent': userAgent,
+          'location': location,
+        },
+      );
+
+  /// Verify recovery token and create authenticated session
+  /// AC3: Allows re-authentication and forces session rotation
+  /// AC4: Brute force protection (3 attempts = 30 min lockout)
+  /// AC5: Invalidates all active sessions on success
+  _i2.Future<Map<String, dynamic>> verifyRecovery(
+    String email,
+    String token, {
+    String? deviceId,
+  }) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'auth',
+        'verifyRecovery',
+        {
+          'email': email,
+          'token': token,
+          'deviceId': deviceId,
+        },
+      );
+
+  /// Revoke recovery token immediately
+  /// AC2: "Not You?" link revokes token and alerts user
+  _i2.Future<Map<String, dynamic>> revokeRecovery(
+    String email,
+    String token,
+  ) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'auth',
+        'revokeRecovery',
+        {
+          'email': email,
+          'token': token,
+        },
+      );
 }
 
 /// Endpoint for exposing Prometheus metrics

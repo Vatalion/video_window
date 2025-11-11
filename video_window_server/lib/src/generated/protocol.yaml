@@ -7,6 +7,9 @@ auth:
   - logout:
   - verifyAppleToken:
   - verifyGoogleToken:
+  - sendRecovery:
+  - verifyRecovery:
+  - revokeRecovery:
 metrics:
   - getMetrics:
   - getHealth:

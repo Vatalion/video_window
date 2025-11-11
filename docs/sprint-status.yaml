@@ -68,7 +68,7 @@ development_status:
   1.1.implement-email-sms-sign-in: done # SPRINT 3 - Complete end-to-end auth flow
   1-2-add-social-sign-in-options: done # SPRINT 3 - ✅ Social auth complete (Apple & Google Sign-In)
   1-3-session-management-refresh: done # SPRINT 3 - ✅ Session lifecycle & token rotation complete
-  1-4-account-recovery-email-only: in-progress # SPRINT 3 - Account recovery with one-time tokens
+  1-4-account-recovery-email-only: done # SPRINT 3 - ✅ Account recovery with one-time tokens - APPROVED
   epic-1-retrospective: optional
 
   # Epic 2: Maker Onboarding & Verification
