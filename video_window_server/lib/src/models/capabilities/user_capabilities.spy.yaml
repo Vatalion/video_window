@@ -3,6 +3,9 @@ class: UserCapabilities
 table: user_capabilities
 
 fields:
+  # Primary key (auto-generated)
+  id: int?
+  
   # Foreign key to user
   userId: int
   

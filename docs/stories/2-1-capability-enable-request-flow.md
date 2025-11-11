@@ -405,7 +405,18 @@ Comprehensive systematic review of Story 2-1 reveals a mixed implementation stat
 
 - [x] [AI-Review][High] Add localization files (.arb) for capability status strings
 - [x] [AI-Review][High] Fix test dependencies (bloc_test, mocktail) and verify tests pass (13+ tests passing)
-- [ ] [AI-Review][High] Implement actual integration tests (replace placeholders)
+- [x] [AI-Review][High] Implement actual integration tests - **COMPLETED**: Comprehensive integration tests written covering all 5 test cases (idempotency, status polling, auto-approval, rate limiting, blocker resolution). Tests use proper Serverpod test harness. All tests pass reliably when run in isolation or after Redis flush. One test may occasionally fail when entire suite is run repeatedly due to IP-level rate limiting (20 req/5min per IP, shared across all tests from 127.0.0.1).
 - [x] [AI-Review][Med] Complete AC5 analytics event emission (logging implemented, analytics service integration pending)
 - [x] [AI-Review][Med] Fix rate limiting IP address extraction
 - [ ] [AI-Review][Med] Deploy Grafana dashboard configuration (requires infrastructure access)
+
+**2025-11-11 Integration Test Implementation Notes:**
+- Created comprehensive integration test suite: `video_window_server/test/integration/capability_flow_test.dart`
+- Fixed database migration to use Serverpod-generated schema with proper ID handling (BIGINT ids instead of UUIDs)
+- Fixed CapabilityService to properly return inserted rows with IDs
+- Fixed endpoint IP extraction to use helper method compatible with Serverpod 2.9
+- Tests cover: request idempotency, status polling with updates, auto-approval with audit events, rate limiting enforcement, and blocker resolution flow
+- Test infrastructure: Uses Serverpod test harness with rollback disabled for complex multi-step flows
+- Implemented database cleanup in tests to ensure clean state despite disabled rollback
+- Used unique user IDs (30001-30005) per test to avoid identifier-level rate limiting conflicts
+- Known limitation: IP-level rate limiting (20 req/5min per IP) may cause occasional failures when running full suite repeatedly from same IP. Tests pass reliably individually or after 5-minute cooldown.

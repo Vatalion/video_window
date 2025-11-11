@@ -40,8 +40,9 @@ class CapabilityService {
         createdAt: now,
       );
 
-      await UserCapabilities.db.insertRow(_session, newCapabilities);
-      return newCapabilities;
+      final inserted =
+          await UserCapabilities.db.insertRow(_session, newCapabilities);
+      return inserted;
     } catch (e, stackTrace) {
       _session.log(
         'Failed to get user capabilities for user $userId: $e',

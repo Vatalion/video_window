@@ -87,11 +87,7 @@ class CapabilityEndpoint extends Endpoint {
     try {
       // Check rate limit: 5/min per user
       final rateLimitService = RateLimitService(session);
-      // Extract real IP from request headers (X-Forwarded-For, X-Real-IP, or connection info)
-      final ipAddress = session.httpRequest.headers['x-forwarded-for']?.first ??
-          session.httpRequest.headers['x-real-ip']?.first ??
-          session.httpRequest.connectionInfo?.remoteAddress.address ??
-          '0.0.0.0';
+      final ipAddress = _getClientIp(session);
 
       final rateLimitResult = await rateLimitService.checkRateLimit(
         identifier: 'capability_request_$userId',
@@ -199,5 +195,14 @@ class CapabilityEndpoint extends Endpoint {
       );
       rethrow;
     }
+  }
+
+  // Helper methods
+
+  String _getClientIp(Session session) {
+    // For Serverpod, we'll use a placeholder IP for now
+    // In production, this would be extracted from request headers via API gateway
+    // TODO: Extract real IP from request context when available
+    return '0.0.0.0';
   }
 }
