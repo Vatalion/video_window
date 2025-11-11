@@ -3,14 +3,6 @@ import 'package:test/test.dart';
 import 'package:video_window_server/src/endpoints/profile/media_endpoint.dart';
 
 void main() {
-  late MediaEndpoint endpoint;
-
-  setUp(() {
-    endpoint = MediaEndpoint();
-    // Note: Platform.environment is unmodifiable
-    // AWS credentials should be set via environment variables for full tests
-  });
-
   group('MediaEndpoint', () {
     test('createAvatarUploadUrl validates file size limit', () {
       // Arrange
@@ -51,9 +43,20 @@ void main() {
     });
 
     test('endpoint initialization succeeds', () {
+      // Skip if AWS credentials not configured
+      if (Platform.environment['AWS_ACCESS_KEY_ID'] == null ||
+          Platform.environment['AWS_SECRET_ACCESS_KEY'] == null) {
+        return;
+      }
+
+      // Arrange
+      final endpoint = MediaEndpoint();
+
       // Assert
       expect(endpoint, isNotNull);
       expect(endpoint.name, equals('media'));
-    });
+    },
+        skip: Platform.environment['AWS_ACCESS_KEY_ID'] == null ||
+            Platform.environment['AWS_SECRET_ACCESS_KEY'] == null);
   });
 }
