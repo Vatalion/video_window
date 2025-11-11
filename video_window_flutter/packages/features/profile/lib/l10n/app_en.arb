@@ -1,0 +1,24 @@
+{
+  "@@locale": "en",
+  "capabilityStatusInactive": "Inactive",
+  "@capabilityStatusInactive": {
+    "description": "Status label for inactive capability"
+  },
+  "capabilityStatusInProgress": "In Progress",
+  "@capabilityStatusInProgress": {
+    "description": "Status label for capability request in progress"
+  },
+  "capabilityStatusInReview": "In Review",
+  "@capabilityStatusInReview": {
+    "description": "Status label for capability under review"
+  },
+  "capabilityStatusReady": "Ready",
+  "@capabilityStatusReady": {
+    "description": "Status label for ready/active capability"
+  },
+  "capabilityStatusBlocked": "Blocked",
+  "@capabilityStatusBlocked": {
+    "description": "Status label for blocked capability"
+  }
+}
+

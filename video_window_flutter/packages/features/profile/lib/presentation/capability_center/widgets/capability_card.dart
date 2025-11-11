@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared/design_system/tokens.dart';
+import '../l10n/capability_localizations.dart';
 
 /// Widget displaying a capability card with status badge and CTA button
 ///
@@ -187,17 +188,20 @@ class CapabilityCard extends StatelessWidget {
   }
 
   String _getStatusLabel() {
+    // Use localized strings instead of hard-coded values (AC1)
+    const l10n = capabilityLocalizations;
+    
     switch (status) {
       case CapabilityStatus.ready:
-        return 'Ready';
+        return l10n.statusReady;
       case CapabilityStatus.inProgress:
-        return 'In Progress';
+        return l10n.statusInProgress;
       case CapabilityStatus.inReview:
-        return 'In Review';
+        return l10n.statusInReview;
       case CapabilityStatus.blocked:
-        return 'Blocked';
+        return l10n.statusBlocked;
       case CapabilityStatus.inactive:
-        return 'Inactive';
+        return l10n.statusInactive;
     }
   }
 

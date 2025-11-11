@@ -133,25 +133,20 @@ class CapabilityEndpoint extends Endpoint {
       }
 
       // AC5: Emit analytics event capability_request_submitted
-      try {
-        session.log(
-          'Analytics event: capability_request_submitted - '
-          'userId=$userId, capability=${request.capability}, entryPoint=${request.context['entryPoint']}',
-          level: LogLevel.info,
-        );
-        // TODO: Replace with actual analytics service when available
-        // await analyticsService.track('capability_request_submitted', {
-        //   'userId': userId,
-        //   'capability': request.capability.toString(),
-        //   'entryPoint': request.context['entryPoint'],
-        //   'timestamp': DateTime.now().toIso8601String(),
-        //   'success': true,
-        // });
-      } catch (e) {
-        // Don't fail request if analytics fails
-        session.log('Failed to emit analytics event: $e',
-            level: LogLevel.warning);
-      }
+      // Using structured logging for MVP (ready for analytics service integration)
+      _emitAnalyticsEvent(
+        session: session,
+        eventName: 'capability_request_submitted',
+        properties: {
+          'user_id': userId,
+          'capability': request.capability.toString(),
+          'entry_point': request.context['entryPoint'] ?? 'unknown',
+          'device_fingerprint': request.context['deviceFingerprint'],
+          'request_timestamp': DateTime.now().toIso8601String(),
+          'result': 'success',
+          'auto_approved': canAutoApprove,
+        },
+      );
 
       // Return updated status
       return await getStatus(session, userId);
@@ -199,10 +194,53 @@ class CapabilityEndpoint extends Endpoint {
 
   // Helper methods
 
+  /// Emit analytics event with structured logging
+  /// 
+  /// AC5: Analytics events are recorded for capability requests
+  /// Uses structured logging that can be easily integrated with analytics service
+  void _emitAnalyticsEvent({
+    required Session session,
+    required String eventName,
+    required Map<String, dynamic> properties,
+  }) {
+    try {
+      // Structured logging format: [ANALYTICS] event_name | property1=value1 | property2=value2
+      final propertiesString = properties.entries
+          .map((e) => '${e.key}=${e.value}')
+          .join(' | ');
+      
+      session.log(
+        '[ANALYTICS] $eventName | $propertiesString',
+        level: LogLevel.info,
+      );
+      
+      // Future integration point:
+      // When analytics service is available, uncomment and implement:
+      // await analyticsService.track(eventName, properties);
+    } catch (e) {
+      session.log(
+        'Failed to emit analytics event $eventName: $e',
+        level: LogLevel.warning,
+      );
+    }
+  }
+
+  /// Extract client IP address from session
+  /// 
+  /// NOTE: Serverpod 2.9.1 Session object doesn't expose HTTP request details
+  /// (headers, connectionInfo) through its public API. IP extraction requires
+  /// either:
+  /// 1. Upgrade to newer Serverpod version with request context access
+  /// 2. Use API gateway/proxy that injects IP into request metadata
+  /// 3. Custom middleware to capture IP before endpoint execution
+  /// 
+  /// For MVP: Using placeholder that allows rate limiting by user ID.
+  /// Production deployment should use API gateway (e.g., AWS ALB, nginx)
+  /// to inject client IP into a custom header that can be read via metadata.
   String _getClientIp(Session session) {
-    // For Serverpod, we'll use a placeholder IP for now
-    // In production, this would be extracted from request headers via API gateway
-    // TODO: Extract real IP from request context when available
+    // Placeholder IP - rate limiting currently relies on user_id only
+    // TODO: Extract from session metadata when available in production setup
+    // Example: session.serverpod.metadata['client-ip'] ?? '0.0.0.0'
     return '0.0.0.0';
   }
 }
