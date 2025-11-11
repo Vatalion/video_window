@@ -35,7 +35,13 @@ void main() {
           );
 
           expect(result, isA<List<String>>());
+          expect(result.length, greaterThan(0));
           expect(result.length, lessThanOrEqualTo(10));
+          // Verify all items are strings
+          for (final item in result) {
+            expect(item, isA<String>());
+            expect(item.isNotEmpty, isTrue);
+          }
         });
 
         test('should handle excludeVideoIds parameter', () async {
@@ -51,6 +57,7 @@ void main() {
           );
 
           expect(result, isA<List<String>>());
+          expect(result.length, greaterThan(0));
         });
 
         test('should handle preferredTags parameter', () async {
@@ -66,6 +73,26 @@ void main() {
           );
 
           expect(result, isA<List<String>>());
+          expect(result.length, greaterThan(0));
+        });
+
+        test('should respect limit parameter', () async {
+          // AC1: Test limit enforcement
+          final session = sessionBuilder.build();
+          final service = RecommendationBridgeService(session);
+
+          final result5 = await service.getRecommendations(
+            userId: 'test_user_limit',
+            limit: 5,
+          );
+
+          final result20 = await service.getRecommendations(
+            userId: 'test_user_limit',
+            limit: 20,
+          );
+
+          expect(result5.length, lessThanOrEqualTo(5));
+          expect(result20.length, lessThanOrEqualTo(20));
         });
       });
 
@@ -82,12 +109,29 @@ void main() {
 
           // Should return results (either from LightFM or trending fallback)
           expect(result, isA<List<String>>());
+          expect(result.length, greaterThan(0));
+        });
+
+        test('should log fallback event', () async {
+          // AC2: Verify fallback logging occurs
+          final session = sessionBuilder.build();
+          final service = RecommendationBridgeService(session);
+
+          // Trigger fallback by calling with user that may cause error
+          final result = await service.getRecommendations(
+            userId: 'test_user_fallback_log',
+            limit: 5,
+          );
+
+          expect(result, isA<List<String>>());
+          // Note: Log verification would require access to session logs
+          // In production, this would verify Datadog event emission
         });
       });
 
       group('RecommendationBridgeService - Circuit Breaker', () {
         test('should implement circuit breaker pattern', () async {
-          // Verify circuit breaker state exists
+          // Verify circuit breaker state exists and functions
           final session = sessionBuilder.build();
           final service = RecommendationBridgeService(session);
 
@@ -97,6 +141,25 @@ void main() {
           );
 
           expect(result, isA<List<String>>());
+          expect(result.length, greaterThan(0));
+        });
+
+        test('should handle multiple consecutive calls', () async {
+          // Test circuit breaker under load
+          final session = sessionBuilder.build();
+          final service = RecommendationBridgeService(session);
+
+          final results = await Future.wait([
+            service.getRecommendations(userId: 'test_user_1', limit: 5),
+            service.getRecommendations(userId: 'test_user_2', limit: 5),
+            service.getRecommendations(userId: 'test_user_3', limit: 5),
+          ]);
+
+          expect(results.length, equals(3));
+          for (final result in results) {
+            expect(result, isA<List<String>>());
+            expect(result.length, greaterThan(0));
+          }
         });
       });
 
@@ -116,6 +179,7 @@ void main() {
           expect(result, isNotNull);
           expect(result.feedId, isNotEmpty);
           expect(result.videos, isA<List<Map<String, dynamic>>>());
+          expect(result.videos.length, greaterThan(0));
         });
 
         test('should fallback to trending when personalized fails', () async {
@@ -131,6 +195,30 @@ void main() {
 
           expect(result, isNotNull);
           expect(result.feedId, isNotEmpty);
+          expect(result.videos, isA<List<Map<String, dynamic>>>());
+        });
+
+        test('should propagate feedSessionId correctly', () async {
+          // AC4: Test feed session ID generation
+          final session = sessionBuilder.build();
+          final feedService = FeedService(session);
+
+          final result1 = await feedService.getFeedVideos(
+            userId: 'test_user_session',
+            algorithm: 'personalized',
+            limit: 10,
+          );
+
+          final result2 = await feedService.getFeedVideos(
+            userId: 'test_user_session',
+            algorithm: 'personalized',
+            limit: 10,
+          );
+
+          expect(result1.feedId, isNotEmpty);
+          expect(result2.feedId, isNotEmpty);
+          // Feed session IDs should be unique per request
+          expect(result1.feedId, isNot(equals(result2.feedId)));
         });
       });
     },

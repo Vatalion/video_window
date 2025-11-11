@@ -219,6 +219,32 @@ void main() {
 
           expect(result1.feedId, isNotEmpty);
           expect(result2.feedId, isNotEmpty);
+          // Verify feed session ID format
+          expect(result1.feedId, startsWith('feed_session_'));
+          expect(result2.feedId, startsWith('feed_session_'));
+        });
+
+        test('should include algorithm metadata in feed result', () async {
+          // AC4: Verify algorithm metadata propagation
+          final session = sessionBuilder.build();
+          final feedService = FeedService(session);
+
+          final personalizedResult = await feedService.getFeedVideos(
+            userId: 'test_user_algorithm',
+            algorithm: 'personalized',
+            limit: 10,
+          );
+
+          final trendingResult = await feedService.getFeedVideos(
+            userId: 'test_user_algorithm',
+            algorithm: 'trending',
+            limit: 10,
+          );
+
+          expect(personalizedResult.feedId, isNotEmpty);
+          expect(trendingResult.feedId, isNotEmpty);
+          expect(personalizedResult.videos, isA<List<Map<String, dynamic>>>());
+          expect(trendingResult.videos, isA<List<Map<String, dynamic>>>());
         });
       });
     },
