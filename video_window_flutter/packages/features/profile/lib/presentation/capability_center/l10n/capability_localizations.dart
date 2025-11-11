@@ -31,4 +31,3 @@ class CapabilityLocalizations {
 
 /// Default instance for English localization
 const capabilityLocalizations = CapabilityLocalizations();
-

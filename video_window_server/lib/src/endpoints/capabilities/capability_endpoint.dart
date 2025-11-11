@@ -195,7 +195,7 @@ class CapabilityEndpoint extends Endpoint {
   // Helper methods
 
   /// Emit analytics event with structured logging
-  /// 
+  ///
   /// AC5: Analytics events are recorded for capability requests
   /// Uses structured logging that can be easily integrated with analytics service
   void _emitAnalyticsEvent({
@@ -205,15 +205,14 @@ class CapabilityEndpoint extends Endpoint {
   }) {
     try {
       // Structured logging format: [ANALYTICS] event_name | property1=value1 | property2=value2
-      final propertiesString = properties.entries
-          .map((e) => '${e.key}=${e.value}')
-          .join(' | ');
-      
+      final propertiesString =
+          properties.entries.map((e) => '${e.key}=${e.value}').join(' | ');
+
       session.log(
         '[ANALYTICS] $eventName | $propertiesString',
         level: LogLevel.info,
       );
-      
+
       // Future integration point:
       // When analytics service is available, uncomment and implement:
       // await analyticsService.track(eventName, properties);
@@ -226,14 +225,14 @@ class CapabilityEndpoint extends Endpoint {
   }
 
   /// Extract client IP address from session
-  /// 
+  ///
   /// NOTE: Serverpod 2.9.1 Session object doesn't expose HTTP request details
   /// (headers, connectionInfo) through its public API. IP extraction requires
   /// either:
   /// 1. Upgrade to newer Serverpod version with request context access
   /// 2. Use API gateway/proxy that injects IP into request metadata
   /// 3. Custom middleware to capture IP before endpoint execution
-  /// 
+  ///
   /// For MVP: Using placeholder that allows rate limiting by user ID.
   /// Production deployment should use API gateway (e.g., AWS ALB, nginx)
   /// to inject client IP into a custom header that can be read via metadata.

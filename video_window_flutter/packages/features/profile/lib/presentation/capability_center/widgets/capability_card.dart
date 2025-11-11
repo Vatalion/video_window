@@ -190,7 +190,7 @@ class CapabilityCard extends StatelessWidget {
   String _getStatusLabel() {
     // Use localized strings instead of hard-coded values (AC1)
     const l10n = capabilityLocalizations;
-    
+
     switch (status) {
       case CapabilityStatus.ready:
         return l10n.statusReady;
