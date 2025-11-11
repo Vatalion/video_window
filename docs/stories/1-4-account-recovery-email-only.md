@@ -1,7 +1,7 @@
 # Story 1-4: Account Recovery (Email Only)
 
 ## Status
-Ready for Dev
+In Progress
 
 ## Story
 **As a** viewer or maker who has lost access,
