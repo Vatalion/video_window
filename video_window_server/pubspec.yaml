@@ -24,6 +24,11 @@ dependencies:
   # opentelemetry: ^0.18.0  # Commented until full integration needed
   # AWS SDK for CloudWatch Logs (production logging)
   # aws_cloudwatch_logs_api: ^2.0.0  # Commented until AWS credentials configured
+  # AWS SDK for S3 and Lambda (Story 3-2: Avatar & Media Upload System)
+  aws_s3_api: ^2.0.0
+  aws_lambda_api: ^2.0.0
+  # Image processing for avatar resizing and WebP conversion
+  image: ^4.1.7
 
 dev_dependencies:
   lints: ">=3.0.0 <7.0.0"

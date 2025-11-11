@@ -466,6 +466,50 @@ class EndpointPayment extends _i1.EndpointRef {
       );
 }
 
+/// Media endpoint for avatar upload and virus scan callbacks
+/// Implements Story 3-2: Avatar & Media Upload System
+/// AC1: Presigned upload flow with chunked transfer, max 5 MB enforcement
+/// AC2: Virus scanning pipeline dispatches uploads to AWS Lambda
+/// AC5: All uploads require authenticated requests, signed URLs expire after 5 minutes
+/// {@category Endpoint}
+class EndpointMedia extends _i1.EndpointRef {
+  EndpointMedia(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'media';
+
+  /// Create presigned upload URL for avatar
+  /// POST /media/avatar/upload-url
+  /// AC1: Presigned upload flow with max 5 MB enforcement and MIME validation
+  /// AC5: Authenticated requests required, signed URLs expire after 5 minutes
+  _i2.Future<Map<String, dynamic>> createAvatarUploadUrl(
+    int userId,
+    String fileName,
+    String mimeType,
+    int fileSizeBytes,
+  ) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'media',
+        'createAvatarUploadUrl',
+        {
+          'userId': userId,
+          'fileName': fileName,
+          'mimeType': mimeType,
+          'fileSizeBytes': fileSizeBytes,
+        },
+      );
+
+  /// Handle virus scan callback from AWS Lambda
+  /// POST /media/virus-scan-callback
+  /// AC2: Virus scanning pipeline callback - updates media status
+  _i2.Future<void> handleVirusScanCallback(Map<String, dynamic> callbackData) =>
+      caller.callServerEndpoint<void>(
+        'media',
+        'handleVirusScanCallback',
+        {'callbackData': callbackData},
+      );
+}
+
 /// Profile endpoint for managing user profiles, privacy settings, and notifications
 /// Implements Story 3-1: Viewer Profile Management
 /// {@category Endpoint}
@@ -689,6 +733,7 @@ class Client extends _i1.ServerpodClientShared {
     offer = EndpointOffer(this);
     order = EndpointOrder(this);
     payment = EndpointPayment(this);
+    media = EndpointMedia(this);
     profile = EndpointProfile(this);
     story = EndpointStory(this);
     stripeWebhook = EndpointStripeWebhook(this);
@@ -711,6 +756,8 @@ class Client extends _i1.ServerpodClientShared {
 
   late final EndpointPayment payment;
 
+  late final EndpointMedia media;
+
   late final EndpointProfile profile;
 
   late final EndpointStory story;
@@ -729,6 +776,7 @@ class Client extends _i1.ServerpodClientShared {
         'offer': offer,
         'order': order,
         'payment': payment,
+        'media': media,
         'profile': profile,
         'story': story,
         'stripeWebhook': stripeWebhook,

@@ -133,6 +133,8 @@ class TestEndpoints {
 
   late final _PaymentEndpoint payment;
 
+  late final _MediaEndpoint media;
+
   late final _ProfileEndpoint profile;
 
   late final _StoryEndpoint story;
@@ -178,6 +180,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     payment = _PaymentEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    media = _MediaEndpoint(
       endpoints,
       serializationManager,
     );
@@ -1074,6 +1080,83 @@ class _PaymentEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _i3.Future<Map<String, dynamic>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _MediaEndpoint {
+  _MediaEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<Map<String, dynamic>> createAvatarUploadUrl(
+    _i1.TestSessionBuilder sessionBuilder,
+    int userId,
+    String fileName,
+    String mimeType,
+    int fileSizeBytes,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'media',
+        method: 'createAvatarUploadUrl',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'media',
+          methodName: 'createAvatarUploadUrl',
+          parameters: _i1.testObjectToJson({
+            'userId': userId,
+            'fileName': fileName,
+            'mimeType': mimeType,
+            'fileSizeBytes': fileSizeBytes,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<Map<String, dynamic>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<void> handleVirusScanCallback(
+    _i1.TestSessionBuilder sessionBuilder,
+    Map<String, dynamic> callbackData,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'media',
+        method: 'handleVirusScanCallback',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'media',
+          methodName: 'handleVirusScanCallback',
+          parameters: _i1.testObjectToJson({'callbackData': callbackData}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<void>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

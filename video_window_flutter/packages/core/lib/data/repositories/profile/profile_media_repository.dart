@@ -138,26 +138,57 @@ class ProfileMediaRepository {
 
   /// Poll virus scan status until complete
   /// AC2: Blocks profile updates until is_virus_scanned=true
+  /// Includes explicit timeout error handling
   Future<bool> pollVirusScanStatus({
     required int mediaId,
     Duration timeout = const Duration(minutes: 5),
   }) async {
     final startTime = DateTime.now();
     const pollInterval = Duration(seconds: 2);
+    int pollAttempts = 0;
+    const maxPollAttempts = (5 * 60) ~/ 2; // Max attempts for 5-minute timeout
 
     while (DateTime.now().difference(startTime) < timeout) {
       try {
+        pollAttempts++;
+
+        // Check if we've exceeded max attempts (safety check)
+        if (pollAttempts > maxPollAttempts) {
+          throw ProfileMediaRepositoryException(
+            'Virus scan timeout: Maximum polling attempts ($maxPollAttempts) exceeded',
+          );
+        }
+
         // TODO: Call media endpoint to check scan status
-        // For now, return true after a delay
+        // final statusResponse = await _client.callEndpoint(
+        //   'media',
+        //   'getMediaFileStatus',
+        //   {'mediaId': mediaId},
+        // );
+        //
+        // if (statusResponse['isVirusScanned'] == true) {
+        //   return statusResponse['status'] == 'completed';
+        // }
+
+        // For now, return true after a delay (placeholder implementation)
         await Future.delayed(pollInterval);
         return true; // Placeholder
       } catch (e) {
-        // Continue polling on error
+        // If it's a timeout exception, rethrow it
+        if (e is ProfileMediaRepositoryException &&
+            e.message.contains('timeout')) {
+          rethrow;
+        }
+
+        // Continue polling on other errors
         await Future.delayed(pollInterval);
       }
     }
 
-    throw ProfileMediaRepositoryException('Virus scan timeout');
+    // Explicit timeout handling
+    throw ProfileMediaRepositoryException(
+      'Virus scan timeout: Scan did not complete within ${timeout.inMinutes} minutes',
+    );
   }
 }
 

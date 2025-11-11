@@ -1,4 +1,8 @@
 import 'package:serverpod/serverpod.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:aws_lambda_api/lambda-2015-03-31.dart';
+import 'package:shared_aws_api/shared.dart';
 import '../generated/profile/media_file.dart';
 
 /// Virus scan dispatcher for invoking AWS Lambda and handling callbacks
@@ -10,6 +14,28 @@ class VirusScanDispatcher {
       'arn:aws:sns:us-east-1:4815162342:video-window-virus-scan-callback';
   // Lambda function name
   static const String _lambdaFunctionName = 'video-window-virus-scan';
+  static const String _lambdaRegion = 'us-east-1';
+
+  late final Lambda _lambda;
+
+  VirusScanDispatcher() {
+    // Initialize Lambda client with credentials from environment
+    final accessKey = Platform.environment['AWS_ACCESS_KEY_ID'];
+    final secretKey = Platform.environment['AWS_SECRET_ACCESS_KEY'];
+
+    if (accessKey == null || secretKey == null) {
+      throw Exception(
+          'AWS credentials not configured: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY required');
+    }
+
+    _lambda = Lambda(
+      region: _lambdaRegion,
+      credentials: AwsClientCredentials(
+        accessKey: accessKey,
+        secretKey: secretKey,
+      ),
+    );
+  }
 
   /// Dispatch media file to virus scanning Lambda
   /// AC2: Dispatches uploads to AWS Lambda
@@ -32,24 +58,31 @@ class VirusScanDispatcher {
       );
       await MediaFile.db.updateRow(session, updatedMediaFile);
 
-      // TODO: Implement actual Lambda invocation
-      // 1. Invoke AWS Lambda function with S3 key and bucket
-      // 2. Lambda will scan file using ClamAV
-      // 3. Lambda publishes result to SNS topic
-      // 4. SNS triggers callback endpoint: /media/virus-scan-callback
+      // Invoke AWS Lambda function with S3 key and bucket
+      // Lambda will scan file using ClamAV and publish result to SNS topic
+      final payload = {
+        'mediaId': mediaFileId,
+        's3Key': s3Key,
+        'bucketName': bucketName,
+        'callbackTopicArn': _snsTopicArn,
+      };
 
-      session.log(
-        'Dispatching virus scan for media file $mediaFileId (S3: $s3Key)',
-        level: LogLevel.info,
+      final invokeResponse = await _lambda.invoke(
+        functionName: _lambdaFunctionName,
+        invocationType: InvocationType.event,
+        payload: utf8.encode(jsonEncode(payload)),
       );
 
-      // Placeholder for Lambda invocation
-      // await _invokeLambdaFunction({
-      //   'mediaId': mediaFileId,
-      //   's3Key': s3Key,
-      //   'bucketName': bucketName,
-      //   'callbackTopicArn': _snsTopicArn,
-      // });
+      if (invokeResponse.statusCode != 202 &&
+          invokeResponse.statusCode != 200) {
+        throw Exception(
+            'Lambda invocation failed with status: ${invokeResponse.statusCode}');
+      }
+
+      session.log(
+        'Dispatched virus scan for media file $mediaFileId (S3: $s3Key)',
+        level: LogLevel.info,
+      );
     } catch (e, stackTrace) {
       session.log(
         'Failed to dispatch virus scan for media file $mediaFileId: $e',
@@ -59,13 +92,17 @@ class VirusScanDispatcher {
       );
 
       // Update media file status to failed
-      final mediaFile = await MediaFile.db.findById(session, mediaFileId);
-      if (mediaFile != null) {
-        final failedMediaFile = mediaFile.copyWith(
-          status: 'failed',
-          updatedAt: DateTime.now(),
-        );
-        await MediaFile.db.updateRow(session, failedMediaFile);
+      try {
+        final mediaFile = await MediaFile.db.findById(session, mediaFileId);
+        if (mediaFile != null) {
+          final failedMediaFile = mediaFile.copyWith(
+            status: 'failed',
+            updatedAt: DateTime.now(),
+          );
+          await MediaFile.db.updateRow(session, failedMediaFile);
+        }
+      } catch (_) {
+        // Ignore errors updating failed status
       }
 
       rethrow;
@@ -85,9 +122,24 @@ class VirusScanDispatcher {
         throw Exception('Invalid SNS message: missing Message');
       }
 
-      // TODO: Parse JSON message body
-      // Extract: mediaId, scanResult, scanTimestamp
-      // Call media endpoint's handleVirusScanCallback method
+      // Parse JSON message body
+      final messageData = jsonDecode(messageBody) as Map<String, dynamic>;
+      final mediaId = messageData['mediaId'] as int?;
+      final scanResult =
+          messageData['scanResult'] as String?; // 'clean' or 'infected'
+
+      if (mediaId == null || scanResult == null) {
+        throw Exception(
+            'Invalid callback data: mediaId and scanResult required');
+      }
+
+      // Forward to media endpoint's handleVirusScanCallback method
+      // This will be called by the SNS webhook handler
+      // For now, we just log the result
+      session.log(
+        'Virus scan callback received: mediaId=$mediaId, result=$scanResult',
+        level: LogLevel.info,
+      );
     } catch (e, stackTrace) {
       session.log(
         'Failed to handle virus scan callback: $e',

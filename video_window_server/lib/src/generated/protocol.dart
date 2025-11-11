@@ -34,13 +34,14 @@ import 'capabilities/verification_task.dart' as _i22;
 import 'capabilities/verification_task_status.dart' as _i23;
 import 'capabilities/verification_task_type.dart' as _i24;
 import 'profile/dsar_request.dart' as _i25;
-import 'profile/notification_preferences.dart' as _i26;
-import 'profile/privacy_settings.dart' as _i27;
-import 'profile/user_profile.dart' as _i28;
+import 'profile/media_file.dart' as _i26;
+import 'profile/notification_preferences.dart' as _i27;
+import 'profile/privacy_settings.dart' as _i28;
+import 'profile/user_profile.dart' as _i29;
 import 'package:video_window_server/src/generated/capabilities/capability_request.dart'
-    as _i29;
-import 'package:video_window_server/src/generated/capabilities/trusted_device.dart'
     as _i30;
+import 'package:video_window_server/src/generated/capabilities/trusted_device.dart'
+    as _i31;
 export 'greeting.dart';
 export 'auth/auth_tokens.dart';
 export 'auth/otp.dart';
@@ -64,6 +65,7 @@ export 'capabilities/verification_task.dart';
 export 'capabilities/verification_task_status.dart';
 export 'capabilities/verification_task_type.dart';
 export 'profile/dsar_request.dart';
+export 'profile/media_file.dart';
 export 'profile/notification_preferences.dart';
 export 'profile/privacy_settings.dart';
 export 'profile/user_profile.dart';
@@ -436,6 +438,149 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'requestType',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'media_files',
+      dartName: 'MediaFile',
+      schema: 'public',
+      module: 'video_window',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'media_files_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'type',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'originalFileName',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 's3Key',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'cdnUrl',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'mimeType',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'fileSizeBytes',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'metadata',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'status',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'isVirusScanned',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'media_files_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'media_user_id_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'media_status_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'status',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'media_s3_key_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 's3Key',
             )
           ],
           type: 'btree',
@@ -1793,14 +1938,17 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i25.DsarRequest) {
       return _i25.DsarRequest.fromJson(data) as T;
     }
-    if (t == _i26.NotificationPreferences) {
-      return _i26.NotificationPreferences.fromJson(data) as T;
+    if (t == _i26.MediaFile) {
+      return _i26.MediaFile.fromJson(data) as T;
     }
-    if (t == _i27.PrivacySettings) {
-      return _i27.PrivacySettings.fromJson(data) as T;
+    if (t == _i27.NotificationPreferences) {
+      return _i27.NotificationPreferences.fromJson(data) as T;
     }
-    if (t == _i28.UserProfile) {
-      return _i28.UserProfile.fromJson(data) as T;
+    if (t == _i28.PrivacySettings) {
+      return _i28.PrivacySettings.fromJson(data) as T;
+    }
+    if (t == _i29.UserProfile) {
+      return _i29.UserProfile.fromJson(data) as T;
     }
     if (t == _i1.getType<_i3.Greeting?>()) {
       return (data != null ? _i3.Greeting.fromJson(data) : null) as T;
@@ -1879,32 +2027,35 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i25.DsarRequest?>()) {
       return (data != null ? _i25.DsarRequest.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i26.NotificationPreferences?>()) {
-      return (data != null ? _i26.NotificationPreferences.fromJson(data) : null)
+    if (t == _i1.getType<_i26.MediaFile?>()) {
+      return (data != null ? _i26.MediaFile.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i27.NotificationPreferences?>()) {
+      return (data != null ? _i27.NotificationPreferences.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i27.PrivacySettings?>()) {
-      return (data != null ? _i27.PrivacySettings.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i28.PrivacySettings?>()) {
+      return (data != null ? _i28.PrivacySettings.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i28.UserProfile?>()) {
-      return (data != null ? _i28.UserProfile.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i29.UserProfile?>()) {
+      return (data != null ? _i29.UserProfile.fromJson(data) : null) as T;
     }
     if (t == Map<String, String>) {
       return (data as Map).map((k, v) =>
           MapEntry(deserialize<String>(k), deserialize<String>(v))) as T;
     }
-    if (t == List<_i29.CapabilityRequest>) {
+    if (t == List<_i30.CapabilityRequest>) {
       return (data as List)
-          .map((e) => deserialize<_i29.CapabilityRequest>(e))
+          .map((e) => deserialize<_i30.CapabilityRequest>(e))
           .toList() as T;
     }
     if (t == Map<String, dynamic>) {
       return (data as Map).map((k, v) =>
           MapEntry(deserialize<String>(k), deserialize<dynamic>(v))) as T;
     }
-    if (t == List<_i30.TrustedDevice>) {
+    if (t == List<_i31.TrustedDevice>) {
       return (data as List)
-          .map((e) => deserialize<_i30.TrustedDevice>(e))
+          .map((e) => deserialize<_i31.TrustedDevice>(e))
           .toList() as T;
     }
     if (t == _i1.getType<Map<String, dynamic>?>()) {
@@ -1997,13 +2148,16 @@ class Protocol extends _i1.SerializationManagerServer {
     if (data is _i25.DsarRequest) {
       return 'DsarRequest';
     }
-    if (data is _i26.NotificationPreferences) {
+    if (data is _i26.MediaFile) {
+      return 'MediaFile';
+    }
+    if (data is _i27.NotificationPreferences) {
       return 'NotificationPreferences';
     }
-    if (data is _i27.PrivacySettings) {
+    if (data is _i28.PrivacySettings) {
       return 'PrivacySettings';
     }
-    if (data is _i28.UserProfile) {
+    if (data is _i29.UserProfile) {
       return 'UserProfile';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -2088,14 +2242,17 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'DsarRequest') {
       return deserialize<_i25.DsarRequest>(data['data']);
     }
+    if (dataClassName == 'MediaFile') {
+      return deserialize<_i26.MediaFile>(data['data']);
+    }
     if (dataClassName == 'NotificationPreferences') {
-      return deserialize<_i26.NotificationPreferences>(data['data']);
+      return deserialize<_i27.NotificationPreferences>(data['data']);
     }
     if (dataClassName == 'PrivacySettings') {
-      return deserialize<_i27.PrivacySettings>(data['data']);
+      return deserialize<_i28.PrivacySettings>(data['data']);
     }
     if (dataClassName == 'UserProfile') {
-      return deserialize<_i28.UserProfile>(data['data']);
+      return deserialize<_i29.UserProfile>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -2135,12 +2292,14 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i22.VerificationTask.t;
       case _i25.DsarRequest:
         return _i25.DsarRequest.t;
-      case _i26.NotificationPreferences:
-        return _i26.NotificationPreferences.t;
-      case _i27.PrivacySettings:
-        return _i27.PrivacySettings.t;
-      case _i28.UserProfile:
-        return _i28.UserProfile.t;
+      case _i26.MediaFile:
+        return _i26.MediaFile.t;
+      case _i27.NotificationPreferences:
+        return _i27.NotificationPreferences.t;
+      case _i28.PrivacySettings:
+        return _i28.PrivacySettings.t;
+      case _i29.UserProfile:
+        return _i29.UserProfile.t;
     }
     return null;
   }

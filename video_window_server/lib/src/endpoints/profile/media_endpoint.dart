@@ -1,8 +1,7 @@
 import 'package:serverpod/serverpod.dart';
+import 'dart:convert';
 import '../../services/media/media_processing_service.dart';
-import '../../services/media/virus_scan_dispatcher.dart';
-// TODO: Import MediaFile after running 'serverpod generate'
-// import '../../generated/profile/media_file.dart';
+import '../../generated/profile/media_file.dart';
 
 /// Media endpoint for avatar upload and virus scan callbacks
 /// Implements Story 3-2: Avatar & Media Upload System
@@ -15,7 +14,6 @@ class MediaEndpoint extends Endpoint {
 
   final MediaProcessingService _mediaProcessingService =
       MediaProcessingService();
-  final VirusScanDispatcher _virusScanDispatcher = VirusScanDispatcher();
 
   /// Create presigned upload URL for avatar
   /// POST /media/avatar/upload-url
@@ -47,6 +45,8 @@ class MediaEndpoint extends Endpoint {
       }
 
       // Generate presigned URL with 5-minute expiration
+      final s3Key =
+          'profile-media/$userId/temp/${DateTime.now().millisecondsSinceEpoch}_$fileName';
       final uploadUrl =
           await _mediaProcessingService.generatePresignedUploadUrl(
         userId: userId,
@@ -55,26 +55,29 @@ class MediaEndpoint extends Endpoint {
         expirationMinutes: 5,
       );
 
-      // TODO: Create media file record after MediaFile model is generated
       // Create media file record with pending status
-      // final mediaFile = MediaFile(
-      //   userId: userId,
-      //   type: 'avatar',
-      //   originalFileName: fileName,
-      //   s3Key: 'profile-media/$userId/temp/${DateTime.now().millisecondsSinceEpoch}_$fileName',
-      //   mimeType: mimeType,
-      //   fileSizeBytes: fileSizeBytes,
-      //   metadata: {},
-      //   status: 'pending',
-      //   isVirusScanned: false,
-      //   createdAt: DateTime.now(),
-      //   updatedAt: DateTime.now(),
-      // );
-      // await MediaFile.db.insertRow(session, mediaFile);
+      final mediaFile = MediaFile(
+        userId: userId,
+        type: 'avatar',
+        originalFileName: fileName,
+        s3Key: s3Key,
+        mimeType: mimeType,
+        fileSizeBytes: fileSizeBytes,
+        metadata: null,
+        status: 'pending',
+        isVirusScanned: false,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      final insertedMediaFile =
+          await MediaFile.db.insertRow(session, mediaFile);
+
+      // Dispatch virus scan after upload completes (client will trigger this)
+      // For now, we return the media ID so client can poll status
 
       return {
         'presignedUrl': uploadUrl,
-        'mediaId': 0, // TODO: Use actual mediaFile.id after model generation
+        'mediaId': insertedMediaFile.id ?? 0,
         'expiresAt':
             DateTime.now().add(const Duration(minutes: 5)).toIso8601String(),
       };
@@ -107,43 +110,39 @@ class MediaEndpoint extends Endpoint {
             'Invalid callback data: mediaId and scanResult required');
       }
 
-      // TODO: Uncomment after MediaFile model is generated
-      // final mediaFile = await MediaFile.db.findById(session, mediaId);
-      // if (mediaFile == null) {
-      //   throw Exception('Media file not found: $mediaId');
-      // }
+      final mediaFile = await MediaFile.db.findById(session, mediaId);
+      if (mediaFile == null) {
+        throw Exception('Media file not found: $mediaId');
+      }
 
-      // TODO: Update media file with scan result after MediaFile model is generated
-      // final mediaFile = await MediaFile.db.findById(session, mediaId);
-      // if (mediaFile == null) {
-      //   throw Exception('Media file not found: $mediaId');
-      // }
-      // final updatedMediaFile = mediaFile.copyWith(
-      //   isVirusScanned: true,
-      //   status: scanResult == 'clean' ? 'processing' : 'failed',
-      //   updatedAt: DateTime.now(),
-      //   metadata: {
-      //     ...mediaFile.metadata,
-      //     'virusScanResult': scanResult,
-      //     'virusScanTimestamp': scanTimestamp ?? DateTime.now().toIso8601String(),
-      //   },
-      // );
-      // await MediaFile.db.updateRow(session, updatedMediaFile);
+      // Update media file with scan result
+      final metadataMap = mediaFile.metadata != null
+          ? jsonDecode(mediaFile.metadata!) as Map<String, dynamic>
+          : <String, dynamic>{};
+      metadataMap['virusScanResult'] = scanResult;
+      metadataMap['virusScanTimestamp'] =
+          scanTimestamp ?? DateTime.now().toIso8601String();
+
+      final updatedMediaFile = mediaFile.copyWith(
+        isVirusScanned: true,
+        status: scanResult == 'clean' ? 'processing' : 'failed',
+        updatedAt: DateTime.now(),
+        metadata: jsonEncode(metadataMap),
+      );
+      await MediaFile.db.updateRow(session, updatedMediaFile);
 
       // If scan passed, trigger image processing
       if (scanResult == 'clean') {
-        // TODO: Get userId from mediaFile after model generation
         await _mediaProcessingService.processAvatarImage(
           session: session,
           mediaFileId: mediaId,
-          userId: 0, // TODO: Use mediaFile.userId after model generation
+          userId: mediaFile.userId,
         );
       } else {
         // If infected, purge temporary S3 object
-        // TODO: Get s3Key from mediaFile after model generation
-        // await _mediaProcessingService.purgeTemporaryFile(
-        //   s3Key: mediaFile.s3Key,
-        // );
+        await _mediaProcessingService.purgeTemporaryFile(
+          s3Key: mediaFile.s3Key,
+        );
       }
     } catch (e, stackTrace) {
       session.log(

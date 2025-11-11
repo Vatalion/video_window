@@ -31,6 +31,9 @@ order:
   - updateShipping:
 payment:
   - createCheckoutSession:
+media:
+  - createAvatarUploadUrl:
+  - handleVirusScanCallback:
 profile:
   - getMyProfile:
   - updateMyProfile:

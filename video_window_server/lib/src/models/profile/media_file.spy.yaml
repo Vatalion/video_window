@@ -4,45 +4,28 @@
 
 class: MediaFile
 table: media_files
+
 fields:
-  id:
-    type: int
-    databaseType: bigint
-  userId:
-    type: int
-    databaseType: bigint
-  type:
-    type: String
-    databaseType: text
-  originalFileName:
-    type: String
-    databaseType: text
-  s3Key:
-    type: String
-    databaseType: text
-  cdnUrl:
-    type: String?
-    databaseType: text
-    nullable: true
-  mimeType:
-    type: String
-    databaseType: text
-  fileSizeBytes:
-    type: int
-    databaseType: integer
-  metadata:
-    type: Map<String, dynamic>
-    databaseType: jsonb
-  status:
-    type: String
-    databaseType: text
-  isVirusScanned:
-    type: bool
-    databaseType: boolean
-  createdAt:
-    type: DateTime
-    databaseType: timestamp
-  updatedAt:
-    type: DateTime
-    databaseType: timestamp
+  id: int?
+  userId: int
+  type: String
+  originalFileName: String
+  s3Key: String
+  cdnUrl: String?
+  mimeType: String
+  fileSizeBytes: int
+  # JSONB metadata stored as String (e.g., virus scan results, processing info)
+  metadata: String?
+  status: String
+  isVirusScanned: bool
+  createdAt: DateTime
+  updatedAt: DateTime
+
+indexes:
+  media_user_id_idx:
+    fields: userId
+  media_status_idx:
+    fields: status
+  media_s3_key_idx:
+    fields: s3Key
 
