@@ -1,0 +1,24 @@
+# Privacy Settings model
+class: PrivacySettings
+table: user_privacy_settings
+
+fields:
+  id: int?
+  userId: int
+  profileVisibility: String # public, friendsOnly, private
+  showEmailToPublic: bool
+  showPhoneToFriends: bool
+  allowTagging: bool
+  allowSearchByPhone: bool
+  allowDataAnalytics: bool
+  allowMarketingEmails: bool
+  allowPushNotifications: bool
+  shareProfileWithPartners: bool
+  createdAt: DateTime
+  updatedAt: DateTime
+
+indexes:
+  privacy_user_id_idx:
+    fields: userId
+    unique: true
+

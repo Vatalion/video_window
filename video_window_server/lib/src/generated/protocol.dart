@@ -33,8 +33,14 @@ import 'capabilities/user_capabilities.dart' as _i21;
 import 'capabilities/verification_task.dart' as _i22;
 import 'capabilities/verification_task_status.dart' as _i23;
 import 'capabilities/verification_task_type.dart' as _i24;
+import 'profile/dsar_request.dart' as _i25;
+import 'profile/notification_preferences.dart' as _i26;
+import 'profile/privacy_settings.dart' as _i27;
+import 'profile/user_profile.dart' as _i28;
 import 'package:video_window_server/src/generated/capabilities/capability_request.dart'
-    as _i25;
+    as _i29;
+import 'package:video_window_server/src/generated/capabilities/trusted_device.dart'
+    as _i30;
 export 'greeting.dart';
 export 'auth/auth_tokens.dart';
 export 'auth/otp.dart';
@@ -57,6 +63,10 @@ export 'capabilities/user_capabilities.dart';
 export 'capabilities/verification_task.dart';
 export 'capabilities/verification_task_status.dart';
 export 'capabilities/verification_task_type.dart';
+export 'profile/dsar_request.dart';
+export 'profile/notification_preferences.dart';
+export 'profile/privacy_settings.dart';
+export 'profile/user_profile.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
   Protocol._();
@@ -301,6 +311,131 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'createdAt',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'dsar_requests',
+      dartName: 'DsarRequest',
+      schema: 'public',
+      module: 'video_window',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'dsar_requests_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'requestType',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'status',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'requestedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'completedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'requestData',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'auditLog',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'dsar_requests_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'dsar_user_id_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'dsar_status_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'status',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'dsar_request_type_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'requestType',
             )
           ],
           type: 'btree',
@@ -1016,6 +1151,322 @@ class Protocol extends _i1.SerializationManagerServer {
       managed: true,
     ),
     _i2.TableDefinition(
+      name: 'user_notification_preferences',
+      dartName: 'NotificationPreferences',
+      schema: 'public',
+      module: 'video_window',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault:
+              'nextval(\'user_notification_preferences_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'emailNotifications',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'pushNotifications',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'inAppNotifications',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'settings',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'quietHours',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'user_notification_preferences_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'notification_user_id_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'user_privacy_settings',
+      dartName: 'PrivacySettings',
+      schema: 'public',
+      module: 'video_window',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'user_privacy_settings_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'profileVisibility',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'showEmailToPublic',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'showPhoneToFriends',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'allowTagging',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'allowSearchByPhone',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'allowDataAnalytics',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'allowMarketingEmails',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'allowPushNotifications',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'shareProfileWithPartners',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'user_privacy_settings_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'privacy_user_id_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'user_profiles',
+      dartName: 'UserProfile',
+      schema: 'public',
+      module: 'video_window',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'user_profiles_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'username',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'fullName',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'bio',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'avatarUrl',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'profileData',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'visibility',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'isVerified',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'user_profiles_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'profile_user_id_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
       name: 'users',
       dartName: 'User',
       schema: 'public',
@@ -1339,6 +1790,18 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i24.VerificationTaskType) {
       return _i24.VerificationTaskType.fromJson(data) as T;
     }
+    if (t == _i25.DsarRequest) {
+      return _i25.DsarRequest.fromJson(data) as T;
+    }
+    if (t == _i26.NotificationPreferences) {
+      return _i26.NotificationPreferences.fromJson(data) as T;
+    }
+    if (t == _i27.PrivacySettings) {
+      return _i27.PrivacySettings.fromJson(data) as T;
+    }
+    if (t == _i28.UserProfile) {
+      return _i28.UserProfile.fromJson(data) as T;
+    }
     if (t == _i1.getType<_i3.Greeting?>()) {
       return (data != null ? _i3.Greeting.fromJson(data) : null) as T;
     }
@@ -1413,18 +1876,36 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data != null ? _i24.VerificationTaskType.fromJson(data) : null)
           as T;
     }
+    if (t == _i1.getType<_i25.DsarRequest?>()) {
+      return (data != null ? _i25.DsarRequest.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i26.NotificationPreferences?>()) {
+      return (data != null ? _i26.NotificationPreferences.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i27.PrivacySettings?>()) {
+      return (data != null ? _i27.PrivacySettings.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i28.UserProfile?>()) {
+      return (data != null ? _i28.UserProfile.fromJson(data) : null) as T;
+    }
     if (t == Map<String, String>) {
       return (data as Map).map((k, v) =>
           MapEntry(deserialize<String>(k), deserialize<String>(v))) as T;
     }
-    if (t == List<_i25.CapabilityRequest>) {
+    if (t == List<_i29.CapabilityRequest>) {
       return (data as List)
-          .map((e) => deserialize<_i25.CapabilityRequest>(e))
+          .map((e) => deserialize<_i29.CapabilityRequest>(e))
           .toList() as T;
     }
     if (t == Map<String, dynamic>) {
       return (data as Map).map((k, v) =>
           MapEntry(deserialize<String>(k), deserialize<dynamic>(v))) as T;
+    }
+    if (t == List<_i30.TrustedDevice>) {
+      return (data as List)
+          .map((e) => deserialize<_i30.TrustedDevice>(e))
+          .toList() as T;
     }
     if (t == _i1.getType<Map<String, dynamic>?>()) {
       return (data != null
@@ -1513,6 +1994,18 @@ class Protocol extends _i1.SerializationManagerServer {
     if (data is _i24.VerificationTaskType) {
       return 'VerificationTaskType';
     }
+    if (data is _i25.DsarRequest) {
+      return 'DsarRequest';
+    }
+    if (data is _i26.NotificationPreferences) {
+      return 'NotificationPreferences';
+    }
+    if (data is _i27.PrivacySettings) {
+      return 'PrivacySettings';
+    }
+    if (data is _i28.UserProfile) {
+      return 'UserProfile';
+    }
     className = _i2.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod.$className';
@@ -1592,6 +2085,18 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'VerificationTaskType') {
       return deserialize<_i24.VerificationTaskType>(data['data']);
     }
+    if (dataClassName == 'DsarRequest') {
+      return deserialize<_i25.DsarRequest>(data['data']);
+    }
+    if (dataClassName == 'NotificationPreferences') {
+      return deserialize<_i26.NotificationPreferences>(data['data']);
+    }
+    if (dataClassName == 'PrivacySettings') {
+      return deserialize<_i27.PrivacySettings>(data['data']);
+    }
+    if (dataClassName == 'UserProfile') {
+      return deserialize<_i28.UserProfile>(data['data']);
+    }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
       return _i2.Protocol().deserializeByClassName(data);
@@ -1628,6 +2133,14 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i21.UserCapabilities.t;
       case _i22.VerificationTask:
         return _i22.VerificationTask.t;
+      case _i25.DsarRequest:
+        return _i25.DsarRequest.t;
+      case _i26.NotificationPreferences:
+        return _i26.NotificationPreferences.t;
+      case _i27.PrivacySettings:
+        return _i27.PrivacySettings.t;
+      case _i28.UserProfile:
+        return _i28.UserProfile.t;
     }
     return null;
   }

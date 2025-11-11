@@ -1,0 +1,24 @@
+# User Profile model for profile management
+class: UserProfile
+table: user_profiles
+
+fields:
+  id: int?
+  userId: int
+  username: String?
+  fullName: String?
+  bio: String?
+  avatarUrl: String?
+  # Encrypted sensitive fields stored as JSONB (stored as String in Serverpod)
+  profileData: String?
+  # Profile visibility settings
+  visibility: String # public, friendsOnly, private
+  isVerified: bool
+  createdAt: DateTime
+  updatedAt: DateTime
+
+indexes:
+  profile_user_id_idx:
+    fields: userId
+    unique: true
+

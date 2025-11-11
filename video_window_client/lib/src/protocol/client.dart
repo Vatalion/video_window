@@ -19,8 +19,16 @@ import 'package:video_window_client/src/protocol/capabilities/capability_request
     as _i5;
 import 'package:video_window_client/src/protocol/capabilities/verification_task.dart'
     as _i6;
-import 'package:video_window_client/src/protocol/greeting.dart' as _i7;
-import 'protocol.dart' as _i8;
+import 'package:video_window_client/src/protocol/capabilities/trusted_device.dart'
+    as _i7;
+import 'package:video_window_client/src/protocol/profile/user_profile.dart'
+    as _i8;
+import 'package:video_window_client/src/protocol/profile/privacy_settings.dart'
+    as _i9;
+import 'package:video_window_client/src/protocol/profile/notification_preferences.dart'
+    as _i10;
+import 'package:video_window_client/src/protocol/greeting.dart' as _i11;
+import 'protocol.dart' as _i12;
 
 /// Capability endpoint for managing user capability requests and status
 /// Implements Story 2-1: Capability Enablement Request Flow
@@ -98,6 +106,86 @@ class EndpointCapability extends _i1.EndpointRef {
         'capability',
         'getVerificationTask',
         {'taskId': taskId},
+      );
+
+  /// Get Stripe onboarding link for payout activation
+  ///
+  /// AC1: Provides Stripe Express onboarding URL for payout setup
+  /// POST /capabilities/stripe/onboarding-link
+  _i2.Future<Map<String, dynamic>> getStripeOnboardingLink(
+    int userId,
+    String returnUrl,
+  ) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'capability',
+        'getStripeOnboardingLink',
+        {
+          'userId': userId,
+          'returnUrl': returnUrl,
+        },
+      );
+}
+
+/// Device trust endpoint for managing device registration and trust
+/// Implements Epic 2 Story 2-4: Device Trust & Risk Monitoring
+/// {@category Endpoint}
+class EndpointDevice extends _i1.EndpointRef {
+  EndpointDevice(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'device';
+
+  /// Register or update device telemetry
+  /// AC1: Device registration occurs on app launch, capturing device ID, platform, attestation result, and telemetry
+  ///
+  /// POST /devices/register
+  _i2.Future<_i7.TrustedDevice> registerDevice(
+    int userId,
+    String deviceId,
+    String deviceType,
+    String platform,
+    Map<String, dynamic> telemetry,
+  ) =>
+      caller.callServerEndpoint<_i7.TrustedDevice>(
+        'device',
+        'registerDevice',
+        {
+          'userId': userId,
+          'deviceId': deviceId,
+          'deviceType': deviceType,
+          'platform': platform,
+          'telemetry': telemetry,
+        },
+      );
+
+  /// Get all active devices for the current user
+  /// AC3: Device management screen lists registered devices with trust score, last seen timestamp
+  ///
+  /// GET /devices
+  _i2.Future<List<_i7.TrustedDevice>> getDevices(int userId) =>
+      caller.callServerEndpoint<List<_i7.TrustedDevice>>(
+        'device',
+        'getDevices',
+        {'userId': userId},
+      );
+
+  /// Revoke device trust
+  /// AC3: Revocation lowers capability state appropriately
+  ///
+  /// POST /devices/{id}/revoke
+  _i2.Future<void> revokeDevice(
+    int userId,
+    int deviceId,
+    String? reason,
+  ) =>
+      caller.callServerEndpoint<void>(
+        'device',
+        'revokeDevice',
+        {
+          'userId': userId,
+          'deviceId': deviceId,
+          'reason': reason,
+        },
       );
 }
 
@@ -351,7 +439,8 @@ class EndpointOrder extends _i1.EndpointRef {
 }
 
 /// Payment processing endpoint via Stripe
-/// Placeholder for Epic 12 - Checkout & Payment
+/// Implements Epic 12 - Checkout & Payment
+/// Story 2-3: Guards checkout with canCollectPayments check
 /// {@category Endpoint}
 class EndpointPayment extends _i1.EndpointRef {
   EndpointPayment(_i1.EndpointCaller caller) : super(caller);
@@ -359,12 +448,133 @@ class EndpointPayment extends _i1.EndpointRef {
   @override
   String get name => 'payment';
 
-  /// Placeholder: Create Stripe checkout session
-  _i2.Future<Map<String, dynamic>> createCheckoutSession(int orderId) =>
+  /// Create Stripe checkout session
+  ///
+  /// AC5: Guards checkout creation with canCollectPayments verification
+  /// Returns error with blocker summary if capability not active
+  _i2.Future<Map<String, dynamic>> createCheckoutSession(
+    int userId,
+    int orderId,
+  ) =>
       caller.callServerEndpoint<Map<String, dynamic>>(
         'payment',
         'createCheckoutSession',
-        {'orderId': orderId},
+        {
+          'userId': userId,
+          'orderId': orderId,
+        },
+      );
+}
+
+/// Profile endpoint for managing user profiles, privacy settings, and notifications
+/// Implements Story 3-1: Viewer Profile Management
+/// {@category Endpoint}
+class EndpointProfile extends _i1.EndpointRef {
+  EndpointProfile(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'profile';
+
+  /// Get current user profile
+  /// GET /profile/me
+  /// AC1: Complete profile management interface
+  /// AC6: Role-based access control - users can only access their own profile
+  _i2.Future<_i8.UserProfile?> getMyProfile(int userId) =>
+      caller.callServerEndpoint<_i8.UserProfile?>(
+        'profile',
+        'getMyProfile',
+        {'userId': userId},
+      );
+
+  /// Update current user profile
+  /// PUT /profile/me
+  /// AC1: Complete profile management interface with validation
+  /// AC4: Sensitive PII data encrypted at rest
+  /// AC6: Role-based access control enforced
+  _i2.Future<_i8.UserProfile> updateMyProfile(
+    int userId,
+    Map<String, dynamic> profileData,
+  ) =>
+      caller.callServerEndpoint<_i8.UserProfile>(
+        'profile',
+        'updateMyProfile',
+        {
+          'userId': userId,
+          'profileData': profileData,
+        },
+      );
+
+  /// Get privacy settings
+  /// GET /profile/privacy
+  /// AC3: Granular privacy settings
+  _i2.Future<_i9.PrivacySettings> getPrivacySettings(int userId) =>
+      caller.callServerEndpoint<_i9.PrivacySettings>(
+        'profile',
+        'getPrivacySettings',
+        {'userId': userId},
+      );
+
+  /// Update privacy settings
+  /// PUT /profile/privacy
+  /// AC3: Granular privacy settings with GDPR/CCPA compliance
+  _i2.Future<_i9.PrivacySettings> updatePrivacySettings(
+    int userId,
+    Map<String, dynamic> settingsData,
+  ) =>
+      caller.callServerEndpoint<_i9.PrivacySettings>(
+        'profile',
+        'updatePrivacySettings',
+        {
+          'userId': userId,
+          'settingsData': settingsData,
+        },
+      );
+
+  /// Get notification preferences
+  /// GET /profile/notifications
+  /// AC7: Notification preference matrix
+  _i2.Future<_i10.NotificationPreferences> getNotificationPreferences(
+          int userId) =>
+      caller.callServerEndpoint<_i10.NotificationPreferences>(
+        'profile',
+        'getNotificationPreferences',
+        {'userId': userId},
+      );
+
+  /// Update notification preferences
+  /// PUT /profile/notifications
+  /// AC7: Notification preference matrix with granular controls
+  _i2.Future<_i10.NotificationPreferences> updateNotificationPreferences(
+    int userId,
+    Map<String, dynamic> prefsData,
+  ) =>
+      caller.callServerEndpoint<_i10.NotificationPreferences>(
+        'profile',
+        'updateNotificationPreferences',
+        {
+          'userId': userId,
+          'prefsData': prefsData,
+        },
+      );
+
+  /// Export user data (DSAR - Right to Access)
+  /// GET /profile/dsar/export
+  /// AC5: DSAR functionality - data export
+  _i2.Future<Map<String, dynamic>> exportUserData(int userId) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'profile',
+        'exportUserData',
+        {'userId': userId},
+      );
+
+  /// Delete user data (DSAR - Right to Erasure)
+  /// DELETE /profile/dsar/delete
+  /// AC5: DSAR functionality - data deletion with audit logging
+  _i2.Future<void> deleteUserData(int userId) =>
+      caller.callServerEndpoint<void>(
+        'profile',
+        'deleteUserData',
+        {'userId': userId},
       );
 }
 
@@ -400,6 +610,33 @@ class EndpointStory extends _i1.EndpointRef {
       );
 }
 
+/// Stripe webhook endpoint for handling payout onboarding events
+/// Implements Story 2-3: Payout & Compliance Activation
+/// {@category Endpoint}
+class EndpointStripeWebhook extends _i1.EndpointRef {
+  EndpointStripeWebhook(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'stripeWebhook';
+
+  /// Handle Stripe webhook events
+  ///
+  /// AC2: Processes Stripe Express onboarding webhooks
+  /// AC4: Updates verification tasks and capability status
+  _i2.Future<Map<String, dynamic>> handleWebhook(
+    String payload,
+    String signature,
+  ) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'stripeWebhook',
+        'handleWebhook',
+        {
+          'payload': payload,
+          'signature': signature,
+        },
+      );
+}
+
 /// This is an example endpoint that returns a greeting message through
 /// its [hello] method.
 /// {@category Endpoint}
@@ -410,8 +647,8 @@ class EndpointGreeting extends _i1.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i2.Future<_i7.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i7.Greeting>(
+  _i2.Future<_i11.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i11.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -434,7 +671,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i8.Protocol(),
+          _i12.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,
@@ -445,17 +682,22 @@ class Client extends _i1.ServerpodClientShared {
               disconnectStreamsOnLostInternetConnection,
         ) {
     capability = EndpointCapability(this);
+    device = EndpointDevice(this);
     health = EndpointHealth(this);
     auth = EndpointAuth(this);
     metrics = EndpointMetrics(this);
     offer = EndpointOffer(this);
     order = EndpointOrder(this);
     payment = EndpointPayment(this);
+    profile = EndpointProfile(this);
     story = EndpointStory(this);
+    stripeWebhook = EndpointStripeWebhook(this);
     greeting = EndpointGreeting(this);
   }
 
   late final EndpointCapability capability;
+
+  late final EndpointDevice device;
 
   late final EndpointHealth health;
 
@@ -469,20 +711,27 @@ class Client extends _i1.ServerpodClientShared {
 
   late final EndpointPayment payment;
 
+  late final EndpointProfile profile;
+
   late final EndpointStory story;
+
+  late final EndpointStripeWebhook stripeWebhook;
 
   late final EndpointGreeting greeting;
 
   @override
   Map<String, _i1.EndpointRef> get endpointRefLookup => {
         'capability': capability,
+        'device': device,
         'health': health,
         'auth': auth,
         'metrics': metrics,
         'offer': offer,
         'order': order,
         'payment': payment,
+        'profile': profile,
         'story': story,
+        'stripeWebhook': stripeWebhook,
         'greeting': greeting,
       };
 

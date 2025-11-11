@@ -1,0 +1,26 @@
+# DSAR Request model for tracking data subject access requests
+class: DsarRequest
+table: dsar_requests
+
+fields:
+  id: int?
+  userId: int
+  requestType: String # access, correction, deletion, portability
+  status: String # pending, processing, completed, rejected
+  requestedAt: DateTime
+  completedAt: DateTime?
+  # JSONB for request metadata and response data (stored as String in Serverpod)
+  requestData: String?
+  # Audit trail (stored as String in Serverpod)
+  auditLog: String?
+  createdAt: DateTime
+  updatedAt: DateTime
+
+indexes:
+  dsar_user_id_idx:
+    fields: userId
+  dsar_status_idx:
+    fields: status
+  dsar_request_type_idx:
+    fields: requestType
+

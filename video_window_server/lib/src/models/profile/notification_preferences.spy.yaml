@@ -1,0 +1,22 @@
+# Notification Preferences model
+class: NotificationPreferences
+table: user_notification_preferences
+
+fields:
+  id: int?
+  userId: int
+  emailNotifications: bool
+  pushNotifications: bool
+  inAppNotifications: bool
+  # JSONB for granular notification settings (stored as String in Serverpod)
+  settings: String?
+  # Quiet hours (JSONB: {start: "22:00", end: "08:00", timezone: "UTC"})
+  quietHours: String?
+  createdAt: DateTime
+  updatedAt: DateTime
+
+indexes:
+  notification_user_id_idx:
+    fields: userId
+    unique: true
+

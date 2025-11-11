@@ -4,6 +4,11 @@ capability:
   - getRequests:
   - completeVerificationTask:
   - getVerificationTask:
+  - getStripeOnboardingLink:
+device:
+  - registerDevice:
+  - getDevices:
+  - revokeDevice:
 health:
   - check:
 auth:
@@ -26,8 +31,19 @@ order:
   - updateShipping:
 payment:
   - createCheckoutSession:
+profile:
+  - getMyProfile:
+  - updateMyProfile:
+  - getPrivacySettings:
+  - updatePrivacySettings:
+  - getNotificationPreferences:
+  - updateNotificationPreferences:
+  - exportUserData:
+  - deleteUserData:
 story:
   - getFeed:
   - getStory:
+stripeWebhook:
+  - handleWebhook:
 greeting:
   - hello:
