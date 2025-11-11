@@ -159,20 +159,29 @@ class ProfileMediaRepository {
           );
         }
 
-        // TODO: Call media endpoint to check scan status
-        // final statusResponse = await _client.callEndpoint(
-        //   'media',
-        //   'getMediaFileStatus',
-        //   {'mediaId': mediaId},
-        // );
-        //
-        // if (statusResponse['isVirusScanned'] == true) {
-        //   return statusResponse['status'] == 'completed';
-        // }
+        // Call media endpoint to check scan status
+        final statusResponse = await _client.callEndpoint(
+          'media',
+          'getMediaFileStatus',
+          {'mediaId': mediaId},
+        ) as Map<String, dynamic>;
 
-        // For now, return true after a delay (placeholder implementation)
+        final isVirusScanned =
+            statusResponse['isVirusScanned'] as bool? ?? false;
+        final status = statusResponse['status'] as String? ?? 'pending';
+
+        // If virus scan is complete, check if status is completed or failed
+        if (isVirusScanned) {
+          if (status == 'failed') {
+            throw ProfileMediaRepositoryException(
+              'Virus scan failed: Media file marked as failed',
+            );
+          }
+          return status == 'completed' || status == 'processing';
+        }
+
+        // Continue polling if scan not complete yet
         await Future.delayed(pollInterval);
-        return true; // Placeholder
       } catch (e) {
         // If it's a timeout exception, rethrow it
         if (e is ProfileMediaRepositoryException &&

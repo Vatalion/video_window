@@ -92,6 +92,36 @@ class MediaEndpoint extends Endpoint {
     }
   }
 
+  /// Get media file status for polling virus scan completion
+  /// GET /media/status/{mediaId}
+  /// AC2: Allows client to poll virus scan status until is_virus_scanned=true
+  Future<Map<String, dynamic>> getMediaFileStatus(
+    Session session,
+    int mediaId,
+  ) async {
+    try {
+      final mediaFile = await MediaFile.db.findById(session, mediaId);
+      if (mediaFile == null) {
+        throw Exception('Media file not found: $mediaId');
+      }
+
+      return {
+        'mediaId': mediaId,
+        'status': mediaFile.status,
+        'isVirusScanned': mediaFile.isVirusScanned,
+        'updatedAt': mediaFile.updatedAt.toIso8601String(),
+      };
+    } catch (e, stackTrace) {
+      session.log(
+        'Failed to get media file status for $mediaId: $e',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
   /// Handle virus scan callback from AWS Lambda
   /// POST /media/virus-scan-callback
   /// AC2: Virus scanning pipeline callback - updates media status

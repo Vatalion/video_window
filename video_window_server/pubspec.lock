@@ -466,7 +466,7 @@ packages:
     source: hosted
     version: "2.9.1"
   shared_aws_api:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: shared_aws_api
       sha256: "6a6eb57d422d5a4b09c6f65703dd9be90d5a0d7a6fa284762139e5c0dea19136"

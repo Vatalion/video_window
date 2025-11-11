@@ -27,6 +27,7 @@ dependencies:
   # AWS SDK for S3 and Lambda (Story 3-2: Avatar & Media Upload System)
   aws_s3_api: ^2.0.0
   aws_lambda_api: ^2.0.0
+  shared_aws_api: ^2.0.0
   # Image processing for avatar resizing and WebP conversion
   image: ^4.1.7
 

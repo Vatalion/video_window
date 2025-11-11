@@ -1,9 +1,11 @@
 import 'package:serverpod/serverpod.dart';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:convert';
 import 'package:aws_s3_api/s3-2006-03-01.dart';
 import 'package:shared_aws_api/shared.dart';
 import 'package:image/image.dart' as img;
+import 'package:crypto/crypto.dart';
 import '../../generated/profile/media_file.dart';
 import '../../generated/profile/user_profile.dart';
 
@@ -41,6 +43,7 @@ class MediaProcessingService {
   /// AC1: Presigned upload flow with expiration
   /// AC5: Signed URLs expire after 5 minutes
   /// Uses AWS Signature Version 4 to generate presigned URLs
+  /// Implements full AWS SigV4 signing algorithm per AWS specification
   Future<String> generatePresignedUploadUrl({
     required int userId,
     required String fileName,
@@ -50,31 +53,57 @@ class MediaProcessingService {
     final s3Key =
         'profile-media/$userId/temp/${DateTime.now().millisecondsSinceEpoch}_$fileName';
 
-    // Generate presigned PUT URL using AWS Signature Version 4
-    // This is a simplified implementation - in production, consider using a dedicated presigner library
     final accessKey = Platform.environment['AWS_ACCESS_KEY_ID']!;
+    final secretKey = Platform.environment['AWS_SECRET_ACCESS_KEY']!;
     final expiresIn = expirationMinutes * 60;
     final now = DateTime.now().toUtc();
 
     // AWS Signature Version 4 presigned URL generation
     final endpoint = '$_s3Bucket.s3.$_s3Region.amazonaws.com';
-    final url = 'https://$endpoint/$s3Key';
+    final host = endpoint;
+    final dateStamp = _formatDate(now);
+    final amzDate = _formatDateTime(now);
+    final credentialScope = '$dateStamp/$_s3Region/s3/aws4_request';
 
-    // For now, return URL with query parameters
-    // In production, implement full AWS SigV4 signing
-    // This requires: credential scope, canonical request, string to sign, signature
-    // For MVP, we'll use a placeholder that indicates the structure
-    // TODO: Implement full AWS SigV4 presigned URL generation or use a presigner library
+    // Step 1: Create canonical request
+    // S3 keys should be URL-encoded but forward slashes remain as-is
+    final canonicalUri =
+        '/${s3Key.split('/').map(Uri.encodeComponent).join('/')}';
+    final canonicalQueryString = _buildCanonicalQueryString(
+      accessKey: accessKey,
+      dateStamp: dateStamp,
+      amzDate: amzDate,
+      expiresIn: expiresIn,
+      region: _s3Region,
+    );
+    final canonicalHeaders = 'host:$host\n';
+    final signedHeaders = 'host';
+    final payloadHash = sha256.convert(utf8.encode('')).toString();
+    final canonicalRequest =
+        'PUT\n$canonicalUri\n$canonicalQueryString\n$canonicalHeaders\n$signedHeaders\n$payloadHash';
 
-    // Simplified approach: Return URL with expiration hint
-    // Actual implementation should use AWS SigV4 signing
+    // Step 2: Create string to sign
+    final algorithm = 'AWS4-HMAC-SHA256';
+    final stringToSign =
+        '$algorithm\n$amzDate\n$credentialScope\n${sha256.convert(utf8.encode(canonicalRequest)).toString()}';
+
+    // Step 3: Calculate signature
+    final signature = _calculateSignature(
+      secretKey: secretKey,
+      dateStamp: dateStamp,
+      region: _s3Region,
+      service: 's3',
+      stringToSign: stringToSign,
+    );
+
+    // Step 4: Build presigned URL with signature
     final queryParams = {
-      'X-Amz-Algorithm': 'AWS4-HMAC-SHA256',
-      'X-Amz-Credential':
-          '$accessKey/${_formatDate(now)}/$_s3Region/s3/aws4_request',
-      'X-Amz-Date': _formatDateTime(now),
+      'X-Amz-Algorithm': algorithm,
+      'X-Amz-Credential': '$accessKey/$credentialScope',
+      'X-Amz-Date': amzDate,
       'X-Amz-Expires': expiresIn.toString(),
-      'X-Amz-SignedHeaders': 'host',
+      'X-Amz-SignedHeaders': signedHeaders,
+      'X-Amz-Signature': signature,
     };
 
     final queryString = queryParams.entries
@@ -82,7 +111,61 @@ class MediaProcessingService {
             '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
         .join('&');
 
-    return '$url?$queryString';
+    return 'https://$host$canonicalUri?$queryString';
+  }
+
+  /// Build canonical query string for AWS SigV4
+  String _buildCanonicalQueryString({
+    required String accessKey,
+    required String dateStamp,
+    required String amzDate,
+    required int expiresIn,
+    required String region,
+  }) {
+    final params = {
+      'X-Amz-Algorithm': 'AWS4-HMAC-SHA256',
+      'X-Amz-Credential': '$accessKey/$dateStamp/$region/s3/aws4_request',
+      'X-Amz-Date': amzDate,
+      'X-Amz-Expires': expiresIn.toString(),
+      'X-Amz-SignedHeaders': 'host',
+    };
+
+    // Sort parameters by key
+    final sortedKeys = params.keys.toList()..sort();
+    return sortedKeys
+        .map((key) =>
+            '${Uri.encodeComponent(key)}=${Uri.encodeComponent(params[key]!)}')
+        .join('&');
+  }
+
+  /// Calculate AWS SigV4 signature
+  String _calculateSignature({
+    required String secretKey,
+    required String dateStamp,
+    required String region,
+    required String service,
+    required String stringToSign,
+  }) {
+    // kDate = HMAC("AWS4" + kSecret, DateStamp)
+    final kDate = Hmac(sha256, utf8.encode('AWS4$secretKey'))
+        .convert(utf8.encode(dateStamp))
+        .bytes;
+
+    // kRegion = HMAC(kDate, RegionName)
+    final kRegion = Hmac(sha256, kDate).convert(utf8.encode(region)).bytes;
+
+    // kService = HMAC(kRegion, ServiceName)
+    final kService = Hmac(sha256, kRegion).convert(utf8.encode(service)).bytes;
+
+    // kSigning = HMAC(kService, "aws4_request")
+    final kSigning =
+        Hmac(sha256, kService).convert(utf8.encode('aws4_request')).bytes;
+
+    // signature = HMAC(kSigning, StringToSign)
+    final signature =
+        Hmac(sha256, kSigning).convert(utf8.encode(stringToSign)).toString();
+
+    return signature;
   }
 
   String _formatDate(DateTime date) {
