@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:shared/design_system/tokens.dart';
 
 /// Bottom sheet displayed when payment collection capability is blocked
 ///
-/// AC2: Checkout CTA adds PayoutBlockerSheet when !canCollectPayments
+/// AC1: Opens modal summarizing payout prerequisites and provides Stripe Express onboarding CTA
 class PayoutBlockerSheet extends StatelessWidget {
   final VoidCallback onEnablePayments;
   final VoidCallback? onCancel;
   final List<String> requirements;
+  final String? stripeOnboardingUrl;
 
   const PayoutBlockerSheet({
     super.key,
@@ -18,14 +20,18 @@ class PayoutBlockerSheet extends StatelessWidget {
       'Verify identity',
       'Provide tax information',
     ],
+    this.stripeOnboardingUrl,
   });
 
   /// Show the bottom sheet
+  ///
+  /// AC1: Displays payout prerequisites and Stripe Express onboarding link
   static Future<void> show(
     BuildContext context, {
     required VoidCallback onEnablePayments,
     VoidCallback? onCancel,
     List<String>? requirements,
+    String? stripeOnboardingUrl,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -35,6 +41,7 @@ class PayoutBlockerSheet extends StatelessWidget {
         onEnablePayments: onEnablePayments,
         onCancel: onCancel,
         requirements: requirements ?? const [],
+        stripeOnboardingUrl: stripeOnboardingUrl,
       ),
     );
   }
@@ -74,7 +81,7 @@ class PayoutBlockerSheet extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: AppColors.error.withOpacity(0.1),
+                    color: AppColors.error.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -175,7 +182,24 @@ class PayoutBlockerSheet extends StatelessWidget {
                 ],
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: onEnablePayments,
+                    onPressed: () async {
+                      // AC1: Launch Stripe Express onboarding if URL provided
+                      if (stripeOnboardingUrl != null &&
+                          stripeOnboardingUrl!.isNotEmpty) {
+                        final uri = Uri.parse(stripeOnboardingUrl!);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        } else {
+                          // Fallback to callback
+                          onEnablePayments();
+                        }
+                      } else {
+                        onEnablePayments();
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.onPrimary,
@@ -185,7 +209,9 @@ class PayoutBlockerSheet extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'Set Up Payments',
+                      stripeOnboardingUrl != null
+                          ? 'Complete Stripe Setup'
+                          : 'Set Up Payments',
                       style: AppTypography.labelLarge,
                     ),
                   ),

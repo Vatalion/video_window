@@ -12,6 +12,9 @@ class CapabilityCard extends StatelessWidget {
   final VoidCallback? onActionPressed;
   final String? actionLabel;
   final List<String> blockers;
+  final Map<String, String>?
+      statusDetails; // AC4: Detailed status info (e.g., Stripe account state, tax form status)
+  final String? statusLink; // AC4: Link to complete outstanding tasks
 
   const CapabilityCard({
     super.key,
@@ -21,6 +24,8 @@ class CapabilityCard extends StatelessWidget {
     this.onActionPressed,
     this.actionLabel,
     this.blockers = const [],
+    this.statusDetails,
+    this.statusLink,
   });
 
   @override
@@ -34,7 +39,7 @@ class CapabilityCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.md),
         side: BorderSide(
-          color: _getStatusColor().withOpacity(0.3),
+          color: _getStatusColor().withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -65,6 +70,66 @@ class CapabilityCard extends StatelessWidget {
                 color: AppColors.neutral600,
               ),
             ),
+
+            // AC4: Status details (Stripe account state, tax form submission, etc.)
+            if (statusDetails != null && statusDetails!.isNotEmpty) ...[
+              SizedBox(height: AppSpacing.sm),
+              Container(
+                padding: EdgeInsets.all(AppSpacing.sm),
+                decoration: BoxDecoration(
+                  color: AppColors.neutral50,
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Status Details',
+                      style: AppTypography.labelMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: AppSpacing.xs),
+                    ...statusDetails!.entries.map(
+                      (entry) => Padding(
+                        padding: EdgeInsets.only(bottom: AppSpacing.xs),
+                        child: Row(
+                          children: [
+                            Icon(
+                              _getStatusDetailIcon(entry.key),
+                              size: 14,
+                              color: AppColors.neutral700,
+                            ),
+                            SizedBox(width: AppSpacing.xs),
+                            Expanded(
+                              child: Text(
+                                '${entry.key}: ${entry.value}',
+                                style: AppTypography.bodySmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (statusLink != null && statusLink!.isNotEmpty) ...[
+                      SizedBox(height: AppSpacing.xs),
+                      InkWell(
+                        onTap: () {
+                          // Handle link tap - could navigate to Stripe onboarding or task completion
+                        },
+                        child: Text(
+                          'Complete outstanding tasks →',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.primary,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
 
             // Blockers (if any)
             if (blockers.isNotEmpty) ...[
@@ -129,7 +194,7 @@ class CapabilityCard extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: _getStatusColor().withOpacity(0.1),
+        color: _getStatusColor().withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppRadius.full),
         border: Border.all(
           color: _getStatusColor(),
@@ -216,6 +281,18 @@ class CapabilityCard extends StatelessWidget {
       case CapabilityStatus.ready:
         return AppColors.success;
     }
+  }
+
+  /// AC4: Get icon for status detail key
+  IconData _getStatusDetailIcon(String key) {
+    if (key.toLowerCase().contains('stripe')) {
+      return Icons.account_balance_wallet;
+    } else if (key.toLowerCase().contains('tax')) {
+      return Icons.receipt;
+    } else if (key.toLowerCase().contains('review')) {
+      return Icons.pending;
+    }
+    return Icons.info;
   }
 }
 

@@ -2,6 +2,7 @@ import 'package:serverpod/serverpod.dart';
 import '../../services/capabilities/capability_service.dart';
 import '../../services/verification_service.dart';
 import '../../services/auth/rate_limit_service.dart';
+import '../../services/stripe/stripe_service.dart';
 import '../../generated/capabilities/capability_status_response.dart';
 import '../../generated/capabilities/capability_request_dto.dart';
 import '../../generated/capabilities/capability_request.dart';
@@ -285,6 +286,42 @@ class CapabilityEndpoint extends Endpoint {
     } catch (e, stackTrace) {
       session.log(
         'Failed to get verification task $taskId: $e',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// Get Stripe onboarding link for payout activation
+  ///
+  /// AC1: Provides Stripe Express onboarding URL for payout setup
+  /// POST /capabilities/stripe/onboarding-link
+  Future<Map<String, dynamic>> getStripeOnboardingLink(
+    Session session,
+    int userId,
+    String returnUrl,
+  ) async {
+    try {
+      final stripeService = StripeService(session);
+      final onboardingUrl = await stripeService.createOnboardingLink(
+        userId: userId,
+        returnUrl: returnUrl,
+      );
+
+      session.log(
+        'Stripe onboarding link generated for user $userId',
+        level: LogLevel.info,
+      );
+
+      return {
+        'success': true,
+        'onboardingUrl': onboardingUrl,
+      };
+    } catch (e, stackTrace) {
+      session.log(
+        'Failed to generate Stripe onboarding link for user $userId: $e',
         level: LogLevel.error,
         exception: e,
         stackTrace: stackTrace,

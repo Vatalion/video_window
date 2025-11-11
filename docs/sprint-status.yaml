@@ -75,7 +75,7 @@ development_status:
   epic-2: contexted
   2-1-capability-enable-request-flow: done # ✅ Capability system complete - all review findings addressed
   2-2-verification-within-publish-flow: done
-  2-3-payout-and-compliance-activation: ready-for-dev
+  2-3-payout-and-compliance-activation: done
   2-4-device-trust-and-risk-monitoring: ready-for-dev
   epic-2-retrospective: optional
 
