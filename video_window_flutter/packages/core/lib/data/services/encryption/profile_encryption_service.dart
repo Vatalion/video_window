@@ -65,7 +65,6 @@ class ProfileEncryptionService {
       throw Exception('Master key not initialized');
     }
 
-    final masterKey = encrypt_lib.Key.fromBase64(masterKeyBase64);
     final salt = await _getUserSalt(userId);
 
     // Derive key using PBKDF2 (simplified - in production use proper PBKDF2)

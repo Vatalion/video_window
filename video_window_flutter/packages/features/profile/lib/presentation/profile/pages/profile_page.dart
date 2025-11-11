@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:core/data/repositories/profile/profile_repository.dart';
-import 'package:video_window_flutter/lib/app_shell/app_config.dart';
+import 'package:video_window_client/video_window_client.dart';
+import 'package:serverpod_flutter/serverpod_flutter.dart';
 import '../bloc/profile_bloc.dart';
 import '../bloc/profile_event.dart';
 import '../bloc/profile_state.dart';
@@ -18,9 +19,14 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get client from context or create new instance
+    // TODO: Use proper dependency injection when available
+    final client = Client('http://localhost:8080/')
+      ..connectivityMonitor = FlutterConnectivityMonitor();
+
     return BlocProvider(
       create: (context) => ProfileBloc(
-        ProfileRepository(AppConfig.serverClient),
+        ProfileRepository(client),
       )..add(ProfileLoadRequested(userId)),
       child: Scaffold(
         appBar: AppBar(

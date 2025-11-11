@@ -1,4 +1,3 @@
-import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:video_window_client/video_window_client.dart' show Client;
 import 'dart:convert';
 
