@@ -5,6 +5,7 @@ import '../../generated/capabilities/capability_type.dart';
 import '../../generated/capabilities/capability_request_status.dart';
 import '../../generated/capabilities/capability_review_state.dart';
 import '../../generated/capabilities/capability_audit_event.dart';
+import '../device_trust_service.dart';
 import 'dart:convert';
 
 /// Service for managing user capabilities and verification workflows
@@ -140,7 +141,12 @@ class CapabilityService {
 
         case CapabilityType.fulfillOrders:
           // Require payment capability and trusted device
-          return capabilities.canCollectPayments; // Simplified for now
+          if (!capabilities.canCollectPayments) {
+            return false;
+          }
+          // Check device trust (AC2: Capabilities requiring trusted devices remain blocked until at least one device exceeds threshold)
+          final deviceTrustService = DeviceTrustService(_session);
+          return await deviceTrustService.hasTrustedDevice(userId);
       }
     } catch (e, stackTrace) {
       _session.log(
@@ -294,6 +300,13 @@ class CapabilityService {
             final blockers = <String, String>{};
             if (!capabilities.canCollectPayments) {
               blockers['payment'] = 'Payment capability must be enabled first';
+            }
+            // Check device trust blocker (may be set by DeviceTrustService)
+            final blockersMap =
+                jsonDecode(capabilities.blockers) as Map<String, dynamic>? ??
+                    {};
+            if (blockersMap.containsKey('device_trust')) {
+              blockers['device_trust'] = blockersMap['device_trust'] as String;
             }
             return blockers;
           }
