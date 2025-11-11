@@ -109,8 +109,7 @@ class VerificationService {
       task.updatedAt = now;
 
       // Merge metadata into payload
-      final currentPayload =
-          jsonDecode(task.payload) as Map<String, dynamic>;
+      final currentPayload = jsonDecode(task.payload) as Map<String, dynamic>;
       currentPayload.addAll({
         'provider': provider,
         'providerStatus': status,
