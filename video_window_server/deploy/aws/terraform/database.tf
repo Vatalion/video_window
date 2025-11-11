@@ -13,6 +13,27 @@ resource "aws_db_instance" "postgres" {
   ]
   publicly_accessible  = true
   db_subnet_group_name = module.vpc.database_subnet_group_name
+  
+  # Backup Configuration (AC2, AC3)
+  backup_retention_period = 30  # 30-day retention per AC3
+  backup_window          = "03:00-04:00"  # UTC backup window (minimize impact)
+  maintenance_window     = "sun:04:00-sun:05:00"  # UTC maintenance window
+  
+  # Enable Point-in-Time Recovery (AC2)
+  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
+  
+  # Storage encryption
+  storage_encrypted = true
+  
+  # Enable deletion protection for production
+  deletion_protection = false  # Set to true in production
+  
+  tags = {
+    Name        = "${var.project_name}-database"
+    Environment = "production"
+    BackupEnabled = "true"
+    ManagedBy   = "terraform"
+  }
 }
 
 resource "aws_route53_record" "database" {
@@ -52,6 +73,24 @@ resource "aws_db_instance" "postgres_staging" {
   ]
   publicly_accessible  = true
   db_subnet_group_name = module.vpc.database_subnet_group_name
+  
+  # Backup Configuration (reduced retention for staging)
+  backup_retention_period = 7  # 7-day retention for staging
+  backup_window          = "03:00-04:00"
+  maintenance_window     = "sun:04:00-sun:05:00"
+  
+  # Enable CloudWatch logs
+  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
+  
+  # Storage encryption
+  storage_encrypted = true
+  
+  tags = {
+    Name        = "${var.project_name}-staging-database"
+    Environment = "staging"
+    BackupEnabled = "true"
+    ManagedBy   = "terraform"
+  }
 }
 
 resource "aws_route53_record" "database_staging" {
