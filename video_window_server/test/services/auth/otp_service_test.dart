@@ -253,7 +253,7 @@ void main() {
 
         const identifier = 'test@example.com';
 
-        final otp = await otpService.createOTP(identifier);
+        final _ = await otpService.createOTP(identifier);
         const wrongOtp = '000000'; // Incorrect code
 
         final result = await otpService.verifyOTP(identifier, wrongOtp);
@@ -349,7 +349,7 @@ void main() {
 
         const identifier = 'test@example.com';
 
-        final otp = await otpService.createOTP(identifier);
+        final _ = await otpService.createOTP(identifier);
         const wrongOtp = '000000';
 
         // Attempt 5 times with wrong code
@@ -451,7 +451,7 @@ void main() {
         const identifier2 = 'user2@example.com';
 
         final otp1 = await otpService.createOTP(identifier1);
-        final otp2 = await otpService.createOTP(identifier2);
+        final _ = await otpService.createOTP(identifier2);
 
         // User2 tries to use User1's OTP
         final result = await otpService.verifyOTP(identifier2, otp1);

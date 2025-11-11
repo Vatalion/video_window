@@ -149,7 +149,7 @@ class AccountLockoutService {
         ]);
 
         session.log(
-          'Account locked: $identifier for ${lockDuration.inMinutes} minutes (${newAttempts} attempts)',
+          'Account locked: $identifier for ${lockDuration.inMinutes} minutes ($newAttempts attempts)',
           level: LogLevel.warning,
         );
 

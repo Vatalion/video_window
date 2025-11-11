@@ -1,5 +1,4 @@
 import 'package:test/test.dart';
-import 'package:serverpod/serverpod.dart';
 import 'package:video_window_server/src/services/auth/social_auth_service.dart';
 import 'package:video_window_server/src/generated/auth/user.dart';
 

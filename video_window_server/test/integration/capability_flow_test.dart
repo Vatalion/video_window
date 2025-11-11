@@ -5,7 +5,6 @@ import 'package:video_window_server/src/generated/capabilities/capability_reques
 import 'package:video_window_server/src/generated/capabilities/capability_audit_event.dart';
 import 'package:video_window_server/src/generated/capabilities/user_capabilities.dart';
 import 'package:video_window_server/src/services/capabilities/capability_service.dart';
-import 'package:serverpod_test/serverpod_test.dart' show RollbackDatabase;
 
 import 'test_tools/serverpod_test_tools.dart';
 
