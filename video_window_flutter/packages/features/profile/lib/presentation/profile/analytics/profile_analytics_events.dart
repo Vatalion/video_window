@@ -122,3 +122,34 @@ class DsarOperationEvent extends AnalyticsEvent {
   @override
   DateTime get timestamp => _timestamp;
 }
+
+/// Analytics event for avatar upload (Story 3-2)
+/// AC4: Analytics event avatar_uploaded with metadata
+class AvatarUploadedEvent extends AnalyticsEvent {
+  final int userId;
+  final int fileSizeBytes;
+  final String mimeType;
+  final int processingTimeMs;
+  final DateTime _timestamp;
+
+  AvatarUploadedEvent({
+    required this.userId,
+    required this.fileSizeBytes,
+    required this.mimeType,
+    required this.processingTimeMs,
+  }) : _timestamp = DateTime.now();
+
+  @override
+  String get name => 'avatar_uploaded';
+
+  @override
+  Map<String, dynamic> get properties => {
+        'user_id': userId,
+        'file_size': fileSizeBytes,
+        'mime_type': mimeType,
+        'processing_time_ms': processingTimeMs,
+      };
+
+  @override
+  DateTime get timestamp => _timestamp;
+}

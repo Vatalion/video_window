@@ -93,3 +93,23 @@ class ProfileError extends ProfileState {
   @override
   List<Object?> get props => [message, errorCode];
 }
+
+/// Avatar upload in progress state (Story 3-2)
+class AvatarUploading extends ProfileState {
+  final double progress;
+
+  const AvatarUploading(this.progress);
+
+  @override
+  List<Object?> get props => [progress];
+}
+
+/// Avatar upload completed state (Story 3-2)
+class AvatarUploadCompleted extends ProfileState {
+  final String avatarUrl;
+
+  const AvatarUploadCompleted(this.avatarUrl);
+
+  @override
+  List<Object?> get props => [avatarUrl];
+}

@@ -1,20 +1,26 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:core/data/repositories/profile/profile_repository.dart';
+import 'package:core/data/repositories/profile/profile_media_repository.dart';
 import 'package:core/services/analytics_service.dart';
+import 'dart:io';
 import 'profile_event.dart';
 import 'profile_state.dart';
 import '../analytics/profile_analytics_events.dart';
 
 /// BLoC for managing profile state
 /// Implements Story 3-1: Viewer Profile Management
+/// Extends Story 3-2: Avatar & Media Upload System
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final ProfileRepository _profileRepository;
+  final ProfileMediaRepository? _mediaRepository;
   final AnalyticsService? _analyticsService;
 
   ProfileBloc(
     this._profileRepository, {
+    ProfileMediaRepository? mediaRepository,
     AnalyticsService? analyticsService,
-  })  : _analyticsService = analyticsService,
+  })  : _mediaRepository = mediaRepository,
+        _analyticsService = analyticsService,
         super(const ProfileInitial()) {
     on<ProfileLoadRequested>(_onProfileLoadRequested);
     on<ProfileUpdateRequested>(_onProfileUpdateRequested);
@@ -26,6 +32,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         _onNotificationPreferencesUpdateRequested);
     on<ExportUserDataRequested>(_onExportUserDataRequested);
     on<DeleteUserDataRequested>(_onDeleteUserDataRequested);
+    on<AvatarUploadRequested>(_onAvatarUploadRequested);
+    on<AvatarUploadProgressed>(_onAvatarUploadProgressed);
   }
 
   Future<void> _onProfileLoadRequested(
@@ -210,6 +218,108 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         message: 'Failed to delete user data: $e',
         errorCode: 'DELETE_ERROR',
       ));
+    }
+  }
+
+  /// Handle avatar upload request (Story 3-2)
+  /// AC1: Presigned upload flow with chunked transfer
+  /// AC4: Upload UI provides progress indicator
+  Future<void> _onAvatarUploadRequested(
+    AvatarUploadRequested event,
+    Emitter<ProfileState> emit,
+  ) async {
+    if (_mediaRepository == null) {
+      emit(const ProfileError(
+        message: 'Media repository not available',
+        errorCode: 'MEDIA_REPO_ERROR',
+      ));
+      return;
+    }
+
+    try {
+      final startTime = DateTime.now();
+      emit(const AvatarUploading(0.0));
+
+      // Get file metadata
+      final file = event.imageFile;
+      final fileSize = await file.length();
+      final fileName = file.path.split('/').last;
+      final mimeType = _getMimeType(fileName);
+
+      // Get presigned upload URL
+      final uploadUrlData = await _mediaRepository!.getAvatarUploadUrl(
+        userId: event.userId,
+        fileName: fileName,
+        mimeType: mimeType,
+        fileSizeBytes: fileSize,
+      );
+
+      final presignedUrl = uploadUrlData['presignedUrl'] as String;
+      final mediaId = uploadUrlData['mediaId'] as int;
+
+      // Upload file with progress tracking
+      await _mediaRepository!.uploadToS3(
+        presignedUrl: presignedUrl,
+        file: file,
+        onProgress: (progress) {
+          add(AvatarUploadProgressed(event.userId, progress));
+        },
+      );
+
+      // Poll for virus scan completion
+      await _mediaRepository!.pollVirusScanStatus(mediaId: mediaId);
+
+      // Reload profile to get updated avatar URL
+      final profile = await _profileRepository.getMyProfile(event.userId);
+      final avatarUrl = profile?['avatarUrl'] as String?;
+
+      if (avatarUrl == null) {
+        throw Exception('Avatar URL not found after upload');
+      }
+
+      // Emit analytics event
+      final processingTime =
+          DateTime.now().difference(startTime).inMilliseconds;
+      _analyticsService?.trackEvent(
+        AvatarUploadedEvent(
+          userId: event.userId,
+          fileSizeBytes: fileSize,
+          mimeType: mimeType,
+          processingTimeMs: processingTime,
+        ),
+      );
+
+      emit(AvatarUploadCompleted(avatarUrl));
+    } catch (e) {
+      emit(ProfileError(
+        message: 'Failed to upload avatar: $e',
+        errorCode: 'AVATAR_UPLOAD_ERROR',
+      ));
+    }
+  }
+
+  /// Handle avatar upload progress (Story 3-2)
+  /// AC4: Upload UI provides progress indicator
+  void _onAvatarUploadProgressed(
+    AvatarUploadProgressed event,
+    Emitter<ProfileState> emit,
+  ) {
+    emit(AvatarUploading(event.progress));
+  }
+
+  /// Get MIME type from file extension
+  String _getMimeType(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      default:
+        return 'image/jpeg';
     }
   }
 }

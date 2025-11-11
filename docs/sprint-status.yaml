@@ -82,7 +82,7 @@ development_status:
   # Epic 3: Viewer Profile & Settings
   epic-3: contexted
   3-1-viewer-profile-management: done
-  3-2-avatar-media-upload-system: ready-for-dev
+  3-2-avatar-media-upload-system: review
   3-3-privacy-settings-and-controls: ready-for-dev
   3-4-notification-preferences: ready-for-dev
   3-5-account-settings-management: ready-for-dev

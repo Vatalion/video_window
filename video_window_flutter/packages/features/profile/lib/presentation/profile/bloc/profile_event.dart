@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'dart:io';
 
 /// Events for profile management
 abstract class ProfileEvent extends Equatable {
@@ -89,4 +90,26 @@ class DeleteUserDataRequested extends ProfileEvent {
 
   @override
   List<Object?> get props => [userId];
+}
+
+/// Upload avatar (Story 3-2)
+class AvatarUploadRequested extends ProfileEvent {
+  final int userId;
+  final File imageFile;
+
+  const AvatarUploadRequested(this.userId, this.imageFile);
+
+  @override
+  List<Object?> get props => [userId, imageFile];
+}
+
+/// Avatar upload progress (Story 3-2)
+class AvatarUploadProgressed extends ProfileEvent {
+  final int userId;
+  final double progress;
+
+  const AvatarUploadProgressed(this.userId, this.progress);
+
+  @override
+  List<Object?> get props => [userId, progress];
 }
