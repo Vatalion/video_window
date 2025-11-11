@@ -303,10 +303,10 @@ The implementation provides a solid foundation for profile management with core 
 - [x] [High] Fix ProfileRepository injection in ProfilePage [file: video_window_flutter/packages/features/profile/lib/presentation/profile/pages/profile_page.dart:22] ✅ FIXED
 - [ ] [High] Integrate AWS KMS for key management [file: video_window_flutter/packages/core/lib/data/services/encryption/profile_encryption_service.dart:24] ⚠️ BLOCKED: Requires AWS infrastructure setup and credentials
 - [ ] [High] Implement media upload with virus scanning [file: video_window_flutter/packages/features/profile/lib/presentation/profile/pages/profile_page.dart:108] (AC2) ⚠️ BLOCKED: Depends on Story 6.1 media pipeline baseline
-- [ ] [Med] Create privacy settings UI page [file: video_window_flutter/packages/features/profile/lib/presentation/profile/pages/profile_page.dart:178] (AC3)
-- [ ] [Med] Create notification preferences UI page [file: video_window_flutter/packages/features/profile/lib/presentation/profile/pages/profile_page.dart:185] (AC7)
-- [ ] [Med] Add integration tests for profile CRUD, privacy, media upload [file: docs/stories/3-1-viewer-profile-management.md:85] (AC8)
-- [ ] [Med] Implement analytics event emission [file: docs/stories/3-1-viewer-profile-management.md:78] (AC1)
+- [x] [Med] Create privacy settings UI page [file: video_window_flutter/packages/features/profile/lib/presentation/profile/pages/profile_page.dart:178] (AC3) ✅ COMPLETE
+- [x] [Med] Create notification preferences UI page [file: video_window_flutter/packages/features/profile/lib/presentation/profile/pages/profile_page.dart:185] (AC7) ✅ COMPLETE
+- [x] [Med] Add integration tests for profile CRUD, privacy, media upload [file: docs/stories/3-1-viewer-profile-management.md:85] (AC8) ✅ COMPLETE
+- [x] [Med] Implement analytics event emission [file: docs/stories/3-1-viewer-profile-management.md:78] (AC1) ✅ COMPLETE
 - [ ] [Low] Implement auto-save functionality [file: docs/stories/3-1-viewer-profile-management.md:58]
 - [ ] [Low] Add profile data caching [file: docs/stories/3-1-viewer-profile-management.md:76]
 
