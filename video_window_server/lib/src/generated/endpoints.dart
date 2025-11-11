@@ -146,6 +146,50 @@ class Endpoints extends _i1.EndpointDispatch {
             params['userId'],
           ),
         ),
+        'completeVerificationTask': _i1.MethodConnector(
+          name: 'completeVerificationTask',
+          params: {
+            'taskId': _i1.ParameterDescription(
+              name: 'taskId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'webhookPayload': _i1.ParameterDescription(
+              name: 'webhookPayload',
+              type: _i1.getType<Map<String, dynamic>>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['capability'] as _i2.CapabilityEndpoint)
+                  .completeVerificationTask(
+            session,
+            params['taskId'],
+            params['webhookPayload'],
+          ),
+        ),
+        'getVerificationTask': _i1.MethodConnector(
+          name: 'getVerificationTask',
+          params: {
+            'taskId': _i1.ParameterDescription(
+              name: 'taskId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['capability'] as _i2.CapabilityEndpoint)
+                  .getVerificationTask(
+            session,
+            params['taskId'],
+          ),
+        ),
       },
     );
     connectors['health'] = _i1.EndpointConnector(

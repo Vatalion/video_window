@@ -2,6 +2,8 @@ capability:
   - getStatus:
   - requestCapability:
   - getRequests:
+  - completeVerificationTask:
+  - getVerificationTask:
 health:
   - check:
 auth:

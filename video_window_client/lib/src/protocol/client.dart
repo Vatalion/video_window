@@ -17,8 +17,10 @@ import 'package:video_window_client/src/protocol/capabilities/capability_request
     as _i4;
 import 'package:video_window_client/src/protocol/capabilities/capability_request.dart'
     as _i5;
-import 'package:video_window_client/src/protocol/greeting.dart' as _i6;
-import 'protocol.dart' as _i7;
+import 'package:video_window_client/src/protocol/capabilities/verification_task.dart'
+    as _i6;
+import 'package:video_window_client/src/protocol/greeting.dart' as _i7;
+import 'protocol.dart' as _i8;
 
 /// Capability endpoint for managing user capability requests and status
 /// Implements Story 2-1: Capability Enablement Request Flow
@@ -66,6 +68,36 @@ class EndpointCapability extends _i1.EndpointRef {
         'capability',
         'getRequests',
         {'userId': userId},
+      );
+
+  /// Complete a verification task (webhook endpoint)
+  ///
+  /// AC3: Persona webhook updates verification_task and toggles identityVerifiedAt when approved
+  /// AC4: Validates webhook signature for security
+  /// AC6: Emits audit event verification.completed with provider metadata, redacting PII
+  ///
+  /// POST /capabilities/tasks/{id}/complete
+  _i2.Future<void> completeVerificationTask(
+    int taskId,
+    Map<String, dynamic> webhookPayload,
+  ) =>
+      caller.callServerEndpoint<void>(
+        'capability',
+        'completeVerificationTask',
+        {
+          'taskId': taskId,
+          'webhookPayload': webhookPayload,
+        },
+      );
+
+  /// Get verification task status
+  ///
+  /// GET /capabilities/tasks/{id}
+  _i2.Future<_i6.VerificationTask?> getVerificationTask(int taskId) =>
+      caller.callServerEndpoint<_i6.VerificationTask?>(
+        'capability',
+        'getVerificationTask',
+        {'taskId': taskId},
       );
 }
 
@@ -378,8 +410,8 @@ class EndpointGreeting extends _i1.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i2.Future<_i6.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i6.Greeting>(
+  _i2.Future<_i7.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i7.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -402,7 +434,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i7.Protocol(),
+          _i8.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,

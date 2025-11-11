@@ -1,10 +1,12 @@
 import 'package:serverpod/serverpod.dart';
 import '../../services/capabilities/capability_service.dart';
+import '../../services/verification_service.dart';
 import '../../services/auth/rate_limit_service.dart';
 import '../../generated/capabilities/capability_status_response.dart';
 import '../../generated/capabilities/capability_request_dto.dart';
 import '../../generated/capabilities/capability_request.dart';
 import '../../generated/capabilities/capability_type.dart';
+import '../../generated/capabilities/verification_task.dart';
 
 /// Capability endpoint for managing user capability requests and status
 /// Implements Story 2-1: Capability Enablement Request Flow
@@ -221,6 +223,73 @@ class CapabilityEndpoint extends Endpoint {
         'Failed to emit analytics event $eventName: $e',
         level: LogLevel.warning,
       );
+    }
+  }
+
+  /// Complete a verification task (webhook endpoint)
+  ///
+  /// AC3: Persona webhook updates verification_task and toggles identityVerifiedAt when approved
+  /// AC4: Validates webhook signature for security
+  /// AC6: Emits audit event verification.completed with provider metadata, redacting PII
+  ///
+  /// POST /capabilities/tasks/{id}/complete
+  Future<void> completeVerificationTask(
+    Session session,
+    int taskId,
+    Map<String, dynamic> webhookPayload,
+  ) async {
+    try {
+      final verificationService = VerificationService(session);
+
+      // Extract webhook payload
+      final provider = webhookPayload['provider'] as String? ?? 'unknown';
+      final status = webhookPayload['status'] as String? ?? 'unknown';
+      final metadata =
+          webhookPayload['metadata'] as Map<String, dynamic>? ?? {};
+      final signature = webhookPayload['signature'] as String?;
+
+      // Complete the verification task
+      await verificationService.completeVerificationTask(
+        taskId: taskId.toString(),
+        provider: provider,
+        status: status,
+        metadata: metadata,
+        webhookSignature: signature,
+      );
+
+      session.log(
+        'Verification task completed via webhook: $taskId, provider: $provider, status: $status',
+        level: LogLevel.info,
+      );
+    } catch (e, stackTrace) {
+      session.log(
+        'Failed to complete verification task $taskId: $e',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// Get verification task status
+  ///
+  /// GET /capabilities/tasks/{id}
+  Future<VerificationTask?> getVerificationTask(
+    Session session,
+    int taskId,
+  ) async {
+    try {
+      final verificationService = VerificationService(session);
+      return await verificationService.getVerificationTask(taskId.toString());
+    } catch (e, stackTrace) {
+      session.log(
+        'Failed to get verification task $taskId: $e',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
     }
   }
 
