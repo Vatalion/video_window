@@ -153,3 +153,57 @@ class FeedPreloadCompleteEvent extends AnalyticsEvent {
   @override
   DateTime get timestamp => DateTime.now();
 }
+
+/// Feed recommendation served event
+/// AC4: DATA QUALITY CRITICAL - Contains algorithm, feed session, and experiment variant IDs
+class FeedRecommendationServedEvent extends AnalyticsEvent {
+  final String videoId;
+  final String algorithm;
+  final String feedSessionId;
+  final String? experimentVariantId;
+
+  FeedRecommendationServedEvent({
+    required this.videoId,
+    required this.algorithm,
+    required this.feedSessionId,
+    this.experimentVariantId,
+  });
+
+  @override
+  String get name => 'feed_recommendation_served';
+
+  @override
+  Map<String, dynamic> get properties => {
+        'video_id': videoId,
+        'algorithm': algorithm,
+        'feed_session_id': feedSessionId,
+        if (experimentVariantId != null)
+          'experiment_variant_id': experimentVariantId,
+      };
+
+  @override
+  DateTime get timestamp => DateTime.now();
+}
+
+/// Feed recommendation error event
+class FeedRecommendationErrorEvent extends AnalyticsEvent {
+  final String videoId;
+  final String error;
+
+  FeedRecommendationErrorEvent({
+    required this.videoId,
+    required this.error,
+  });
+
+  @override
+  String get name => 'feed_recommendation_error';
+
+  @override
+  Map<String, dynamic> get properties => {
+        'video_id': videoId,
+        'error': error,
+      };
+
+  @override
+  DateTime get timestamp => DateTime.now();
+}

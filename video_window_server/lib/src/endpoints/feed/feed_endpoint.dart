@@ -1,5 +1,7 @@
 import 'package:serverpod/serverpod.dart';
+
 import '../../services/feed_service.dart';
+import 'interaction_endpoint.dart';
 
 /// Feed endpoint for video feed operations
 /// AC1, AC2: Feed pagination and video retrieval
@@ -50,6 +52,7 @@ class FeedEndpoint extends Endpoint {
   }
 
   /// Record video interaction
+  /// AC3 (Story 4-5): Delegates to interaction endpoint for Kafka streaming
   /// AC8: Track engagement metrics
   Future<Map<String, dynamic>> recordInteraction(
     Session session, {
@@ -60,19 +63,16 @@ class FeedEndpoint extends Endpoint {
     Map<String, dynamic>? metadata,
   }) async {
     try {
-      final feedService = FeedService(session);
-      await feedService.recordInteraction(
+      // AC3: Use interaction endpoint for Kafka streaming
+      final interactionEndpoint = InteractionEndpoint();
+      return await interactionEndpoint.recordInteraction(
+        session,
         userId: userId,
         videoId: videoId,
-        interaction: interaction,
+        interactionType: interaction,
         watchTime: watchTime,
         metadata: metadata,
       );
-
-      return {
-        'success': true,
-        'interactionId': '${DateTime.now().millisecondsSinceEpoch}',
-      };
     } catch (e) {
       session.log(
         'Failed to record interaction: $e',

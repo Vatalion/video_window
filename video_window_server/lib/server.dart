@@ -5,6 +5,7 @@ import 'package:video_window_server/src/web/routes/root.dart';
 
 import 'src/generated/protocol.dart';
 import 'src/generated/endpoints.dart';
+import 'src/tasks/feed_lightfm_retrain.dart';
 
 // This is the starting point of your Serverpod server. In most cases, you will
 // only need to make additions to this file if you add future calls,  are
@@ -38,6 +39,16 @@ void run(List<String> args) async {
     FutureCallNames.birthdayReminder.name,
   );
 
+  // AC5 (Story 4-5): Register LightFM retraining job
+  // Schedule nightly at 02:00 UTC via cron or scheduled future call
+  pod.registerFutureCall(
+    FeedLightFMRetrain(),
+    FutureCallNames.feedLightFMRetrain.name,
+  );
+
+  // AC5: Schedule initial LightFM retraining job for next 02:00 UTC
+  await _scheduleLightFMRetrain(pod);
+
   // You can schedule future calls for a later time during startup. But you can
   // also schedule them in any endpoint or webroute through the session object.
   // there is also [futureCallAtTime] if you want to schedule a future call at a
@@ -53,8 +64,43 @@ void run(List<String> args) async {
   );
 }
 
+/// Schedule LightFM retraining job for next 02:00 UTC
+/// AC5: Nightly retraining at 02:00 UTC
+Future<void> _scheduleLightFMRetrain(Serverpod pod) async {
+  final now = DateTime.now().toUtc();
+  var nextRun = DateTime.utc(
+    now.year,
+    now.month,
+    now.day,
+    2, // 02:00 UTC
+    0,
+    0,
+  );
+
+  // If 02:00 UTC has already passed today, schedule for tomorrow
+  if (nextRun.isBefore(now) || nextRun.isAtSameMomentAs(now)) {
+    nextRun = nextRun.add(const Duration(days: 1));
+  }
+
+  await pod.futureCallAtTime(
+    FutureCallNames.feedLightFMRetrain.name,
+    Greeting(
+      message: 'LightFM Retrain',
+      author: 'System',
+      timestamp: DateTime.now(),
+    ),
+    nextRun,
+  );
+
+  // Log scheduling via server startup log
+  // Note: In production, this would be logged via Serverpod's logging system
+}
+
 /// Names of all future calls in the server.
 ///
 /// This is better than using a string literal, as it will reduce the risk of
 /// typos and make it easier to refactor the code.
-enum FutureCallNames { birthdayReminder }
+enum FutureCallNames {
+  birthdayReminder,
+  feedLightFMRetrain,
+}
