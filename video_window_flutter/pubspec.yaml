@@ -33,6 +33,8 @@ dependencies:
     path: packages/core
   shared:
     path: packages/shared
+  profile:
+    path: packages/features/profile
 
   # Navigation
   go_router: ^14.6.2

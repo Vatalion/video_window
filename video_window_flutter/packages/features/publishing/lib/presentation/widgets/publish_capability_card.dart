@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/design_system/tokens.dart';
+import 'package:profile/presentation/capability_center/bloc/capability_center_bloc.dart';
+import 'package:profile/presentation/capability_center/bloc/capability_center_event.dart';
+import 'package:profile/presentation/capability_center/bloc/capability_center_state.dart';
 import 'persona_verification_widget.dart';
 
 /// Inline prompt card in publish flow when capability is missing
 ///
 /// AC1: Displays inline verification card summarizing blockers and primary CTA
 /// AC2: Launches Persona verification from the card with proper branding
+/// AC3: Listens to capability changes and updates UI when publish capability is enabled
 /// AC4: Handles error states (rejected, timeout, cancelled) with actionable messaging
+///
+/// Story 2-2 Fix: Now integrates with CapabilityCenterBloc to auto-update when capability is enabled
 class PublishCapabilityCard extends StatefulWidget {
+  final int userId;
   final String? draftId;
   final String? capabilityRequestId;
   final VoidCallback onRequestCapability;
@@ -18,6 +26,7 @@ class PublishCapabilityCard extends StatefulWidget {
 
   const PublishCapabilityCard({
     super.key,
+    required this.userId,
     this.draftId,
     this.capabilityRequestId,
     required this.onRequestCapability,
@@ -35,35 +44,91 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
   String?
       _verificationStatus; // 'not_started', 'in_progress', 'completed', 'rejected'
   String? _errorMessage;
+  bool _isPolling = false;
+
+  @override
+  void dispose() {
+    // Stop polling when widget is disposed
+    if (_isPolling) {
+      context
+          .read<CapabilityCenterBloc>()
+          .add(CapabilityCenterPollingStopped());
+    }
+    super.dispose();
+  }
+
+  /// Start polling for capability updates
+  ///
+  /// AC3: Start polling when verification is in progress to detect when capability is enabled
+  void _startPolling() {
+    if (!_isPolling) {
+      context
+          .read<CapabilityCenterBloc>()
+          .add(CapabilityCenterPollingStarted(widget.userId));
+      setState(() {
+        _isPolling = true;
+      });
+    }
+  }
+
+  /// Stop polling for capability updates
+  void _stopPolling() {
+    if (_isPolling) {
+      context
+          .read<CapabilityCenterBloc>()
+          .add(CapabilityCenterPollingStopped());
+      setState(() {
+        _isPolling = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: _getBorderColor(),
-          width: 2,
-        ),
-      ),
-      child: Card(
-        elevation: AppElevation.md,
-        margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
+    // AC3: Listen to capability changes - when canPublish becomes true, notify parent
+    return BlocListener<CapabilityCenterBloc, CapabilityCenterState>(
+      listener: (context, state) {
+        if (state is CapabilityCenterLoaded) {
+          // If publish capability is now enabled and we were in progress, mark as completed
+          if (state.canPublish &&
+              (_verificationStatus == 'in_progress' || _isPolling)) {
+            setState(() {
+              _verificationStatus = 'completed';
+            });
+            _stopPolling();
+            widget.onVerificationStatusChanged?.call('completed');
+            // Optionally auto-dismiss the card
+            widget.onDismiss?.call();
+          }
+        }
+      },
+      child: Container(
+        margin: EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(
+            color: _getBorderColor(),
+            width: 2,
+          ),
         ),
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              SizedBox(height: AppSpacing.lg),
-              _buildBlockersList(),
-              SizedBox(height: AppSpacing.lg),
-              _buildActionSection(),
-            ],
+        child: Card(
+          elevation: AppElevation.md,
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(),
+                SizedBox(height: AppSpacing.lg),
+                _buildBlockersList(),
+                SizedBox(height: AppSpacing.lg),
+                _buildActionSection(),
+              ],
+            ),
           ),
         ),
       ),
@@ -242,6 +307,8 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
           setState(() {
             _verificationStatus = 'in_progress';
           });
+          // AC3: Start polling to detect when capability is enabled
+          _startPolling();
           widget.onVerificationStatusChanged?.call('in_progress');
         },
         onVerificationCompleted: (status, metadata) {
@@ -252,6 +319,8 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
                   'Verification was not approved. Please try again or contact support.';
             }
           });
+          // Stop polling on completion (success or failure)
+          _stopPolling();
           widget.onVerificationStatusChanged?.call(status);
         },
         onError: (error) {
@@ -259,6 +328,7 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
             _verificationStatus = 'failed';
             _errorMessage = error;
           });
+          _stopPolling();
           widget.onVerificationStatusChanged?.call('failed');
         },
       );
@@ -287,6 +357,8 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
       _verificationStatus = null;
       _errorMessage = null;
     });
+    // Reset polling state for retry
+    _stopPolling();
     widget.onRequestCapability();
   }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:core/data/services/capabilities/capability_service.dart';
+import 'package:video_window_client/video_window_client.dart';
 import 'capability_center_event.dart';
 import 'capability_center_state.dart';
 
@@ -142,23 +143,27 @@ class CapabilityCenterBloc
   }
 
   /// Map API response to state
+  ///
+  /// AC3: Maps server response to state, including capability flags and timestamps
+  /// Story 2-2 Fix: Now uses actual CapabilityStatusResponse instead of hardcoded values
   CapabilityCenterLoaded _mapStatusToState(
     dynamic status,
     int userId, {
     bool isPolling = false,
   }) {
-    // TODO: Replace with proper typed response after client generation
-    // For now, using dynamic placeholder
+    // Cast to typed response
+    final typedStatus = status as CapabilityStatusResponse;
+
     return CapabilityCenterLoaded(
       userId: userId,
-      canPublish: false, // status.canPublish
-      canCollectPayments: false, // status.canCollectPayments
-      canFulfillOrders: false, // status.canFulfillOrders
-      identityVerifiedAt: null, // status.identityVerifiedAt
-      payoutConfiguredAt: null, // status.payoutConfiguredAt
-      fulfillmentEnabledAt: null, // status.fulfillmentEnabledAt
-      reviewState: 'none', // status.reviewState
-      blockers: {}, // status.blockers
+      canPublish: typedStatus.canPublish,
+      canCollectPayments: typedStatus.canCollectPayments,
+      canFulfillOrders: typedStatus.canFulfillOrders,
+      identityVerifiedAt: typedStatus.identityVerifiedAt,
+      payoutConfiguredAt: typedStatus.payoutConfiguredAt,
+      fulfillmentEnabledAt: typedStatus.fulfillmentEnabledAt,
+      reviewState: typedStatus.reviewState.name,
+      blockers: typedStatus.blockers,
       isPolling: isPolling,
     );
   }

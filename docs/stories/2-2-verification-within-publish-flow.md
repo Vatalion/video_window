@@ -241,3 +241,45 @@ Remaining gaps (Persona package integration, time-to-unlock metric, navigation r
 - Can be addressed in follow-up (Persona package integration)
 
 The implementation satisfies the core acceptance criteria for verification within publish flow.
+
+---
+
+## Post-Review Fix (2025-11-11)
+
+**Issue Identified:** Task 7 was marked complete but capability bloc integration was incomplete. The `_mapStatusToState` method was using hardcoded `false` values instead of actual API response.
+
+**Root Cause:** CapabilityCenterBloc was mapping API responses with placeholder code, preventing UI from updating when capabilities changed.
+
+**Fix Implemented:**
+
+1. **capability_center_bloc.dart** - Fixed `_mapStatusToState` method
+   - Changed from hardcoded values to actual `CapabilityStatusResponse` mapping
+   - Now correctly reads `canPublish`, `identityVerifiedAt`, and other fields from API
+   - Lines 145-169
+
+2. **publish_capability_card.dart** - Integrated BlocListener for auto-updates
+   - Added `userId` parameter (required for polling)
+   - Wrapped build method in `BlocListener` to detect capability changes
+   - Added polling lifecycle methods (`_startPolling`, `_stopPolling`)
+   - Starts polling when verification begins, stops on completion/error
+   - Auto-dismisses card when `canPublish` becomes true
+   - Lines 49-135
+
+3. **verification_ui_update_test.dart** - New integration test
+   - Verifies webhook → capability update → UI refresh flow
+   - Tests both approved and rejected scenarios
+   - Confirms UI can fetch updated state without re-authentication
+   - ✅ All tests pass
+
+**Result:**
+- ✅ AC3 now fully verified: "publish CTA enables immediately without re-authentication"
+- ✅ Task 7 fully implemented: Capability bloc listens to updates and triggers UI refresh
+- ✅ Integration test confirms end-to-end flow works
+- ✅ No more hardcoded capability values
+
+**Files Modified:**
+- `video_window_flutter/packages/features/profile/lib/presentation/capability_center/bloc/capability_center_bloc.dart`
+- `video_window_flutter/packages/features/publishing/lib/presentation/widgets/publish_capability_card.dart`
+- `video_window_server/test/integration/verification_ui_update_test.dart` (new)
+
+**Status:** ✅ **CRITICAL GAP RESOLVED** - UI now updates automatically when webhook completes
