@@ -11,6 +11,9 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   final FeedRepository _repository;
   final String? _userId;
 
+  // Expose repository for use cases
+  FeedRepository get repository => _repository;
+
   // PERF-005: Stream subscription management
   final List<StreamSubscription> _subscriptions = [];
 
@@ -30,6 +33,8 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     on<FeedToggleLike>(_onToggleLike);
     on<FeedToggleWishlist>(_onToggleWishlist);
     on<FeedBatterySaverModeChanged>(_onBatterySaverModeChanged); // AC5
+    on<FeedPreferencesUpdated>(
+        _onPreferencesUpdated); // AC1: Handle preference updates
   }
 
   @override
@@ -285,5 +290,46 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       isBatterySaverMode: event.isBatterySaverMode,
       videoPlaybackStates: newPlaybackStates,
     ));
+  }
+
+  /// AC1: Handle feed preferences updated
+  /// Refreshes feed state when preferences change and adjusts preload strategy
+  Future<void> _onPreferencesUpdated(
+    FeedPreferencesUpdated event,
+    Emitter<FeedState> emit,
+  ) async {
+    final currentState = state;
+
+    // AC1: Refresh feed with new preferences
+    // Preferences should reflect in feed within 2 swipes (<1 second)
+    emit(const FeedLoading());
+
+    try {
+      final result = await _repository.fetchFeedPage(
+        userId: _userId,
+        algorithm: event.configuration.algorithm,
+        preferredTags: event.configuration.preferredTags.isNotEmpty
+            ? event.configuration.preferredTags
+            : null,
+        // Blocked makers are filtered on backend
+      );
+
+      emit(FeedLoaded(
+        videos: result.videos,
+        nextCursor: result.nextCursor,
+        hasMore: result.hasMore,
+      ));
+    } catch (e) {
+      // If refresh fails, restore previous state
+      if (currentState is FeedLoaded) {
+        emit(currentState);
+      } else {
+        emit(FeedError(
+          message:
+              'Failed to refresh feed with new preferences: ${e.toString()}',
+          exception: e is Exception ? e : Exception(e.toString()),
+        ));
+      }
+    }
   }
 }

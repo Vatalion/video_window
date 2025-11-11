@@ -31,11 +31,13 @@ class RecommendationBridgeService {
   /// Get personalized recommendations from LightFM service
   /// AC1: gRPC deadline 150ms, retries capped at 2
   /// AC2: Falls back to trending feed on error or timeout
+  /// AC5: Includes user-configured tags and blocked makers in payload
   Future<List<String>> getRecommendations({
     required String userId,
     int limit = 20,
     List<String>? excludeVideoIds,
     List<String>? preferredTags,
+    List<String>? blockedMakers,
   }) async {
     // Check circuit breaker
     if (_circuitOpen) {
@@ -56,6 +58,7 @@ class RecommendationBridgeService {
         limit: limit,
         excludeVideoIds: excludeVideoIds,
         preferredTags: preferredTags,
+        blockedMakers: blockedMakers,
       );
 
       // Reset failure counter on success
@@ -81,11 +84,13 @@ class RecommendationBridgeService {
 
   /// Call LightFM gRPC service with retry logic
   /// AC1: Deadline 150ms, max retries 2
+  /// AC5: Includes blocked makers in request payload
   Future<List<String>> _callLightFMService({
     required String userId,
     required int limit,
     List<String>? excludeVideoIds,
     List<String>? preferredTags,
+    List<String>? blockedMakers,
   }) async {
     // TODO: Configure actual gRPC channel endpoint from environment/config
     // For now, using placeholder - will be configured via environment variables
@@ -119,11 +124,13 @@ class RecommendationBridgeService {
         // );
 
         // TODO: Replace with actual gRPC call when proto files are available
+        // AC5: Include blocked makers in request payload
         // final request = GetRecommendationsRequest(
         //   userId: userId,
         //   limit: limit,
         //   excludeVideoIds: excludeVideoIds ?? [],
         //   preferredTags: preferredTags ?? [],
+        //   blockedMakers: blockedMakers ?? [], // AC5: Include blocked makers
         // );
         // final response = await stub.getRecommendations(request, options: callOptions);
         // return response.videoIds;

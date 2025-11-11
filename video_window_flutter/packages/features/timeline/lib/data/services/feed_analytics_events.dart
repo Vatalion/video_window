@@ -207,3 +207,70 @@ class FeedRecommendationErrorEvent extends AnalyticsEvent {
   @override
   DateTime get timestamp => DateTime.now();
 }
+
+/// Feed preferences updated event
+/// AC5: Emits Segment + Datadog events for preference updates with diff metadata and experiment variants
+class FeedPreferencesUpdatedEvent extends AnalyticsEvent {
+  final String userId;
+  final List<String> changedFields;
+  final bool autoPlayEnabled;
+  final bool reducedMotion;
+  final String algorithm;
+  final String sessionId;
+  final String? experimentVariantId;
+
+  FeedPreferencesUpdatedEvent({
+    required this.userId,
+    required this.changedFields,
+    required this.autoPlayEnabled,
+    required this.reducedMotion,
+    required this.algorithm,
+    required this.sessionId,
+    this.experimentVariantId,
+  });
+
+  @override
+  String get name => 'feed_preferences_updated';
+
+  @override
+  Map<String, dynamic> get properties => {
+        'user_id': userId,
+        'changed_fields': changedFields,
+        'auto_play_enabled': autoPlayEnabled,
+        'reduced_motion': reducedMotion,
+        'algorithm': algorithm,
+        'session_id': sessionId,
+        if (experimentVariantId != null)
+          'experiment_variant_id': experimentVariantId,
+      };
+
+  @override
+  DateTime get timestamp => DateTime.now();
+}
+
+/// Feed accessibility toggled event
+/// AC7: Ensures accessibility toggles recorded for WCAG reporting dashboard
+class FeedAccessibilityToggledEvent extends AnalyticsEvent {
+  final String userId;
+  final bool showCaptions;
+  final bool reducedMotion;
+
+  FeedAccessibilityToggledEvent({
+    required this.userId,
+    required this.showCaptions,
+    required this.reducedMotion,
+  });
+
+  @override
+  String get name => 'feed_accessibility_toggled';
+
+  @override
+  Map<String, dynamic> get properties => {
+        'user_id': userId,
+        'show_captions': showCaptions,
+        'reduced_motion': reducedMotion,
+      };
+
+  @override
+  DateTime get timestamp => DateTime.now();
+}

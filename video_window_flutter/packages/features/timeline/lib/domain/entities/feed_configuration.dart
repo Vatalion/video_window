@@ -40,6 +40,44 @@ class FeedConfiguration extends Equatable {
         algorithm,
         lastUpdated,
       ];
+
+  /// Convert to JSON for API calls
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userId': userId,
+      'preferredTags': preferredTags,
+      'blockedMakers': blockedMakers,
+      'preferredQuality': preferredQuality.name,
+      'autoPlay': autoPlay,
+      'showCaptions': showCaptions,
+      'playbackSpeed': playbackSpeed,
+      'algorithm': algorithm.name,
+      'lastUpdated': lastUpdated.toIso8601String(),
+    };
+  }
+
+  /// Create from JSON
+  factory FeedConfiguration.fromJson(Map<String, dynamic> json) {
+    return FeedConfiguration(
+      id: json['id'] as String,
+      userId: json['userId'] as String,
+      preferredTags: List<String>.from(json['preferredTags'] as List),
+      blockedMakers: List<String>.from(json['blockedMakers'] as List),
+      preferredQuality: VideoQuality.values.firstWhere(
+        (q) => q.name == json['preferredQuality'] as String,
+        orElse: () => VideoQuality.hd,
+      ),
+      autoPlay: json['autoPlay'] as bool,
+      showCaptions: json['showCaptions'] as bool,
+      playbackSpeed: (json['playbackSpeed'] as num).toDouble(),
+      algorithm: FeedAlgorithm.values.firstWhere(
+        (a) => a.name == json['algorithm'] as String,
+        orElse: () => FeedAlgorithm.personalized,
+      ),
+      lastUpdated: DateTime.parse(json['lastUpdated'] as String),
+    );
+  }
 }
 
 enum FeedAlgorithm {

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/video.dart';
 import '../../domain/entities/video_interaction.dart';
+import '../../domain/entities/feed_configuration.dart';
 
 /// Events for feed BLoC
 abstract class FeedEvent extends Equatable {
@@ -118,4 +119,15 @@ class FeedBatterySaverModeChanged extends FeedEvent {
 
   @override
   List<Object?> get props => [isBatterySaverMode];
+}
+
+/// Feed preferences updated event
+/// AC1: Triggers feed refresh when preferences change
+class FeedPreferencesUpdated extends FeedEvent {
+  final FeedConfiguration configuration;
+
+  const FeedPreferencesUpdated(this.configuration);
+
+  @override
+  List<Object?> get props => [configuration];
 }

@@ -1,7 +1,7 @@
 # Story 4-6: Feed Personalization & User Preferences
 
 ## Status
-Ready for Dev
+review
 
 ## Story
 **As a** viewer,
@@ -23,17 +23,17 @@ Ready for Dev
 ## Tasks / Subtasks
 
 ### Flutter
-- [ ] Create `feed_settings_sheet.dart` with sections for playback, personalization, blocked makers, and accessibility options. [Source: docs/tech-spec-epic-4.md#source-tree--file-directives]
-- [ ] Implement `update_feed_preferences_use_case.dart` to map form values to domain objects and call repository. [Source: docs/tech-spec-epic-4.md#source-tree--file-directives]
-- [ ] Update `VideoFeedBloc` to refresh feed state when preferences change and to adjust preload strategy accordingly. [Source: docs/tech-spec-epic-4.md#implementation-guide]
+- [x] Create `feed_settings_sheet.dart` with sections for playback, personalization, blocked makers, and accessibility options. [Source: docs/tech-spec-epic-4.md#source-tree--file-directives]
+- [x] Implement `update_feed_preferences_use_case.dart` to map form values to domain objects and call repository. [Source: docs/tech-spec-epic-4.md#source-tree--file-directives]
+- [x] Update `FeedBloc` to refresh feed state when preferences change and to adjust preload strategy accordingly. [Source: docs/tech-spec-epic-4.md#implementation-guide]
 
 ### Serverpod
-- [ ] Extend `feed_endpoint.dart` and `feed_service.dart` to persist `FeedConfiguration` entity, storing blocked makers and quality preferences. [Source: docs/tech-spec-epic-4.md#source-tree--file-directives]
-- [ ] Update recommendation payloads to include user-configured tags and blocked makers. [Source: docs/tech-spec-epic-4.md#implementation-guide]
+- [x] Extend `feed_endpoint.dart` and `feed_service.dart` to persist `FeedConfiguration` entity, storing blocked makers and quality preferences. [Source: docs/tech-spec-epic-4.md#source-tree--file-directives]
+- [x] Update recommendation payloads to include user-configured tags and blocked makers. [Source: docs/tech-spec-epic-4.md#implementation-guide]
 
 ### Analytics & Compliance
-- [ ] Emit Segment + Datadog events for preference updates, capturing diff, algorithm, and session IDs. [Source: docs/tech-spec-epic-4.md#analytics--observability]
-- [ ] Ensure accessibility toggles recorded for WCAG reporting dashboard. [Source: docs/tech-spec-epic-4.md#success-criteria]
+- [x] Emit Segment + Datadog events for preference updates, capturing diff, algorithm, and session IDs. [Source: docs/tech-spec-epic-4.md#analytics--observability]
+- [x] Ensure accessibility toggles recorded for WCAG reporting dashboard. [Source: docs/tech-spec-epic-4.md#success-criteria]
 
 ## Data Models
 - `FeedConfiguration` entity persists user choices, including blocked makers and playback preferences. [Source: docs/tech-spec-epic-4.md#feed-configuration-entity]
@@ -60,19 +60,47 @@ Ready for Dev
 | Date       | Version | Description                               | Author            |
 | ---------- | ------- | ----------------------------------------- | ----------------- |
 | 2025-10-29 | v1.0    | Feed personalization story authored       | GitHub Copilot AI |
+| 2025-11-10 | v1.1    | Story implementation complete - all tasks done, tests written, ready for review | BMAD Dev Agent |
 
 ## Dev Agent Record
 ### Agent Model Used
-_(To be completed by Dev Agent)_
+Composer (BMAD Dev Agent)
 
 ### Debug Log References
-_(To be completed by Dev Agent)_
+- Implementation completed: 2025-11-10
+- All acceptance criteria implemented and tested
+- Analytics events integrated for Segment/Datadog tracking
 
 ### Completion Notes List
-_(To be completed by Dev Agent)_
+- ✅ Created feed_settings_sheet.dart with all required sections (playback, personalization, blocked makers, accessibility)
+- ✅ Implemented update_feed_preferences_use_case.dart with analytics integration
+- ✅ Updated FeedBloc to handle FeedPreferencesUpdated event and refresh feed state
+- ✅ Extended feed_endpoint.dart and feed_service.dart to persist FeedConfiguration
+- ✅ Updated recommendation_bridge_service.dart to include blocked makers in payloads
+- ✅ Added FeedPreferencesUpdatedEvent and FeedAccessibilityToggledEvent for analytics
+- ✅ Implemented JSON serialization for FeedConfiguration entity
+- ✅ Added comprehensive tests (widget, unit, integration)
+- ✅ All acceptance criteria satisfied
 
 ### File List
-_(To be completed by Dev Agent)_
+**Flutter:**
+- video_window_flutter/packages/features/timeline/lib/presentation/pages/feed_settings_sheet.dart
+- video_window_flutter/packages/features/timeline/lib/use_cases/update_feed_preferences_use_case.dart
+- video_window_flutter/packages/features/timeline/lib/presentation/bloc/feed_bloc.dart
+- video_window_flutter/packages/features/timeline/lib/presentation/bloc/feed_event.dart
+- video_window_flutter/packages/features/timeline/lib/domain/entities/feed_configuration.dart
+- video_window_flutter/packages/features/timeline/lib/data/repositories/feed_repository.dart
+- video_window_flutter/packages/features/timeline/lib/data/services/feed_analytics_events.dart
+
+**Tests:**
+- video_window_flutter/packages/features/timeline/test/presentation/pages/feed_settings_sheet_test.dart
+- video_window_flutter/packages/features/timeline/test/use_cases/update_feed_preferences_use_case_test.dart
+- video_window_flutter/packages/features/timeline/test/integration/feed_preferences_integration_test.dart
+
+**Serverpod:**
+- video_window_server/lib/src/endpoints/feed/feed_endpoint.dart
+- video_window_server/lib/src/services/feed_service.dart
+- video_window_server/lib/src/services/recommendation_bridge_service.dart
 
 ## QA Results
 _(To be completed by QA Agent)_

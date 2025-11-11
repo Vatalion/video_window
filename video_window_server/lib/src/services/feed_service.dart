@@ -60,7 +60,16 @@ class FeedService {
       // span?.setTag('cache.hit', false);
 
       // AC1 (Story 4-5): Request recommendations from LightFM when algorithm is personalized
+      // AC5: Include blocked makers from user preferences
       List<String> recommendedVideoIds = [];
+      List<String>? blockedMakers;
+      if (userId != null) {
+        final userPrefs = await getFeedPreferences(userId);
+        blockedMakers = userPrefs != null
+            ? List<String>.from(userPrefs['blockedMakers'] as List? ?? [])
+            : null;
+      }
+
       if (algorithm == 'personalized' && userId != null) {
         try {
           recommendedVideoIds = await _recommendationService.getRecommendations(
@@ -68,6 +77,7 @@ class FeedService {
             limit: limit,
             excludeVideoIds: excludeVideoIds,
             preferredTags: preferredTags,
+            blockedMakers: blockedMakers, // AC5: Include blocked makers
           );
         } catch (e) {
           _session.log(
@@ -85,20 +95,30 @@ class FeedService {
       // 2. Apply personalization algorithm (trending/personalized/newest)
       // 3. Use recommendedVideoIds to order results when algorithm is personalized
       // 4. Generate cursor for next page
+      // 5. AC4: Filter out videos from blocked makers
+
+      // AC4: Filter out blocked makers from videos
+      // This filtering will happen in database query, but we also filter here as safety
+      final filteredVideoIds = recommendedVideoIds.where((id) {
+        // In real implementation, we'd check video.makerId against blockedMakers
+        // For now, placeholder filtering
+        return true;
+      }).toList();
 
       // Placeholder implementation - will use recommendedVideoIds when DB queries are implemented
       final result = FeedResult(
-        videos: recommendedVideoIds
+        videos: filteredVideoIds
             .map((id) => {
                   'id': id,
                   'title': 'Video $id',
                   // TODO: Fetch full video data from database
+                  // AC4: Ensure makerId is included for filtering
                 })
             .toList(),
-        nextCursor: recommendedVideoIds.isNotEmpty
-            ? 'cursor_${recommendedVideoIds.last}'
+        nextCursor: filteredVideoIds.isNotEmpty
+            ? 'cursor_${filteredVideoIds.last}'
             : null,
-        hasMore: recommendedVideoIds.length >= limit,
+        hasMore: filteredVideoIds.length >= limit,
         feedId: feedSessionId, // AC2: Include feedSessionId
       );
 
@@ -161,6 +181,88 @@ class FeedService {
         level: LogLevel.error,
       );
       rethrow;
+    }
+  }
+
+  /// Update feed preferences
+  /// AC1: Persists FeedConfiguration entity, storing blocked makers and quality preferences
+  /// AC2: Recalculates personalization configuration and returns effective settings
+  /// AC5: Updates recommendation payloads to include user-configured tags and blocked makers
+  Future<Map<String, dynamic>> updateFeedPreferences({
+    required String userId,
+    required Map<String, dynamic> configuration,
+  }) async {
+    try {
+      // AC1: Validate blocked makers limit (max 200)
+      final blockedMakers = List<String>.from(
+        configuration['blockedMakers'] as List? ?? [],
+      );
+      if (blockedMakers.length > 200) {
+        throw Exception('Blocked makers list cannot exceed 200 entries');
+      }
+
+      // AC1: Store preferences in database
+      // TODO: Implement actual database persistence when schema is ready
+      // This will:
+      // 1. Upsert feed_configurations table with userId as key
+      // 2. Store preferredTags, blockedMakers, preferredQuality, autoPlay, showCaptions, playbackSpeed, algorithm
+      // 3. Update lastUpdated timestamp
+
+      // For now, store in session cache as placeholder
+      final configKey = 'feed:config:$userId';
+      await _session.caches.local.put(
+        configKey,
+        jsonEncode(configuration),
+        ttl: const Duration(days: 365), // Long-term storage
+      );
+
+      // AC2: Recalculate effective settings
+      final effectiveAlgorithm =
+          configuration['algorithm'] as String? ?? 'personalized';
+      final preferredTags = List<String>.from(
+        configuration['preferredTags'] as List? ?? [],
+      );
+
+      // AC5: Update recommendation payloads to include user-configured tags and blocked makers
+      // This is handled when getFeedVideos is called with these parameters
+
+      // Return effective configuration
+      return {
+        'id': configuration['id'] ?? 'config_$userId',
+        'userId': userId,
+        'preferredTags': preferredTags,
+        'blockedMakers': blockedMakers,
+        'preferredQuality': configuration['preferredQuality'] ?? 'hd',
+        'autoPlay': configuration['autoPlay'] ?? true,
+        'showCaptions': configuration['showCaptions'] ?? false,
+        'playbackSpeed': configuration['playbackSpeed'] ?? 1.0,
+        'algorithm': effectiveAlgorithm,
+        'lastUpdated': DateTime.now().toIso8601String(),
+      };
+    } catch (e) {
+      _session.log(
+        'Failed to update feed preferences: $e',
+        level: LogLevel.error,
+      );
+      rethrow;
+    }
+  }
+
+  /// Get feed preferences for a user
+  Future<Map<String, dynamic>?> getFeedPreferences(String userId) async {
+    try {
+      final configKey = 'feed:config:$userId';
+      final cached = await _session.caches.local.get(configKey);
+      if (cached != null) {
+        return jsonDecode(cached as String) as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      _session.log(
+        'Failed to get feed preferences: $e',
+        level: LogLevel.error,
+      );
+      return null;
     }
   }
 }

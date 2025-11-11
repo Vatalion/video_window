@@ -83,21 +83,31 @@ class FeedEndpoint extends Endpoint {
   }
 
   /// Update feed preferences
+  /// AC1: Persists FeedConfiguration entity, storing blocked makers and quality preferences
+  /// AC2: Returns effective settings plus algorithm being used
   Future<Map<String, dynamic>> updatePreferences(
     Session session, {
     required String userId,
     required Map<String, dynamic> configuration,
   }) async {
     try {
-      // TODO: Implement preference updates
-      // Will:
-      // 1. Store preferences in database
-      // 2. Invalidate recommendation cache
+      final feedService = FeedService(session);
+      final result = await feedService.updateFeedPreferences(
+        userId: userId,
+        configuration: configuration,
+      );
 
+      // AC2: Return effective settings plus algorithm
       return {
         'success': true,
+        'configuration': result,
+        'effectiveAlgorithm': result['algorithm'] ?? 'personalized',
       };
     } catch (e) {
+      session.log(
+        'Failed to update preferences: $e',
+        level: LogLevel.error,
+      );
       throw Exception('Failed to update preferences: $e');
     }
   }
