@@ -1,0 +1,8 @@
+{
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "default_model": "gemini-3-pro-preview-11-2025"
+}

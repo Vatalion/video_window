@@ -68,7 +68,12 @@ class StoryToggleLike extends StoryEvent {
 
 /// Event to toggle save/wishlist
 class StoryToggleSave extends StoryEvent {
-  const StoryToggleSave();
+  final String ctaSurface;
+
+  const StoryToggleSave({required this.ctaSurface});
+
+  @override
+  List<Object?> get props => [ctaSurface];
 }
 
 /// Event to follow maker

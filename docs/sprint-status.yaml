@@ -102,7 +102,7 @@ development_status:
   epic-5: contexted
   5-1-story-detail-page-implementation: review
   5-2-accessible-playback-transcripts: review
-  5-3-share-save-functionality: ready-for-dev
+  5-3-share-save-functionality: review
   epic-5-retrospective: optional
 
   # Epic 6: Content Pipeline & Security

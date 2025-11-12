@@ -87,11 +87,12 @@ class StoryBloc extends Bloc<StoryEvent, StoryState> {
     if (currentState is! StoryLoaded) return;
 
     try {
-      await _shareUseCase.execute(
+      final shareResponse = await _shareUseCase.execute(
         storyId: currentState.story.id,
         channel: event.channel,
         customMessage: event.customMessage,
       );
+      emit(StoryShareReady(shareResponse));
     } catch (e) {
       emit(StoryError(
         message: 'Failed to share story: ${e.toString()}',
@@ -117,17 +118,29 @@ class StoryBloc extends Bloc<StoryEvent, StoryState> {
     final currentState = state;
     if (currentState is! StoryLoaded) return;
 
+    final newSaveState = !currentState.isSaved;
+
+    // Emit optimistic state
+    final optimisticState = currentState.copyWith(
+      isSaved: newSaveState,
+      // Keep wishlistId while unsaving for potential rollback, it will be cleared on success
+    );
+    emit(optimisticState);
+
     try {
-      await _saveUseCase.execute(
+      final wishlistId = await _saveUseCase.execute(
         storyId: currentState.story.id,
-        saveState: !currentState.isSaved,
+        makerId: currentState.story.makerId,
+        saveState: newSaveState,
+        ctaSurface: event.ctaSurface,
       );
-      emit(currentState.copyWith(isSaved: !currentState.isSaved));
+      // On success, emit the final state
+      emit(optimisticState.copyWith(wishlistId: wishlistId));
     } catch (e) {
-      emit(StoryError(
-        message: 'Failed to save story: ${e.toString()}',
-        type: StoryErrorType.network,
-      ));
+      // On failure, roll back to the original state
+      emit(currentState);
+      // Optionally, emit an error state or handle the error in the UI
+      // For now, we just revert the state. A dedicated error field in StoryLoaded would be better.
     }
   }
 

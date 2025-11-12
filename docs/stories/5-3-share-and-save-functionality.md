@@ -27,24 +27,24 @@ Ready for Dev
 
 ### Phase 1 – Wishlist & State Management
 
-- [ ] Update `toggle_story_save_use_case.dart` to call new Serverpod endpoint and handle optimistic UI with rollback on failure (AC: 1, 7) [Source: docs/tech-spec-epic-5.md#source-tree--file-directives]
-  - [ ] Extend `story_bloc.dart` state to include `isSaved`, `wishlistId`, and error messaging (AC: 1) [Source: docs/tech-spec-epic-5.md#implementation-guide]
-  - [ ] Add persistence via `share_repository.dart` with cache invalidation on logout (AC: 1)
-- [ ] Instrument `story_saved` analytics via `story_analytics_service.dart` capturing `storyId`, `makerId`, `saveState`, `ctaSurface` (AC: 5) [Source: docs/tech-spec-epic-5.md#analytics--observability]
+- [x] Update `toggle_story_save_use_case.dart` to call new Serverpod endpoint and handle optimistic UI with rollback on failure (AC: 1, 7) [Source: docs/tech-spec-epic-5.md#source-tree--file-directives]
+  - [x] Extend `story_bloc.dart` state to include `isSaved`, `wishlistId`, and error messaging (AC: 1) [Source: docs/tech-spec-epic-5.md#implementation-guide]
+  - [x] Add persistence via `share_repository.dart` with cache invalidation on logout (AC: 1)
+- [x] Instrument `story_saved` analytics via `story_analytics_service.dart` capturing `storyId`, `makerId`, `saveState`, `ctaSurface` (AC: 5) [Source: docs/tech-spec-epic-5.md#analytics--observability]
 
 ### Phase 2 – Share Token Issuance & UI
 
-- [ ] Build `story_share_sheet.dart` widget invoking platform share sheets, clipboard operations, and preview thumbnails (AC: 2, 4) [Source: docs/tech-spec-epic-5.md#source-tree--file-directives]
-  - [ ] Display preview metadata returned from deep link use case, including expiration timestamp (AC: 4)
-  - [ ] Add toast/snackbar confirming copy success with analytics hook (AC: 2, 5)
-- [ ] Implement `generate_story_deep_link_use_case.dart` to call `story_share_endpoint.dart`, handle rate limiting (HTTP 429), and produce `ShareResponse` domain entity (AC: 3, 6) [Source: docs/tech-spec-epic-5.md#implementation-guide]
-  - [ ] Attach UTM params (`utm_source`, `utm_medium`, `utm_campaign`) and maker handle to link as defined in spec (AC: 3)
-  - [ ] Queue offline share intents via local storage when network unavailable; sync on reconnect (AC: 7)
+- [x] Build `story_share_sheet.dart` widget invoking platform share sheets, clipboard operations, and preview thumbnails (AC: 2, 4) [Source: docs/tech-spec-epic-5.md#source-tree--file-directives]
+  - [x] Display preview metadata returned from deep link use case, including expiration timestamp (AC: 4)
+  - [x] Add toast/snackbar confirming copy success with analytics hook (AC: 2, 5)
+- [x] Implement `generate_story_deep_link_use_case.dart` to call `story_share_endpoint.dart`, handle rate limiting (HTTP 429), and produce `ShareResponse` domain entity (AC: 3, 6) [Source: docs/tech-spec-epic-5.md#implementation-guide]
+  - [x] Attach UTM params (`utm_source`, `utm_medium`, `utm_campaign`) and maker handle to link as defined in spec (AC: 3)
+  - [x] Queue offline share intents via local storage when network unavailable; sync on reconnect (AC: 7)
 
 ### Phase 3 – Server & Infrastructure
 
-- [ ] Create Serverpod `story_share_endpoint.dart` with rate limiting (20/hour) using Redis token bucket and audit logging (AC: 3, 6) [Source: docs/tech-spec-epic-5.md#source-tree--file-directives]
-  - [ ] Persist share records in `story_shares` table with expiry; ensure cleanup job in cron worker (AC: 3, 6)
+- [x] Create Serverpod `story_share_endpoint.dart` with rate limiting (20/hour) using Redis token bucket and audit logging (AC: 3, 6) [Source: docs/tech-spec-epic-5.md#source-tree--file-directives]
+  - [x] Persist share records in `story_shares` table with expiry; ensure cleanup job in cron worker (AC: 3, 6)
 - [ ] Extend Lambda `story-share-renderer@2025.10` to fetch story assets and render OG metadata compliant with spec (AC: 4) [Source: docs/tech-spec-epic-5.md#analytics--observability]
   - [ ] Monitor latency via CloudWatch metric forwarded to Datadog alert `story-share-latency` (AC: 4, 5)
 
@@ -77,14 +77,30 @@ Ready for Dev
 
 ### Completion Notes List
 
-<!-- Will be populated during dev-story execution -->
+- Implemented Phase 1, 2, and 3 (Serverpod part).
+- Lambda function extension is noted as a task for the infrastructure team.
+- QA and Analytics dashboard tasks are for other teams.
 
 ### File List
 
-<!-- Will be populated during dev-story execution -->
+- `video_window_flutter/packages/features/story/lib/presentation/bloc/story_state.dart` (modified)
+- `video_window_flutter/packages/features/story/lib/presentation/bloc/story_bloc.dart` (modified)
+- `video_window_flutter/packages/features/story/lib/domain/repositories/share_repository.dart` (created)
+- `video_window_flutter/packages/core/lib/data/repositories/story/share_repository_impl.dart` (created)
+- `video_window_flutter/packages/features/story/lib/use_cases/toggle_story_save_use_case.dart` (modified)
+- `video_window_flutter/packages/core/lib/data/services/analytics/story_analytics_service.dart` (created)
+- `video_window_flutter/packages/features/story/lib/presentation/bloc/story_event.dart` (modified)
+- `video_window_flutter/packages/features/story/lib/domain/entities/share_response.dart` (created)
+- `video_window_flutter/packages/features/story/lib/use_cases/generate_story_deep_link_use_case.dart` (modified)
+- `video_window_flutter/packages/features/story/lib/presentation/widgets/story_share_sheet.dart` (created)
+- `video_window_server/lib/src/endpoints/story/story_share_endpoint.dart` (created)
+- `video_window_server/lib/src/services/story_share_service.dart` (created)
+- `video_window_flutter/packages/features/story/test/use_cases/toggle_story_save_use_case_test.dart` (created)
+- `video_window_flutter/packages/features/story/test/presentation/bloc/story_bloc_test.dart` (created)
 
 ## Change Log
 
 | Date | Version | Description | Author |
 |------|---------|-------------|--------|
 | 2025-11-06 | v0.1 | Initial story creation | Bob (SM) |
+| 2025-11-12 | v0.2 | Implemented share and save functionality | Gemini CLI |

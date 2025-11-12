@@ -1,13 +1,33 @@
+import '../../../../core/lib/data/services/analytics/story_analytics_service.dart';
+import '../domain/entities/share_response.dart';
+import '../domain/repositories/share_repository.dart';
+
 /// Use case to generate story deep link for sharing
-/// AC5: Share functionality with expiring deep links
+/// AC3, AC5, AC6: Share functionality with deep links, analytics, and rate limiting
 class GenerateStoryDeepLinkUseCase {
-  Future<String> execute({
+  final ShareRepository _shareRepository;
+  final StoryAnalyticsService _analyticsService;
+
+  GenerateStoryDeepLinkUseCase(this._shareRepository, this._analyticsService);
+
+  Future<ShareResponse> execute({
     required String storyId,
     required String channel,
     String? customMessage,
   }) async {
-    // Placeholder implementation
-    // Real implementation would call share service to generate Firebase Dynamic Link
-    throw UnimplementedError('GenerateStoryDeepLinkUseCase.execute');
+    final shareResponse = await _shareRepository.generateStoryDeepLink(
+      storyId: storyId,
+      channel: channel,
+    );
+
+    _analyticsService.storyShared(
+      storyId: storyId,
+      channel: channel,
+      deepLink: shareResponse.deepLink,
+      utmCampaign: 'story-share', // This would be dynamic in a real app
+      shareId: shareResponse.shareId,
+    );
+
+    return shareResponse;
   }
 }

@@ -1,12 +1,32 @@
+import '../../../../core/lib/data/services/analytics/story_analytics_service.dart';
+import '../domain/repositories/share_repository.dart';
+
 /// Use case to toggle story save/wishlist state
-/// AC5: Social engagement features
+/// AC1, AC5: Social engagement features, wishlist persistence
 class ToggleStorySaveUseCase {
-  Future<void> execute({
+  final ShareRepository _shareRepository;
+  final StoryAnalyticsService _analyticsService;
+
+  ToggleStorySaveUseCase(this._shareRepository, this._analyticsService);
+
+  Future<String?> execute({
     required String storyId,
+    required String makerId,
     required bool saveState,
+    required String ctaSurface,
   }) async {
-    // Placeholder implementation
-    // Real implementation would call repository to update save state
-    throw UnimplementedError('ToggleStorySaveUseCase.execute');
+    final wishlistId = await _shareRepository.toggleStorySave(
+      storyId: storyId,
+      isSaved: saveState,
+    );
+
+    _analyticsService.storySaved(
+      storyId: storyId,
+      makerId: makerId,
+      saveState: saveState,
+      ctaSurface: ctaSurface,
+    );
+
+    return wishlistId;
   }
 }

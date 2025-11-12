@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/share_response.dart';
 import '../../domain/entities/story.dart';
 import '../../domain/entities/video_player_state.dart';
 
@@ -27,6 +28,7 @@ class StoryLoaded extends StoryState {
   final String activeSection;
   final bool isLiked;
   final bool isSaved;
+  final String? wishlistId;
   final bool isFollowingMaker;
 
   const StoryLoaded({
@@ -35,6 +37,7 @@ class StoryLoaded extends StoryState {
     this.activeSection = 'overview',
     this.isLiked = false,
     this.isSaved = false,
+    this.wishlistId,
     this.isFollowingMaker = false,
   });
 
@@ -44,6 +47,7 @@ class StoryLoaded extends StoryState {
     String? activeSection,
     bool? isLiked,
     bool? isSaved,
+    String? wishlistId,
     bool? isFollowingMaker,
   }) {
     return StoryLoaded(
@@ -52,6 +56,7 @@ class StoryLoaded extends StoryState {
       activeSection: activeSection ?? this.activeSection,
       isLiked: isLiked ?? this.isLiked,
       isSaved: isSaved ?? this.isSaved,
+      wishlistId: wishlistId ?? this.wishlistId,
       isFollowingMaker: isFollowingMaker ?? this.isFollowingMaker,
     );
   }
@@ -63,6 +68,7 @@ class StoryLoaded extends StoryState {
         activeSection,
         isLiked,
         isSaved,
+        wishlistId,
         isFollowingMaker,
       ];
 }
@@ -79,6 +85,16 @@ class StoryError extends StoryState {
 
   @override
   List<Object?> get props => [message, type];
+}
+
+/// State indicating that a shareable deep link is ready
+class StoryShareReady extends StoryState {
+  final ShareResponse shareResponse;
+
+  const StoryShareReady(this.shareResponse);
+
+  @override
+  List<Object?> get props => [shareResponse];
 }
 
 /// Story error types
