@@ -50,7 +50,7 @@ void main() {
     });
 
     test('caches assets with metadata', () async {
-      final storyId = 'cache-test-story';
+      const storyId = 'cache-test-story';
 
       // First call - should fetch and cache
       final assets1 = await useCase.execute(storyId);

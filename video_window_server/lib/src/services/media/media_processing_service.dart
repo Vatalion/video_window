@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:aws_s3_api/s3-2006-03-01.dart';
-import 'package:shared_aws_api/shared.dart';
 import 'package:image/image.dart' as img;
 import 'package:crypto/crypto.dart';
 import '../../generated/profile/media_file.dart';

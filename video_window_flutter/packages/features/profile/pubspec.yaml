@@ -1,6 +1,7 @@
 name: profile
 description: User profile and capability management features
 publish_to: 'none'
+resolution: workspace
 version: 1.0.0+1
 
 environment:
@@ -21,6 +22,10 @@ dependencies:
   core:
     path: ../../core
 
+  video_window_client: any
+  serverpod_flutter: any
+  image_picker: any
+  crop_your_image: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -76,7 +76,7 @@ class PrivacyPolicyPage extends StatelessWidget {
   }
 
   Widget _buildGdprDisclosures(BuildContext context) {
-    final gdpr = LegalDisclosures.gdprDisclosures;
+    const gdpr = LegalDisclosures.gdprDisclosures;
 
     return Card(
       color: Colors.blue.shade50,
@@ -144,7 +144,7 @@ class PrivacyPolicyPage extends StatelessWidget {
   }
 
   Widget _buildCcpaDisclosures(BuildContext context) {
-    final ccpa = LegalDisclosures.ccpaDisclosures;
+    const ccpa = LegalDisclosures.ccpaDisclosures;
 
     return Card(
       color: Colors.orange.shade50,

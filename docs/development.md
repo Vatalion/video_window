@@ -23,9 +23,7 @@ Ensure you have the following tools installed:
 2. **Bootstrap the workspace:**
    ```bash
    # From project root
-   cd video_window_flutter
-   flutter pub get
-   cd ..
+   melos bootstrap
    ```
 
 3. **Start backend services:**
@@ -72,7 +70,7 @@ This regenerates:
 **Flutter Code Generation (via Melos):**
 For build_runner code generation across all packages:
 ```bash
-# From project root or video_window_flutter directory
+# From project root
 melos run generate
 ```
 
@@ -82,7 +80,7 @@ This runs build_runner on all packages that need it.
 
 **Run all tests (recommended):**
 ```bash
-# From project root or video_window_flutter directory
+# From project root
 melos run test
 ```
 
@@ -117,13 +115,13 @@ cd video_window_server && dart test test/health_endpoint_test.dart
 
 **Format all code (via Melos):**
 ```bash
-# From project root or video_window_flutter directory
+# From project root
 melos run format
 ```
 
 **Analyze all code (via Melos):**
 ```bash
-# From project root or video_window_flutter directory
+# From project root
 melos run analyze
 ```
 
@@ -219,7 +217,7 @@ packages/features/<feature>/
 1. Create directory in `video_window_flutter/packages/features/<feature>`
 2. Add `pubspec.yaml` with dependencies on `core` and `shared`
 3. Create `lib/use_cases/` and `lib/presentation/` directories
-4. Add to workspace in `melos.yaml` (if using Melos)
+4. Add the new package to the `workspace` section in the root `pubspec.yaml` file.
 
 ### Database Migrations
 

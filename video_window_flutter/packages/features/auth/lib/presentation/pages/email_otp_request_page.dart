@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../lib/presentation/bloc/auth_bloc.dart';
+import 'package:auth/lib/presentation/bloc/auth_bloc.dart';
 import 'otp_verification_page.dart';
 import '../widgets/social_sign_in_buttons.dart';
 import '../widgets/social_sign_in_service.dart';
@@ -9,7 +9,7 @@ import '../widgets/social_sign_in_service.dart';
 /// First step in OTP authentication - user enters email
 /// Includes social sign-in options (Apple & Google)
 class EmailOtpRequestPage extends StatefulWidget {
-  const EmailOtpRequestPage({Key? key}) : super(key: key);
+  const EmailOtpRequestPage({super.key});
 
   @override
   State<EmailOtpRequestPage> createState() => _EmailOtpRequestPageState();
@@ -19,7 +19,7 @@ class _EmailOtpRequestPageState extends State<EmailOtpRequestPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   late final SocialSignInService _socialSignInService;
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   @override
   void initState() {

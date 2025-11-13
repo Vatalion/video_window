@@ -1,6 +1,7 @@
 name: core
 description: Core data layer, repositories, and domain models for Video Window
 publish_to: "none"
+resolution: workspace
 version: 1.0.0+1
 
 environment:
@@ -22,8 +23,10 @@ dependencies:
   crypto: ^3.0.3
   flutter_secure_storage: ^9.2.2
 
+  dio: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
   mocktail: ^1.0.0
+  mockito: any

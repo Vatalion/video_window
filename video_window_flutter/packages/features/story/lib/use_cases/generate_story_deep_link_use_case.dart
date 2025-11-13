@@ -1,6 +1,6 @@
-import '../../../../core/lib/data/services/analytics/story_analytics_service.dart';
-import '../domain/entities/share_response.dart';
-import '../domain/repositories/share_repository.dart';
+import 'package:core/data/services/analytics/story_analytics_service.dart';
+import 'package:core/domain/entities/share_response.dart';
+import 'package:core/domain/repositories/share_repository.dart';
 
 /// Use case to generate story deep link for sharing
 /// AC3, AC5, AC6: Share functionality with deep links, analytics, and rate limiting

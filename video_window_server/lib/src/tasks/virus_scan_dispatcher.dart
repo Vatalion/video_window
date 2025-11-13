@@ -2,7 +2,6 @@ import 'package:serverpod/serverpod.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:aws_lambda_api/lambda-2015-03-31.dart';
-import 'package:shared_aws_api/shared.dart';
 import '../generated/profile/media_file.dart';
 
 /// Virus scan dispatcher for invoking AWS Lambda and handling callbacks

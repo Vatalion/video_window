@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../../lib/use_cases/fetch_feed_page_use_case.dart';
-import '../../lib/data/repositories/feed_repository.dart';
-import '../../lib/data/repositories/feed_cache_repository.dart';
-import '../../lib/domain/entities/video.dart';
-import '../../lib/domain/entities/feed_configuration.dart';
+import 'package:timeline/use_cases/fetch_feed_page_use_case.dart';
+import 'package:timeline/data/repositories/feed_repository.dart';
+import 'package:timeline/data/repositories/feed_cache_repository.dart';
+import 'package:timeline/domain/entities/video.dart';
+import 'package:timeline/domain/entities/feed_configuration.dart';
 
 class MockFeedRepository extends Mock implements FeedRepository {}
 
@@ -131,7 +131,7 @@ void main() {
                   duration: const Duration(seconds: 60),
                   viewCount: 0,
                   likeCount: 0,
-                  tags: [],
+                  tags: const [],
                   quality: VideoQuality.hd,
                   createdAt: DateTime.now(),
                   updatedAt: DateTime.now(),

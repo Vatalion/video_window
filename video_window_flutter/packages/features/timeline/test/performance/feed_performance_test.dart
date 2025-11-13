@@ -5,9 +5,7 @@ import 'package:timeline/presentation/bloc/feed_bloc.dart';
 import 'package:timeline/presentation/bloc/feed_event.dart';
 import 'package:timeline/presentation/bloc/feed_state.dart';
 import 'package:timeline/data/repositories/feed_repository.dart';
-import 'package:timeline/domain/entities/video.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:video_window_client/video_window_client.dart';
+ge:video_window_client/video_window_client.dart';
 
 /// Performance tests for feed implementation
 /// AC4, AC5, AC6: Performance testing requirements

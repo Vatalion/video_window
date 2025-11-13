@@ -50,7 +50,7 @@ class InfiniteScrollFooter extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               color: Colors.white70,
               size: 32,

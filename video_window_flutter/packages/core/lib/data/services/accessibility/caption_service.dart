@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 /// Caption cue model
@@ -37,7 +36,7 @@ class CaptionService {
   /// Parse WebVTT content into caption cues
   List<CaptionCue> parseWebVTT(String vttContent) {
     final cues = <CaptionCue>[];
-    final lines = LineSplitter().convert(vttContent);
+    final lines = const LineSplitter().converconst t(vttContent);
 
     int i = 0;
     while (i < lines.length) {

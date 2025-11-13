@@ -21,7 +21,7 @@ void main() {
     });
     group('Layer 1: Per-Identifier Rate Limiting', () {
       test('allows requests within limit (3 requests / 5 min)', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const identifier = 'test@example.com';
@@ -44,7 +44,7 @@ void main() {
 
       test('blocks requests after exceeding limit (3 requests / 5 min)',
           () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const identifier = 'blocked@example.com';
@@ -74,7 +74,7 @@ void main() {
       });
 
       test('normalizes identifier (case-insensitive)', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const email1 = 'Test@Example.COM';
@@ -102,7 +102,7 @@ void main() {
       });
 
       test('enforces multiple time windows (5min, 1hr, 24hr)', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const identifier = 'multiwindow@example.com';
@@ -132,7 +132,7 @@ void main() {
 
     group('Layer 2: Per-IP Rate Limiting', () {
       test('allows requests within IP limit (20 requests / 5 min)', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const ipAddress = '192.168.2.1';
@@ -152,7 +152,7 @@ void main() {
       });
 
       test('blocks requests after exceeding IP limit', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const ipAddress = '192.168.2.2';
@@ -179,7 +179,7 @@ void main() {
       });
 
       test('different IPs have independent limits', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const action = 'otp_request';
@@ -215,7 +215,7 @@ void main() {
 
     group('Layer 3: Global Rate Limiting', () {
       test('enforces global limit (1000 requests / 1 min)', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const action = 'otp_request_global';
@@ -234,7 +234,7 @@ void main() {
 
     group('Progressive Delays on Failed Attempts', () {
       test('no delay on first failed attempt', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const identifier = 'delay@example.com';
@@ -250,7 +250,7 @@ void main() {
       });
 
       test('records failed attempts', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const identifier = 'failed@example.com';
@@ -273,7 +273,7 @@ void main() {
       });
 
       test('exponential backoff on multiple failures', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const identifier = 'exponential@example.com';
@@ -301,7 +301,7 @@ void main() {
       });
 
       test('clears failed attempts after successful auth', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const identifier = 'clear@example.com';
@@ -338,7 +338,7 @@ void main() {
       });
 
       test('caps maximum delay at 300 seconds (5 minutes)', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const identifier = 'maxdelay@example.com';
@@ -365,7 +365,7 @@ void main() {
 
     group('Rate Limit Status and Monitoring', () {
       test('returns current rate limit status', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const identifier = 'status@example.com';
@@ -394,7 +394,7 @@ void main() {
       });
 
       test('status shows correct remaining counts', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const identifier = 'statuscount@example.com';
@@ -432,7 +432,7 @@ void main() {
     group('HTTP Headers', () {
       test('generates correct X-RateLimit headers for allowed requests',
           () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const identifier = 'headers@example.com';
@@ -454,7 +454,7 @@ void main() {
       });
 
       test('generates Retry-After header for blocked requests', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const identifier = 'blocked-headers@example.com';
@@ -486,7 +486,7 @@ void main() {
 
     group('Edge Cases', () {
       test('different actions have independent limits', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const identifier = 'multiaction@example.com';
@@ -519,7 +519,7 @@ void main() {
       });
 
       test('handles concurrent requests correctly', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final rateLimitService = RateLimitService(session);
 
         const identifier = 'concurrent@example.com';

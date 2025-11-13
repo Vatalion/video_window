@@ -32,7 +32,7 @@ class CapabilityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: AppElevation.sm,
-      margin: EdgeInsets.symmetric(
+      margin: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
       ),
@@ -44,7 +44,7 @@ class CapabilityCard extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -61,7 +61,7 @@ class CapabilityCard extends StatelessWidget {
                 _buildStatusBadge(),
               ],
             ),
-            SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.sm),
 
             // Description
             Text(
@@ -73,9 +73,9 @@ class CapabilityCard extends StatelessWidget {
 
             // AC4: Status details (Stripe account state, tax form submission, etc.)
             if (statusDetails != null && statusDetails!.isNotEmpty) ...[
-              SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.sm),
               Container(
-                padding: EdgeInsets.all(AppSpacing.sm),
+                padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
                   color: AppColors.neutral50,
                   borderRadius: BorderRadius.circular(AppRadius.sm),
@@ -89,10 +89,10 @@ class CapabilityCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(height: AppSpacing.xs),
+                    const SizedBox(height: AppSpacing.xs),
                     ...statusDetails!.entries.map(
                       (entry) => Padding(
-                        padding: EdgeInsets.only(bottom: AppSpacing.xs),
+                        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                         child: Row(
                           children: [
                             Icon(
@@ -100,7 +100,7 @@ class CapabilityCard extends StatelessWidget {
                               size: 14,
                               color: AppColors.neutral700,
                             ),
-                            SizedBox(width: AppSpacing.xs),
+                            const SizedBox(width: AppSpacing.xs),
                             Expanded(
                               child: Text(
                                 '${entry.key}: ${entry.value}',
@@ -112,7 +112,7 @@ class CapabilityCard extends StatelessWidget {
                       ),
                     ),
                     if (statusLink != null && statusLink!.isNotEmpty) ...[
-                      SizedBox(height: AppSpacing.xs),
+                      const SizedBox(height: AppSpacing.xs),
                       InkWell(
                         onTap: () {
                           // Handle link tap - could navigate to Stripe onboarding or task completion
@@ -133,18 +133,18 @@ class CapabilityCard extends StatelessWidget {
 
             // Blockers (if any)
             if (blockers.isNotEmpty) ...[
-              SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.sm),
               ...blockers.map(
                 (blocker) => Padding(
-                  padding: EdgeInsets.only(bottom: AppSpacing.xs),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.warning_amber_rounded,
                         size: 16,
                         color: AppColors.warning,
                       ),
-                      SizedBox(width: AppSpacing.xs),
+                      const SizedBox(width: AppSpacing.xs),
                       Expanded(
                         child: Text(
                           blocker,
@@ -161,7 +161,7 @@ class CapabilityCard extends StatelessWidget {
 
             // Action button
             if (onActionPressed != null && actionLabel != null) ...[
-              SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.md),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -169,7 +169,7 @@ class CapabilityCard extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _getActionButtonColor(),
                     foregroundColor: AppColors.onPrimary,
-                    padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
@@ -189,7 +189,7 @@ class CapabilityCard extends StatelessWidget {
 
   Widget _buildStatusBadge() {
     return Container(
-      padding: EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xs,
       ),
@@ -209,7 +209,7 @@ class CapabilityCard extends StatelessWidget {
             size: 14,
             color: _getStatusColor(),
           ),
-          SizedBox(width: AppSpacing.xs),
+          const SizedBox(width: AppSpacing.xs),
           Text(
             _getStatusLabel(),
             style: AppTypography.labelSmall.copyWith(

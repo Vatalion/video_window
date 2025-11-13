@@ -12,27 +12,27 @@ class TrustedDevicesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
+        Text(
           'Trusted Devices',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 8),
-        const Text(
+        SizedBox(height: 8),
+        Text(
           'Manage devices that can access your account without additional verification',
           style: TextStyle(
             fontSize: 14,
             color: Colors.grey,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         // TODO: Implement trusted devices list when backend API is available
-        const Card(
+        Card(
           child: Padding(
             padding: EdgeInsets.all(16),
             child: Text(

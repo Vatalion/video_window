@@ -1,8 +1,6 @@
 import 'package:test/test.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:video_window_server/src/business/profile/notification_manager.dart';
-import 'package:video_window_server/src/generated/profile/notification_preferences.dart';
-import 'package:video_window_server/src/generated/auth/user.dart';
 
 /// Integration test for notification preferences sync with external services
 /// AC3: Ensures Firebase topic subscription and SendGrid suppression updates fire on preference changes

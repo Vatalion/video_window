@@ -1,6 +1,7 @@
 name: auth
 description: Authentication feature for Video Window
 publish_to: 'none'
+resolution: workspace
 version: 1.0.0+1
 
 environment:
@@ -17,6 +18,8 @@ dependencies:
   shared:
     path: ../../shared
 
+  sign_in_with_apple: any
+  google_sign_in: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

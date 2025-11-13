@@ -107,7 +107,7 @@ development_status:
 
   # Epic 6: Content Pipeline & Security
   epic-6: contexted
-  6-1-media-pipeline-content-protection-implementation: ready-for-dev
+  6-1-media-pipeline-content-protection-implementation: review
   6-2-advanced-video-processing-optimization: ready-for-dev
   6-3-content-security-anti-piracy-system: ready-for-dev
   epic-6-retrospective: optional

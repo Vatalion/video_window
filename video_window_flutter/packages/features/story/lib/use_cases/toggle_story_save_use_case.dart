@@ -1,5 +1,5 @@
-import '../../../../core/lib/data/services/analytics/story_analytics_service.dart';
-import '../domain/repositories/share_repository.dart';
+import 'package:core/data/services/analytics/story_analytics_service.dart';
+import 'package:core/domain/repositories/share_repository.dart';
 
 /// Use case to toggle story save/wishlist state
 /// AC1, AC5: Social engagement features, wishlist persistence

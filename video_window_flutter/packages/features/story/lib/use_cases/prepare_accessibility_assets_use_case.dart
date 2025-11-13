@@ -64,7 +64,7 @@ class PrepareAccessibilityAssetsUseCase {
       final metadata = jsonDecode(metadataContent) as Map<String, dynamic>;
 
       final cachedAt = DateTime.parse(metadata['cachedAt'] as String);
-      final expiresAt = cachedAt.add(Duration(hours: _cacheTTLHours));
+      final expiresAt = cachedAt.add(const Duration(hours: _cacheTTLHours));
 
       if (DateTime.now().isAfter(expiresAt)) {
         // Cache expired

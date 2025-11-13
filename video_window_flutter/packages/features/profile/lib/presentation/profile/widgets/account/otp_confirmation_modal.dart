@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:video_window_client/video_window_client.dart';
+client.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 
 /// OTP confirmation modal for re-authentication

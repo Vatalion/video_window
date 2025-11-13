@@ -179,7 +179,7 @@ void main() {
     });
 
     test('privacy policy contains key sections', () {
-      final policy = LegalDisclosures.privacyPolicyText;
+      const policy = LegalDisclosures.privacyPolicyText;
 
       expect(policy.contains('Information We Collect'), isTrue);
       expect(policy.contains('How We Use'), isTrue);
@@ -189,7 +189,7 @@ void main() {
     });
 
     test('terms contain key sections', () {
-      final terms = LegalDisclosures.termsOfServiceText;
+      const terms = LegalDisclosures.termsOfServiceText;
 
       expect(terms.contains('Acceptance of Terms'), isTrue);
       expect(terms.contains('User Accounts'), isTrue);
@@ -250,7 +250,7 @@ void main() {
 
   group('LegalDisclosures - updateCookiePreferences', () {
     test('enforces essential cookies always enabled', () async {
-      final testUserId = 'test-user-123';
+      const testUserId = 'test-user-123';
       final prefs = {
         'essential': false, // Try to disable (should be enforced as true)
         'functional': true,
@@ -266,7 +266,7 @@ void main() {
     });
 
     test('accepts valid preference updates', () async {
-      final testUserId = 'test-user-123';
+      const testUserId = 'test-user-123';
       final prefs = {
         'essential': true,
         'functional': true,
@@ -312,7 +312,7 @@ void main() {
 
   group('LegalDisclosures - recordConsentAcceptance', () {
     test('accepts valid consent record', () async {
-      final testUserId = 'test-user-123';
+      const testUserId = 'test-user-123';
 
       expect(
         () => LegalDisclosures.recordConsentAcceptance(
@@ -331,7 +331,7 @@ void main() {
     });
 
     test('handles all cookies accepted', () async {
-      final testUserId = 'test-user-123';
+      const testUserId = 'test-user-123';
 
       await LegalDisclosures.recordConsentAcceptance(
         testUserId,
@@ -349,7 +349,7 @@ void main() {
     });
 
     test('handles only essential cookies', () async {
-      final testUserId = 'test-user-123';
+      const testUserId = 'test-user-123';
 
       await LegalDisclosures.recordConsentAcceptance(
         testUserId,
@@ -369,7 +369,7 @@ void main() {
 
   group('LegalDisclosures - Compliance Validation', () {
     test('GDPR - provides required information', () {
-      final gdpr = LegalDisclosures.gdprDisclosures;
+      const gdpr = LegalDisclosures.gdprDisclosures;
 
       // Required under GDPR Article 13/14
       expect(gdpr['data_controller'], isNotNull);
@@ -380,7 +380,7 @@ void main() {
     });
 
     test('CCPA - provides required disclosures', () {
-      final ccpa = LegalDisclosures.ccpaDisclosures;
+      const ccpa = LegalDisclosures.ccpaDisclosures;
 
       // Required under CCPA Section 1798.110
       expect(ccpa['categories_collected'], isNotNull);

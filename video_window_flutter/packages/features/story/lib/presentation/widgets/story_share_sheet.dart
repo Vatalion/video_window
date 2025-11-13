@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
-import '../../domain/entities/share_response.dart';
+import 'package:core/domain/entities/share_response.dart';
 
 class StoryShareSheet extends StatelessWidget {
   final ShareResponse shareResponse;

@@ -8,7 +8,7 @@ void main() {
   withServerpod('OTP Service Tests', (sessionBuilder, endpoints) {
     group('OTP Generation Security Tests', () {
       test('generateSecureOTP creates 6-digit code', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         final otp = otpService.generateSecureOTP();
@@ -18,7 +18,7 @@ void main() {
       });
 
       test('generateSecureOTP creates unique codes', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         final codes = <String>{};
@@ -31,7 +31,7 @@ void main() {
       });
 
       test('hashOTP produces consistent hashes with same input', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const otp = '123456';
@@ -45,7 +45,7 @@ void main() {
       });
 
       test('hashOTP produces different hashes with different salts', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const otp = '123456';
@@ -60,7 +60,7 @@ void main() {
       });
 
       test('hashOTP produces different hashes with different OTPs', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const salt = 'test-salt';
@@ -75,7 +75,7 @@ void main() {
       });
 
       test('OTP hash is cryptographically secure (SHA-256)', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const otp = '123456';
@@ -92,7 +92,7 @@ void main() {
 
     group('OTP Creation and Storage Tests', () {
       test('createOTP stores hashed OTP in database', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const identifier = 'test@example.com';
@@ -127,7 +127,7 @@ void main() {
       });
 
       test('createOTP invalidates existing OTPs for same identifier', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const identifier = 'test@example.com';
@@ -159,7 +159,7 @@ void main() {
       });
 
       test('createOTP normalizes identifier (case-insensitive)', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const email1 = 'Test@Example.com';
@@ -179,7 +179,7 @@ void main() {
       });
 
       test('createOTP sets 5-minute expiry', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const identifier = 'test@example.com';
@@ -206,7 +206,7 @@ void main() {
 
     group('OTP Verification Tests - Happy Path', () {
       test('verifyOTP succeeds with correct code', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const identifier = 'test@example.com';
@@ -234,7 +234,7 @@ void main() {
       });
 
       test('verifyOTP is case-insensitive for identifier', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const email = 'Test@Example.COM';
@@ -248,7 +248,7 @@ void main() {
 
     group('OTP Verification Tests - Failure Cases', () {
       test('verifyOTP fails with incorrect code', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const identifier = 'test@example.com';
@@ -279,7 +279,7 @@ void main() {
       });
 
       test('verifyOTP fails when no OTP exists', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const identifier = 'nonexistent@example.com';
@@ -292,7 +292,7 @@ void main() {
       });
 
       test('verifyOTP fails with expired OTP', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const identifier = 'test@example.com';
@@ -325,7 +325,7 @@ void main() {
       });
 
       test('verifyOTP enforces one-time use', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const identifier = 'test@example.com';
@@ -344,7 +344,7 @@ void main() {
       });
 
       test('verifyOTP blocks after max attempts (5 failures)', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const identifier = 'test@example.com';
@@ -379,7 +379,7 @@ void main() {
 
       test('verifyOTP fails even with correct code after max attempts',
           () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const identifier = 'test@example.com';
@@ -402,7 +402,7 @@ void main() {
 
     group('OTP Cleanup Tests', () {
       test('cleanupExpiredOTPs removes only expired records', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         // Create expired OTP
@@ -444,7 +444,7 @@ void main() {
 
     group('Security Edge Cases', () {
       test('Different identifiers cannot access each others OTPs', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const identifier1 = 'user1@example.com';
@@ -460,7 +460,7 @@ void main() {
       });
 
       test('Whitespace in identifier is trimmed consistently', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final otpService = OtpService(session);
 
         const emailWithSpaces = '  test@example.com  ';

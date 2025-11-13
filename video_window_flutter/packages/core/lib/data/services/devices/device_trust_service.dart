@@ -30,7 +30,7 @@ class DeviceTrustService {
       }
 
       // Collect device telemetry
-      final telemetry = await _collectTelemetry();
+      final telemetry = _collectTelemetry();
 
       // Register device
       await _repository.registerDevice(
@@ -115,7 +115,7 @@ class DeviceTrustService {
       const Duration(minutes: 5),
       (timer) async {
         try {
-          final telemetry = await _collectTelemetry();
+          final telemetry = _collectTelemetry();
           await _repository.registerDevice(
             userId: userId,
             deviceId: deviceId,

@@ -34,7 +34,7 @@ class CapabilityCenterBloc
       final status = await _capabilityService.getStatus(event.userId);
       emit(_mapStatusToState(status, event.userId));
     } catch (e) {
-      emit(CapabilityCenterError(
+      emit(const CapabilityCenterError(
         'Failed to load capability status',
         errorCode: 'LOAD_ERROR',
       ));
@@ -62,7 +62,7 @@ class CapabilityCenterBloc
 
       emit(_mapStatusToState(status, event.userId));
     } catch (e) {
-      emit(CapabilityCenterError(
+      emit(const CapabilityCenterError(
         'Failed to request capability',
         errorCode: 'REQUEST_ERROR',
       ));
@@ -92,7 +92,7 @@ class CapabilityCenterBloc
         // Silent failure on background refresh
         return;
       }
-      emit(CapabilityCenterError(
+      emit(const CapabilityCenterError(
         'Failed to refresh capability status',
         errorCode: 'REFRESH_ERROR',
       ));

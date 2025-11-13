@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../widgets/transcript_panel.dart';
+';
 import '../../../core/data/services/accessibility/caption_service.dart';
 
 /// Debug accessibility page for visualizing captions, transcript sync, and focus order

@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/video.dart';
-import '../../domain/entities/video_interaction.dart';
+tion.dart';
 import '../../domain/entities/feed_configuration.dart';
 
 /// Events for feed BLoC

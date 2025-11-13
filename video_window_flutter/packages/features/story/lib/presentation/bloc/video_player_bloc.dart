@@ -142,7 +142,7 @@ class VideoPlayerBloc extends Bloc<VideoPlayerEvent, VideoPlayerStateEntity> {
     // AC7: Emit analytics event for caption toggle
     if (_analyticsService != null && _storyId != null) {
       final event = StoryCaptionToggledEvent(
-        storyId: _storyId!,
+        storyId: _storyId
         language: _currentLanguage,
         wasEnabled: wasEnabled,
       );

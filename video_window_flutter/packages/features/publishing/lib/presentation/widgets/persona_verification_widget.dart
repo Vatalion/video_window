@@ -159,7 +159,7 @@ class _PersonaVerificationWidgetState extends State<PersonaVerificationWidget> {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
-          padding: EdgeInsets.symmetric(
+          padding: const EdgeInsets.symmetric(
             vertical: AppSpacing.md,
             horizontal: AppSpacing.lg,
           ),
@@ -188,15 +188,15 @@ class _PersonaVerificationWidgetState extends State<PersonaVerificationWidget> {
     return Card(
       color: AppColors.error.withValues(alpha: 0.1),
       child: Padding(
-        padding: EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
-                Icon(Icons.error_outline, color: AppColors.error),
-                SizedBox(width: AppSpacing.sm),
+                const Icon(Icons.error_outline, color: AppColors.error),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     'Verification Error',
@@ -207,12 +207,12 @@ class _PersonaVerificationWidgetState extends State<PersonaVerificationWidget> {
                 ),
               ],
             ),
-            SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               _errorMessage!,
               style: AppTypography.bodyMedium,
             ),
-            SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.md),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(

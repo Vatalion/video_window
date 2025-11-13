@@ -54,8 +54,8 @@ void main() {
       final configuration = FeedConfiguration(
         id: 'config_1',
         userId: 'user_1',
-        preferredTags: ['tag1'],
-        blockedMakers: [],
+        preferredTags: const ['tag1'],
+        blockedMakers: const [],
         preferredQuality: VideoQuality.hd,
         autoPlay: true,
         showCaptions: false,
@@ -77,7 +77,7 @@ void main() {
       final configuration = FeedConfiguration(
         id: 'config_1',
         userId: 'user_1',
-        preferredTags: [],
+        preferredTags: const [],
         blockedMakers: List.generate(201, (i) => 'maker_$i'),
         preferredQuality: VideoQuality.hd,
         autoPlay: true,
@@ -100,8 +100,8 @@ void main() {
       final configuration = FeedConfiguration(
         id: 'config_1',
         userId: 'user_1',
-        preferredTags: [],
-        blockedMakers: [],
+        preferredTags: const [],
+        blockedMakers: const [],
         preferredQuality: VideoQuality.hd,
         autoPlay: true,
         showCaptions: false,
@@ -128,8 +128,8 @@ void main() {
       final previous = FeedConfiguration(
         id: 'config_1',
         userId: 'user_1',
-        preferredTags: [],
-        blockedMakers: [],
+        preferredTags: const [],
+        blockedMakers: const [],
         preferredQuality: VideoQuality.hd,
         autoPlay: true,
         showCaptions: false,
@@ -141,8 +141,8 @@ void main() {
       final updated = FeedConfiguration(
         id: 'config_1',
         userId: 'user_1',
-        preferredTags: [],
-        blockedMakers: [],
+        preferredTags: const [],
+        blockedMakers: const [],
         preferredQuality: VideoQuality.hd,
         autoPlay: false, // Changed
         showCaptions: true, // Changed
@@ -177,8 +177,8 @@ void main() {
       final previous = FeedConfiguration(
         id: 'config_1',
         userId: 'user_1',
-        preferredTags: [],
-        blockedMakers: [],
+        preferredTags: const [],
+        blockedMakers: const [],
         preferredQuality: VideoQuality.hd,
         autoPlay: true,
         showCaptions: false,
@@ -190,8 +190,8 @@ void main() {
       final updated = FeedConfiguration(
         id: 'config_1',
         userId: 'user_1',
-        preferredTags: [],
-        blockedMakers: [],
+        preferredTags: const [],
+        blockedMakers: const [],
         preferredQuality: VideoQuality.hd,
         autoPlay: true,
         showCaptions: true, // Changed

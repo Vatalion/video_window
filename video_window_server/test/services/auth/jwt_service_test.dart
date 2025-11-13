@@ -20,7 +20,7 @@ void main() {
 
     group('Token Generation', () {
       test('generates valid access token', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final jwtService = JwtService(session);
         await jwtService.initialize();
 
@@ -36,7 +36,7 @@ void main() {
       });
 
       test('generates valid refresh token', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final jwtService = JwtService(session);
         await jwtService.initialize();
 
@@ -54,7 +54,7 @@ void main() {
 
     group('Token Verification', () {
       test('verifies valid access token', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final jwtService = JwtService(session);
         await jwtService.initialize();
 
@@ -77,7 +77,7 @@ void main() {
       });
 
       test('verifies valid refresh token', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final jwtService = JwtService(session);
         await jwtService.initialize();
 
@@ -95,7 +95,7 @@ void main() {
       });
 
       test('rejects invalid token', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final jwtService = JwtService(session);
         await jwtService.initialize();
 
@@ -105,7 +105,7 @@ void main() {
       });
 
       test('rejects access token as refresh token', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final jwtService = JwtService(session);
         await jwtService.initialize();
 
@@ -120,7 +120,7 @@ void main() {
       });
 
       test('rejects refresh token as access token', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final jwtService = JwtService(session);
         await jwtService.initialize();
 
@@ -137,7 +137,7 @@ void main() {
 
     group('Token Blacklisting', () {
       test('blacklisted token is rejected', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final jwtService = JwtService(session);
         await jwtService.initialize();
 
@@ -167,7 +167,7 @@ void main() {
 
     group('Refresh Token Rotation', () {
       test('successful rotation generates new tokens', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final jwtService = JwtService(session);
         await jwtService.initialize();
 
@@ -210,7 +210,7 @@ void main() {
       });
 
       test('token reuse detection triggers revocation', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final jwtService = JwtService(session);
         await jwtService.initialize();
 
@@ -242,7 +242,7 @@ void main() {
 
     group('Session Revocation', () {
       test('revokeAllTokensForSession blacklists all session tokens', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final jwtService = JwtService(session);
         await jwtService.initialize();
 
@@ -284,7 +284,7 @@ void main() {
 
     group('Token Claims', () {
       test('access token includes all required claims', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final jwtService = JwtService(session);
         await jwtService.initialize();
 

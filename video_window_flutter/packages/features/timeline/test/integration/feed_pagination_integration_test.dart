@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mocktail/mocktail.dart';
-import '../../lib/presentation/pages/feed_page.dart';
-import '../../lib/presentation/bloc/feed_bloc.dart';
-import '../../lib/presentation/bloc/feed_state.dart';
-import '../../lib/presentation/bloc/feed_event.dart';
-import '../../lib/data/repositories/feed_repository.dart';
-import '../../lib/data/repositories/feed_cache_repository.dart';
-import '../../lib/use_cases/fetch_feed_page_use_case.dart';
-import '../../lib/domain/entities/video.dart';
+import 'package:timeline/presentation/pages/feed_page.dart';
+import 'package:timeline/presentation/bloc/feed_bloc.dart';
+import 'package:timeline/presentation/bloc/feed_state.dart';
+import 'package:timeline/presentation/bloc/feed_event.dart';
+import 'package:timeline/data/repositories/feed_repository.dart';
+import 'package:timeline/data/repositories/feed_cache_repository.dart';
+import 'package:timeline/use_cases/fetch_feed_page_use_case.dart';
+import 'package:timeline/domain/entities/video.dart';
 import 'package:flutter/material.dart';
 
 /// Integration tests for feed pagination
@@ -46,7 +46,7 @@ void main() {
                   duration: const Duration(seconds: 60),
                   viewCount: 0,
                   likeCount: 0,
-                  tags: [],
+                  tags: const [],
                   quality: VideoQuality.hd,
                   createdAt: DateTime.now(),
                   updatedAt: DateTime.now(),
@@ -93,7 +93,7 @@ void main() {
                     duration: const Duration(seconds: 60),
                     viewCount: 0,
                     likeCount: 0,
-                    tags: [],
+                    tags: const [],
                     quality: VideoQuality.hd,
                     createdAt: DateTime.now(),
                     updatedAt: DateTime.now(),
@@ -132,7 +132,7 @@ void main() {
             duration: const Duration(seconds: 60),
             viewCount: 0,
             likeCount: 0,
-            tags: [],
+            tags: const [],
             quality: VideoQuality.hd,
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
@@ -191,7 +191,7 @@ void main() {
         );
 
         // Set up loaded state with error
-        feedBloc.emit(FeedLoaded(
+        feedBloc.emit(const FeedLoaded(
           videos: [],
           nextCursor: 'cursor_error',
           hasMore: true,

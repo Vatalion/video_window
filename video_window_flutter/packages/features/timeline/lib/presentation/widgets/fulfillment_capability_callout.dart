@@ -26,8 +26,8 @@ class FulfillmentCapabilityCallout extends StatelessWidget {
 
   Widget _buildCompactCallout() {
     return Container(
-      padding: EdgeInsets.all(AppSpacing.md),
-      margin: EdgeInsets.all(AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      margin: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: AppColors.info.withOpacity(0.1),
         borderRadius: BorderRadius.circular(AppRadius.sm),
@@ -38,12 +38,12 @@ class FulfillmentCapabilityCallout extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.local_shipping_outlined,
             color: AppColors.info,
             size: 20,
           ),
-          SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               'Enable fulfillment to manage orders',
@@ -75,8 +75,8 @@ class FulfillmentCapabilityCallout extends StatelessWidget {
 
   Widget _buildFullCallout() {
     return Container(
-      padding: EdgeInsets.all(AppSpacing.lg),
-      margin: EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      margin: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.md),
@@ -84,11 +84,11 @@ class FulfillmentCapabilityCallout extends StatelessWidget {
           color: AppColors.info,
           width: 2,
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: AppColors.neutral200,
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -99,18 +99,18 @@ class FulfillmentCapabilityCallout extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(AppSpacing.sm),
+                padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
                   color: AppColors.info.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.local_shipping_outlined,
                   color: AppColors.info,
                   size: 28,
                 ),
               ),
-              SizedBox(width: AppSpacing.md),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,7 +121,7 @@ class FulfillmentCapabilityCallout extends StatelessWidget {
                         color: AppColors.neutral900,
                       ),
                     ),
-                    SizedBox(height: AppSpacing.xs),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       'Enable order fulfillment to manage shipping and tracking',
                       style: AppTypography.bodySmall.copyWith(
@@ -140,11 +140,11 @@ class FulfillmentCapabilityCallout extends StatelessWidget {
             ],
           ),
 
-          SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.md),
 
           // Requirements
           Container(
-            padding: EdgeInsets.all(AppSpacing.sm),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
               color: AppColors.neutral100,
               borderRadius: BorderRadius.circular(AppRadius.sm),
@@ -154,12 +154,12 @@ class FulfillmentCapabilityCallout extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.info_outline,
                       size: 16,
                       color: AppColors.info,
                     ),
-                    SizedBox(width: AppSpacing.xs),
+                    const SizedBox(width: AppSpacing.xs),
                     Text(
                       'Prerequisites:',
                       style: AppTypography.labelMedium.copyWith(
@@ -168,7 +168,7 @@ class FulfillmentCapabilityCallout extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: AppSpacing.xs),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   '• Payment collection must be enabled\n'
                   '• Trusted device registration required',
@@ -180,7 +180,7 @@ class FulfillmentCapabilityCallout extends StatelessWidget {
             ),
           ),
 
-          SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.md),
 
           // Action button
           SizedBox(
@@ -190,12 +190,12 @@ class FulfillmentCapabilityCallout extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onPrimary,
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
               ),
-              child: Text(
+              child: const Text(
                 'Enable Fulfillment',
                 style: AppTypography.labelLarge,
               ),

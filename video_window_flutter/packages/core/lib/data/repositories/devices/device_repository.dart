@@ -1,5 +1,4 @@
-import 'package:serverpod_flutter/serverpod_flutter.dart';
-import 'package:video_window_client/video_window_client.dart' show Client;
+t' show Client;
 
 /// Repository for device trust management
 /// Implements data layer for Epic 2 Story 2-4

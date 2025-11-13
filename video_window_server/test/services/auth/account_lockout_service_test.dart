@@ -20,7 +20,7 @@ void main() {
 
     group('Lockout Thresholds', () {
       test('no lock before threshold', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final lockoutService = AccountLockoutService(session);
 
         const identifier = 'test1@example.com';
@@ -39,7 +39,7 @@ void main() {
       });
 
       test('3 failures trigger 5-minute lock', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final lockoutService = AccountLockoutService(session);
 
         const identifier = 'test2@example.com';
@@ -58,7 +58,7 @@ void main() {
       });
 
       test('5 failures trigger 30-minute lock', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final lockoutService = AccountLockoutService(session);
 
         const identifier = 'test3@example.com';
@@ -77,7 +77,7 @@ void main() {
       });
 
       test('10 failures trigger 1-hour lock', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final lockoutService = AccountLockoutService(session);
 
         const identifier = 'test4@example.com';
@@ -96,7 +96,7 @@ void main() {
       });
 
       test('15 failures trigger 24-hour lock', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final lockoutService = AccountLockoutService(session);
 
         const identifier = 'test5@example.com';
@@ -117,7 +117,7 @@ void main() {
 
     group('Lock Management', () {
       test('clearFailedAttempts resets counter and removes lock', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final lockoutService = AccountLockoutService(session);
 
         const identifier = 'test6@example.com';
@@ -144,7 +144,7 @@ void main() {
       });
 
       test('unlockAccount removes lock manually', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final lockoutService = AccountLockoutService(session);
 
         const identifier = 'test7@example.com';
@@ -172,7 +172,7 @@ void main() {
 
     group('Lockout Statistics', () {
       test('getLockoutStats returns correct information', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final lockoutService = AccountLockoutService(session);
 
         const identifier = 'test8@example.com';
@@ -194,7 +194,7 @@ void main() {
       });
 
       test('stats show locked status when account is locked', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final lockoutService = AccountLockoutService(session);
 
         const identifier = 'test9@example.com';
@@ -217,7 +217,7 @@ void main() {
 
     group('Edge Cases', () {
       test('different identifiers have independent lockouts', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final lockoutService = AccountLockoutService(session);
 
         const id1 = 'user1@example.com';
@@ -240,7 +240,7 @@ void main() {
       });
 
       test('different actions have independent lockouts', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final lockoutService = AccountLockoutService(session);
 
         const identifier = 'test10@example.com';
@@ -261,7 +261,7 @@ void main() {
       });
 
       test('identifiers are case-insensitive', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final lockoutService = AccountLockoutService(session);
 
         const action = 'otp_verify';
@@ -279,7 +279,7 @@ void main() {
       });
 
       test('getMessage returns human-readable lock message', () async {
-        final session = await sessionBuilder.build();
+        final session = sessionBuilder.build();
         final lockoutService = AccountLockoutService(session);
 
         const identifier = 'test11@example.com';

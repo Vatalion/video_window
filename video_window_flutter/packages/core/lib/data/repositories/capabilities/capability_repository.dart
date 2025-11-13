@@ -1,5 +1,4 @@
-import 'package:serverpod_flutter/serverpod_flutter.dart';
-import 'package:video_window_client/video_window_client.dart' show Client;
+t' show Client;
 
 /// Repository for capability status and request management
 /// Implements data layer for Epic 2 Story 2-1

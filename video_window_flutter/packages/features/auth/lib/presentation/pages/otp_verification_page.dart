@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../lib/presentation/bloc/auth_bloc.dart';
+import 'package:auth/lib/presentation/bloc/auth_bloc.dart';
 
 /// OTP Verification Page
 /// Second step in OTP authentication - user enters 6-digit code
@@ -11,10 +11,10 @@ class OtpVerificationPage extends StatefulWidget {
   final int expiresIn; // seconds
 
   const OtpVerificationPage({
-    Key? key,
+    super.key,
     required this.email,
     required this.expiresIn,
-  }) : super(key: key);
+  });
 
   @override
   State<OtpVerificationPage> createState() => _OtpVerificationPageState();

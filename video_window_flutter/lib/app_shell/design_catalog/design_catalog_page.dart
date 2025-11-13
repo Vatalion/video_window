@@ -131,9 +131,9 @@ class _ColorsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
-      children: [
+      children: const [
         Text('Brand Colors', style: AppTypography.headlineMedium),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         Wrap(
           spacing: AppSpacing.md,
           runSpacing: AppSpacing.md,
@@ -155,9 +155,9 @@ class _ColorsSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.xl),
+        SizedBox(height: AppSpacing.xl),
         Text('Semantic Colors', style: AppTypography.headlineMedium),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         Wrap(
           spacing: AppSpacing.md,
           runSpacing: AppSpacing.md,
@@ -184,9 +184,9 @@ class _ColorsSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.xl),
+        SizedBox(height: AppSpacing.xl),
         Text('Neutral Colors', style: AppTypography.headlineMedium),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         Wrap(
           spacing: AppSpacing.md,
           runSpacing: AppSpacing.md,
@@ -300,9 +300,9 @@ class _TypographySection extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
-      children: [
+      children: const [
         Text('Display Styles', style: AppTypography.headlineMedium),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         _TypeSample(
           style: AppTypography.displayLarge,
           label: 'Display Large',
@@ -318,9 +318,9 @@ class _TypographySection extends StatelessWidget {
           label: 'Display Small',
           description: '36sp · Bold',
         ),
-        const SizedBox(height: AppSpacing.xl),
+        SizedBox(height: AppSpacing.xl),
         Text('Headline Styles', style: AppTypography.headlineMedium),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         _TypeSample(
           style: AppTypography.headlineLarge,
           label: 'Headline Large',
@@ -336,9 +336,9 @@ class _TypographySection extends StatelessWidget {
           label: 'Headline Small',
           description: '24sp · Semibold',
         ),
-        const SizedBox(height: AppSpacing.xl),
+        SizedBox(height: AppSpacing.xl),
         Text('Body Styles', style: AppTypography.headlineMedium),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         _TypeSample(
           style: AppTypography.bodyLarge,
           label: 'Body Large',
@@ -354,9 +354,9 @@ class _TypographySection extends StatelessWidget {
           label: 'Body Small',
           description: '12sp · Regular',
         ),
-        const SizedBox(height: AppSpacing.xl),
+        SizedBox(height: AppSpacing.xl),
         Text('Label Styles', style: AppTypography.headlineMedium),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         _TypeSample(
           style: AppTypography.labelLarge,
           label: 'Label Large',
@@ -420,9 +420,9 @@ class _SpacingSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
-      children: [
+      children: const [
         Text('Spacing Scale', style: AppTypography.headlineMedium),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         _SpacingSample(size: AppSpacing.xxxs, label: 'xxxs', value: '2dp'),
         _SpacingSample(size: AppSpacing.xxs, label: 'xxs', value: '4dp'),
         _SpacingSample(size: AppSpacing.xs, label: 'xs', value: '8dp'),
@@ -432,9 +432,9 @@ class _SpacingSection extends StatelessWidget {
         _SpacingSample(size: AppSpacing.xl, label: 'xl', value: '32dp'),
         _SpacingSample(size: AppSpacing.xxl, label: 'xxl', value: '48dp'),
         _SpacingSample(size: AppSpacing.xxxl, label: 'xxxl', value: '64dp'),
-        const SizedBox(height: AppSpacing.xl),
+        SizedBox(height: AppSpacing.xl),
         Text('Border Radius', style: AppTypography.headlineMedium),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         Wrap(
           spacing: AppSpacing.md,
           runSpacing: AppSpacing.md,
@@ -447,9 +447,9 @@ class _SpacingSection extends StatelessWidget {
             _RadiusSample(radius: AppRadius.xl, label: 'xl (24dp)'),
           ],
         ),
-        const SizedBox(height: AppSpacing.xl),
+        SizedBox(height: AppSpacing.xl),
         Text('Elevation', style: AppTypography.headlineMedium),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.md),
         Wrap(
           spacing: AppSpacing.md,
           runSpacing: AppSpacing.md,
@@ -578,7 +578,7 @@ class _ButtonsSectionState extends State<_ButtonsSection> {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
-        Text('Button Variants', style: AppTypography.headlineMedium),
+        const Text('Button Variants', style: AppTypography.headlineMedium),
         const SizedBox(height: AppSpacing.md),
         Wrap(
           spacing: AppSpacing.md,
@@ -607,7 +607,7 @@ class _ButtonsSectionState extends State<_ButtonsSection> {
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
-        Text('Button Sizes', style: AppTypography.headlineMedium),
+        const Text('Button Sizes', style: AppTypography.headlineMedium),
         const SizedBox(height: AppSpacing.md),
         Wrap(
           spacing: AppSpacing.md,
@@ -632,7 +632,7 @@ class _ButtonsSectionState extends State<_ButtonsSection> {
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
-        Text('Button States', style: AppTypography.headlineMedium),
+        const Text('Button States', style: AppTypography.headlineMedium),
         const SizedBox(height: AppSpacing.md),
         Wrap(
           spacing: AppSpacing.md,
@@ -681,7 +681,7 @@ class _TextFieldsSection extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
-        Text('Text Field Types', style: AppTypography.headlineMedium),
+        const Text('Text Field Types', style: AppTypography.headlineMedium),
         const SizedBox(height: AppSpacing.md),
         const AppTextField(
           label: 'Text Input',
@@ -749,16 +749,16 @@ class _CardsDialogsSection extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
-        Text('Card Elevations', style: AppTypography.headlineMedium),
+        const Text('Card Elevations', style: AppTypography.headlineMedium),
         const SizedBox(height: AppSpacing.md),
-        AppCard(
+        const AppCard(
           elevation: AppCardElevation.none,
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('None Elevation', style: AppTypography.titleMedium),
-              const SizedBox(height: AppSpacing.xs),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 'Flat card with no shadow',
                 style: AppTypography.bodySmall,
@@ -767,14 +767,14 @@ class _CardsDialogsSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        AppCard(
+        const AppCard(
           elevation: AppCardElevation.small,
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Small Elevation', style: AppTypography.titleMedium),
-              const SizedBox(height: AppSpacing.xs),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 'Subtle shadow (default)',
                 style: AppTypography.bodySmall,
@@ -783,14 +783,14 @@ class _CardsDialogsSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        AppCard(
+        const AppCard(
           elevation: AppCardElevation.medium,
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Medium Elevation', style: AppTypography.titleMedium),
-              const SizedBox(height: AppSpacing.xs),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 'Moderate shadow for raised cards',
                 style: AppTypography.bodySmall,
@@ -799,14 +799,14 @@ class _CardsDialogsSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        AppCard(
+        const AppCard(
           elevation: AppCardElevation.large,
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Large Elevation', style: AppTypography.titleMedium),
-              const SizedBox(height: AppSpacing.xs),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 'Prominent shadow for emphasis',
                 style: AppTypography.bodySmall,
@@ -823,14 +823,14 @@ class _CardsDialogsSection extends StatelessWidget {
               const SnackBar(content: Text('Interactive card tapped!')),
             );
           },
-          child: Row(
+          child: const Row(
             children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Interactive Card', style: AppTypography.titleMedium),
-                    const SizedBox(height: AppSpacing.xs),
+                    SizedBox(height: AppSpacing.xs),
                     Text(
                       'Tap me to see interaction',
                       style: AppTypography.bodySmall,
@@ -838,12 +838,12 @@ class _CardsDialogsSection extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.touch_app),
+              Icon(Icons.touch_app),
             ],
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
-        Text('Dialogs', style: AppTypography.headlineMedium),
+        const Text('Dialogs', style: AppTypography.headlineMedium),
         const SizedBox(height: AppSpacing.md),
         AppButton(
           label: 'Show Confirmation Dialog',

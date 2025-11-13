@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 
-/// Accessibility wrapper for feed items
 /// AC7: Accessibility compliance with semantic labels and screen reader support
 class AccessibilityWrapper extends StatelessWidget {
   final Widget child;

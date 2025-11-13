@@ -122,7 +122,7 @@ void main() {
     testWidgets('AC1: Overlay handles missing services gracefully',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: Stack(
               children: [

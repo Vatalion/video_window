@@ -1,7 +1,7 @@
 # Melos Integration Guide - Video Window Project
 
 **Version:** Melos 7.3.0+  
-**Last Updated:** 2025-11-03  
+**Last Updated:** 2025-11-13  
 **Status:** ✅ Active - Sprint 1 Foundation
 
 ---
@@ -12,40 +12,28 @@ This guide documents how Video Window uses **Melos** for managing our Flutter mo
 
 ### Why Melos in Video Window?
 
-- **Monorepo Management:** Coordinate `packages/core/`, `packages/shared/`, and `packages/features/*` as a single workspace
-- **Script Orchestration:** Single commands execute across all packages (format, analyze, test, generate)
-- **Dependency Management:** Shared dependencies and consistent versioning across packages
-- **CI/CD Integration:** Workspace-level quality gates before merge
+- **Monorepo Management:** Coordinate `video_window_flutter/`, `video_window_server/`, and other packages as a single workspace.
+- **Script Orchestration:** Single commands execute across all packages (format, analyze, test, generate).
+- **Dependency Management:** Shared dependencies and consistent versioning across packages via `pubspec.yaml` workspaces.
+- **CI/CD Integration:** Workspace-level quality gates before merge.
 
 ### Key Principle
-**Melos workspace root = `video_window_flutter/` directory** (NOT project root)
+**Melos workspace root = `video_window/` project directory.**
 
 ---
 
 ## Project Structure
 
 ```
-video_window/                        # Git repository root
-└── video_window_flutter/            # ← MELOS WORKSPACE ROOT
-    ├── melos.yaml                   # Workspace configuration
-    ├── pubspec.yaml                 # Flutter app dependencies
-    ├── lib/                         # Main Flutter app
-    │   ├── app_shell/               # App bootstrap, routing, theme
-    │   └── presentation/            # Global BLoCs (auth, app state)
-    └── packages/                    # Managed by Melos
-        ├── core/                    # Data layer (repositories, services)
-        │   ├── pubspec.yaml
-        │   └── lib/
-        ├── shared/                  # Design system (widgets, theme)
-        │   ├── pubspec.yaml
-        │   └── lib/
-        └── features/                # Feature modules
-            ├── auth/
-            │   ├── pubspec.yaml
-            │   └── lib/
-            ├── timeline/
-            ├── commerce/
-            └── publishing/
+video_window/                        # Git repository and Melos workspace root
+├── pubspec.yaml                     # Melos workspace configuration
+├── video_window_flutter/            # Flutter app
+│   ├── pubspec.yaml                 # App dependencies
+│   └── lib/                         # Main Flutter app
+├── video_window_server/             # Serverpod backend
+│   ├── pubspec.yaml                 # Server dependencies
+│   └── lib/
+└── video_window_client/             # Generated client
 ```
 
 ---
@@ -55,22 +43,18 @@ video_window/                        # Git repository root
 ### First-Time Setup
 
 ```bash
-# From video_window_flutter/ directory
-melos run setup
+# From the project root directory
+melos bootstrap
 ```
 
 **What it does:**
-1. Runs `melos bootstrap` (links all packages, runs hooks, syncs shared dependencies)
-2. Executes `flutter pub get` for all packages
-3. Runs code generation (`build_runner`, `serverpod generate`)
-4. Validates environment setup
+1. Links all packages defined in the `workspace` section of the root `pubspec.yaml`.
+2. Executes `flutter pub get` for all packages.
+3. Runs post-bootstrap hooks defined in `pubspec.yaml`.
 
-**When to use:** First clone, after pulling major changes, when packages seem out of sync
+**When to use:** First clone, after pulling major changes, or when packages seem out of sync.
 
-> **Note:** As of Dart 3.6.0+, [Pub Workspaces](https://dart.dev/tools/pub/workspaces) automatically links packages, making `melos bootstrap` optional for basic linking. However, we still use it for:
-> - Shared dependency version enforcement across packages
-> - Post-bootstrap hooks (code generation, setup scripts)
-> - Explicit workspace validation before development
+> **Note:** As of Dart 3.6.0+, [Pub Workspaces](https://dart.dev/tools/pub/workspaces) automatically links packages. We use `melos bootstrap` to also run our setup scripts and validate the workspace.
 
 ---
 
@@ -80,16 +64,16 @@ melos run setup
 ```bash
 melos run generate
 ```
-- Runs `build_runner` for all packages
-- Use after: Adding freezed models, JSON serialization, updating generated code
+- Runs `build_runner` for all packages that need it.
+- Use after: Adding freezed models, JSON serialization, or updating generated code.
 
 #### Code Quality
 ```bash
 melos run format      # Auto-format all Dart code
 melos run analyze     # Static analysis across workspace
 ```
-- **ALWAYS run before committing**
-- CI will reject PRs that fail these checks
+- **ALWAYS run before committing.**
+- CI will reject PRs that fail these checks.
 
 #### Testing
 ```bash
@@ -103,50 +87,62 @@ melos run test:integration  # Integration tests only
 ```bash
 melos run clean       # Clean all package build artifacts
 ```
-- Use when: Build caching issues, switching branches, troubleshooting
+- Use when: Build caching issues, switching branches, or troubleshooting.
 
 ---
 
-## Melos Configuration (`melos.yaml`)
+## Melos Configuration (`pubspec.yaml`)
 
 ### Package Discovery
 
-```yaml
-packages:
-  - packages/**      # All packages under packages/
-  - .                # Root Flutter app
-```
+The `workspace` key in the root `pubspec.yaml` file defines the packages in the Melos workspace.
 
-**Video Window Pattern:** 
-- Feature packages live in `packages/features/*/`
-- Core infrastructure in `packages/core/`
-- Shared UI in `packages/shared/`
+```yaml
+# pubspec.yaml
+name: video_window
+description: Video Window monorepo workspace.
+publish_to: none
+
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+
+workspace:
+  - video_window_flutter
+  - video_window_server
+  - video_window_client
+  - video_window_flutter/packages/core
+  - video_window_flutter/packages/shared
+  - video_window_flutter/packages/features/*
+
+dev_dependencies:
+  melos: ^7.3.0
+```
 
 ### Script Structure
 
-Our `melos.yaml` defines scripts in this pattern:
+Scripts are defined under the `melos` key in the root `pubspec.yaml`.
 
 ```yaml
-scripts:
-  setup:
-    description: First-time environment setup
-    run: |
-      melos bootstrap
-      melos run generate
+# pubspec.yaml
+melos:
+  scripts:
+    setup:
+      description: First-time environment setup
+      run: |
+        melos bootstrap
+        melos run generate
     
-  generate:
-    description: Run code generation
-    run: flutter pub run build_runner build --delete-conflicting-outputs
-    exec:
-      concurrency: 1
-    packageFilters:
-      dependsOn: 'build_runner'
+    generate:
+      description: Run code generation
+      run: melos exec -- "dart run build_runner build --delete-conflicting-outputs"
+      packageFilters:
+        dependsOn: build_runner
 ```
 
 **Key Patterns:**
-- `run:` executes once at workspace level
-- `exec:` executes in each package
-- `packageFilters:` targets specific packages
+- `run:` executes a command once at the workspace root.
+- `exec:` executes a command in each package.
+- `packageFilters:` targets specific packages based on their properties.
 
 ---
 
@@ -154,35 +150,26 @@ scripts:
 
 ### Path Dependencies (Internal Packages)
 
-```yaml
-# In packages/features/auth/pubspec.yaml
-dependencies:
-  core:
-    path: ../../core
-  shared:
-    path: ../../shared
-```
+Packages within the workspace can depend on each other using `path` dependencies.
 
-**Video Window Rules:**
-1. **Feature packages** depend on `core` and `shared` via path dependencies
-2. **Never publish** internal packages to pub.dev
-3. **Melos manages** version resolution across packages
+```yaml
+# In video_window_flutter/pubspec.yaml
+dependencies:
+  video_window_client:
+    path: ../video_window_client
+  core:
+    path: packages/core
+```
 
 ### Shared External Dependencies
 
-Define once in root `pubspec.yaml`, inherit in packages:
+To ensure consistent versions, you can use `dependency_overrides` in the root `pubspec.yaml`.
 
 ```yaml
-# Root pubspec.yaml
-dependencies:
-  flutter_bloc: ^8.1.3
-  
-# Package pubspec.yaml  
-dependencies:
-  flutter_bloc: ^8.1.3  # Match root version
+# root pubspec.yaml
+dependency_overrides:
+  flutter_bloc: ^8.1.6
 ```
-
-**Benefit:** Consistent versions, easier upgrades
 
 ---
 
@@ -190,48 +177,46 @@ dependencies:
 
 ### Creating a New Feature Package
 
-```bash
-cd video_window_flutter/packages/features
-mkdir -p my_feature/lib/{use_cases,presentation/{bloc,pages,widgets}}
-cd my_feature
+1.  **Create the package directory:**
+    ```bash
+    mkdir -p video_window_flutter/packages/features/my_feature/lib
+    ```
+2.  **Create the `pubspec.yaml` for the new package:**
+    ```yaml
+    # video_window_flutter/packages/features/my_feature/pubspec.yaml
+    name: my_feature
+    description: My new feature.
+    publish_to: none
 
-# Create pubspec.yaml
-cat > pubspec.yaml << 'EOF'
-name: my_feature
-description: My feature description
-publish_to: none
+    environment:
+      sdk: '>=3.8.0 <4.0.0'
 
-environment:
-  sdk: '>=3.5.6 <4.0.0'
-  flutter: '>=3.19.6'
-
-dependencies:
-  flutter:
-    sdk: flutter
-  core:
-    path: ../../core
-  shared:
-    path: ../../shared
-  flutter_bloc: ^8.1.3
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-EOF
-
-# Bootstrap to link dependencies
-cd ../../../
-melos bootstrap
-```
+    dependencies:
+      flutter:
+        sdk: flutter
+      core:
+        path: ../../core
+    ```
+3.  **Add the package to the workspace in the root `pubspec.yaml`:**
+    ```yaml
+    # /pubspec.yaml
+    workspace:
+      - ...
+      - video_window_flutter/packages/features/my_feature
+    ```
+4.  **Bootstrap the workspace to link the new package:**
+    ```bash
+    melos bootstrap
+    ```
 
 ### Running Commands on Specific Packages
 
 ```bash
-# Run tests only in core package
+# Run tests only in the core package
 melos exec --scope=core -- flutter test
 
 # Format only feature packages
-melos exec --dir-exists=packages/features -- dart format .
+melos exec --scope="*feature*" -- dart format .
 
 # Analyze packages that depend on flutter_bloc
 melos exec --depends-on=flutter_bloc -- flutter analyze
@@ -252,18 +237,14 @@ jobs:
         run: dart pub global activate melos
       
       - name: Bootstrap workspace
-        working-directory: video_window_flutter
         run: melos bootstrap
       
       - name: Run quality checks
-        working-directory: video_window_flutter
         run: |
           melos run format --set-exit-if-changed
           melos run analyze
           melos run test
 ```
-
-**Critical:** Always set `working-directory: video_window_flutter` in CI
 
 ---
 
@@ -271,138 +252,64 @@ jobs:
 
 ### Issue: "Package not found" errors
 
-**Symptoms:** Import errors, unresolved dependencies
+**Symptoms:** Import errors, unresolved dependencies.
 
 **Solution:**
 ```bash
-cd video_window_flutter
 melos clean
 melos bootstrap
 ```
+Then restart your IDE.
 
 ### Issue: Code generation not updating
 
-**Symptoms:** Old generated code, build errors
+**Symptoms:** Old generated code, build errors.
 
 **Solution:**
 ```bash
 melos run generate
 # If still failing:
 melos clean
-melos run setup
+melos bootstrap
 ```
 
 ### Issue: Version conflicts between packages
 
-**Symptoms:** "Version solving failed" errors
+**Symptoms:** "Version solving failed" errors.
 
 **Solution:**
-1. Check all `pubspec.yaml` files use consistent versions
-2. Update root dependencies first
-3. Run `melos bootstrap` to resolve
+1.  Use `dependency_overrides` in the root `pubspec.yaml` to force a consistent version.
+2.  Run `melos bootstrap` to apply the override.
 
 ### Issue: Melos commands fail with "not in workspace"
 
-**Symptoms:** "No packages found" errors
+**Symptoms:** "No packages found" or "current directory does not appear to be a Melos workspace" errors.
 
 **Solution:**
-```bash
-# Ensure you're in workspace root
-cd video_window_flutter
-# Not project root (video_window/)
-```
+Ensure you are running `melos` commands from the root of the project (`/Volumes/workspace/projects/flutter/video_window`), where the root `pubspec.yaml` with the `workspace` key is located.
 
 ---
 
 ## Video Window Conventions
 
 ### Package Naming
-- **Snake case:** `my_feature`, not `myFeature` or `my-feature`
-- **Descriptive:** `auth`, `timeline`, `commerce`, not `feature1`
+- **Snake case:** `my_feature`, not `myFeature` or `my-feature`.
+- **Descriptive:** `auth`, `timeline`, `commerce`, not `feature1`.
 
 ### Script Naming
-- **Action verbs:** `format`, `analyze`, `test` (not `formatter`, `linter`)
-- **Scoped variants:** `test:unit`, `test:widget`, `test:integration`
+- **Action verbs:** `format`, `analyze`, `test` (not `formatter`, `linter`).
+- **Scoped variants:** `test:unit`, `test:widget`, `test:integration`.
 
 ### Directory Structure
-Every package follows this structure:
-```
-my_package/
-├── pubspec.yaml
-├── lib/
-│   └── (package code)
-└── test/
-    └── (mirrors lib/ structure)
-```
-
-### Dependency Layers
-```
-Feature Packages (auth, timeline, commerce)
-        ↓ depends on
-Core Package (repositories, services, models)
-        ↓ depends on
-Shared Package (UI components, theme, utils)
-```
-
-**Never:** Feature packages depending on other feature packages
-
----
-
-## Performance Tips
-
-### Parallel Execution
-```bash
-# Melos runs commands in parallel by default
-melos run analyze  # Analyzes all packages concurrently
-```
-
-### Selective Execution
-```bash
-# Only run on changed packages (in CI)
-melos exec --since=origin/main -- flutter test
-```
-
-### Caching
-```bash
-# Melos caches bootstrap results
-# Only re-bootstraps when pubspec.yaml changes
-melos bootstrap  # Fast second run
-```
-
----
-
-## Integration with Other Tools
-
-### VS Code Tasks
-```json
-// .vscode/tasks.json
-{
-  "label": "Melos: Setup",
-  "type": "shell",
-  "command": "melos",
-  "args": ["run", "setup"],
-  "options": {
-    "cwd": "${workspaceFolder}/video_window_flutter"
-  }
-}
-```
-
-### Pre-commit Hooks
-```bash
-# .git/hooks/pre-commit
-#!/bin/sh
-cd video_window_flutter
-melos run format --set-exit-if-changed
-melos run analyze
-```
+Every package should have a `pubspec.yaml`, a `lib` directory, and a `test` directory.
 
 ---
 
 ## Reference Links
 
 - **Official Docs:** https://melos.invertase.dev/
-- **Our Config:** `video_window_flutter/melos.yaml`
-- **Example Usage:** Story 01.1, 01.3 implementation
+- **Pub Workspaces:** https://dart.dev/tools/pub/workspaces
+- **Our Config:** `pubspec.yaml`
 - **Architecture Context:** `docs/architecture/project-structure-implementation.md`
 
 ---
@@ -410,9 +317,8 @@ melos run analyze
 ## Quick Reference Card
 
 ```bash
-# Essential Commands (from video_window_flutter/)
-melos run setup          # First-time setup
-melos bootstrap          # Link packages
+# Essential Commands (from project root)
+melos bootstrap          # Link packages and run setup
 melos run generate       # Code generation
 melos run format         # Format code
 melos run analyze        # Static analysis
@@ -422,16 +328,15 @@ melos clean              # Clean artifacts
 # Package-specific
 melos exec --scope=core -- flutter test
 melos list               # List all packages
-melos version            # Version management
 ```
 
 ---
 
 **Next Steps for Developers:**
-1. Read this guide fully before starting Sprint 1
-2. Run `melos run setup` as first action
-3. Bookmark for daily reference
-4. Update this guide when discovering new patterns
+1. Read this guide fully before starting new work.
+2. Run `melos bootstrap` as the first action after cloning.
+3. Bookmark for daily reference.
+4. Update this guide when discovering new patterns.
 
 ---
 
@@ -439,6 +344,7 @@ melos version            # Version management
 
 | Date | Version | Change | Author |
 |------|---------|--------|--------|
+| 2025-11-13 | v2.0 | Updated for Melos 7.x and `pubspec.yaml` workspaces | Gemini |
 | 2025-11-03 | v1.0 | Initial integration guide created for Sprint 1 | Winston (Architect) |
 
 ---

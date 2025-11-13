@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../lib/presentation/bloc/auth_bloc.dart';
+import 'package:auth/lib/presentation/bloc/auth_bloc.dart';
 
 /// Recovery Token Verification Page
 /// Second step in account recovery - user enters the recovery token
@@ -10,9 +10,9 @@ class RecoveryTokenVerificationPage extends StatefulWidget {
   final String email;
 
   const RecoveryTokenVerificationPage({
-    Key? key,
+    super.key,
     required this.email,
-  }) : super(key: key);
+  });
 
   @override
   State<RecoveryTokenVerificationPage> createState() =>
@@ -164,7 +164,7 @@ class _RecoveryTokenVerificationPageState
                             bottom: 0,
                             child: Container(
                               padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 color: Colors.green,
                                 shape: BoxShape.circle,
                               ),

@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/share_response.dart';
+import 'package:core/domain/entities/share_response.dart';
 import '../../domain/entities/story.dart';
 import '../../domain/entities/video_player_state.dart';
 

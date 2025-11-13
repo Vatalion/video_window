@@ -52,7 +52,7 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
     if (_isPolling) {
       context
           .read<CapabilityCenterBloc>()
-          .add(CapabilityCenterPollingStopped());
+          .add(const CapabilityCenterPollingStopped());
     }
     super.dispose();
   }
@@ -76,7 +76,7 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
     if (_isPolling) {
       context
           .read<CapabilityCenterBloc>()
-          .add(CapabilityCenterPollingStopped());
+          .add(const CapabilityCenterPollingStopped());
       setState(() {
         _isPolling = false;
       });
@@ -103,7 +103,7 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
         }
       },
       child: Container(
-        margin: EdgeInsets.all(AppSpacing.md),
+        margin: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppRadius.md),
           border: Border.all(
@@ -118,14 +118,14 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
             borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           child: Padding(
-            padding: EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(),
-                SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.lg),
                 _buildBlockersList(),
-                SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.lg),
                 _buildActionSection(),
               ],
             ),
@@ -139,7 +139,7 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
     return Row(
       children: [
         Container(
-          padding: EdgeInsets.all(AppSpacing.sm),
+          padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
             color: _getHeaderColor().withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppRadius.sm),
@@ -150,7 +150,7 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
             size: 32,
           ),
         ),
-        SizedBox(width: AppSpacing.md),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,7 +161,7 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
                   color: AppColors.neutral900,
                 ),
               ),
-              SizedBox(height: AppSpacing.xs),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 _getSubtitle(),
                 style: AppTypography.bodyMedium.copyWith(
@@ -195,10 +195,10 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
             color: AppColors.neutral900,
           ),
         ),
-        SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.sm),
         ...widget.blockerMessages.entries.map(
           (entry) => Padding(
-            padding: EdgeInsets.only(bottom: AppSpacing.sm),
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -211,7 +211,7 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
                       ? AppColors.success
                       : AppColors.neutral500,
                 ),
-                SizedBox(width: AppSpacing.sm),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     entry.value,
@@ -232,7 +232,7 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
       return Column(
         children: [
           const LinearProgressIndicator(),
-          SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.md),
           Text(
             'Verification in progress...',
             style: AppTypography.bodyMedium.copyWith(
@@ -250,15 +250,15 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
         children: [
           if (_errorMessage != null)
             Padding(
-              padding: EdgeInsets.only(bottom: AppSpacing.md),
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
               child: Card(
                 color: AppColors.error.withValues(alpha: 0.1),
                 child: Padding(
-                  padding: EdgeInsets.all(AppSpacing.md),
+                  padding: const EdgeInsets.all(AppSpacing.md),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline, color: AppColors.error),
-                      SizedBox(width: AppSpacing.sm),
+                      const Icon(Icons.info_outline, color: AppColors.error),
+                      const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
                           _errorMessage!,
@@ -283,7 +283,7 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
               child: const Text('Retry Verification'),
             ),
           ),
-          SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.sm),
           SizedBox(
             width: double.infinity,
             child: TextButton(
@@ -342,7 +342,7 @@ class _PublishCapabilityCardState extends State<PublishCapabilityCard> {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
-          padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),

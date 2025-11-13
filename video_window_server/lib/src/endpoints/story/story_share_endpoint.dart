@@ -1,5 +1,5 @@
 import 'package:serverpod/serverpod.dart';
-import '../services/story_share_service.dart';
+import 'package:video_window_server/src/services/story_share_service.dart';
 
 class StoryShareEndpoint extends Endpoint {
   // In a real app, this would be injected.

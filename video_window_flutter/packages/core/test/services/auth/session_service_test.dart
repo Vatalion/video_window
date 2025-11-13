@@ -38,7 +38,7 @@ void main() {
     });
 
     test('initialize returns true with valid stored session', () async {
-      final futureExpiry = DateTime.now().add(Duration(hours: 1));
+      final futureExpiry = DateTime.now().add(const Duration(hours: 1));
 
       when(mockSecureStorage.read(key: 'auth_access_token'))
           .thenAnswer((_) async => 'access_token');
@@ -55,7 +55,7 @@ void main() {
     });
 
     test('initialize attempts refresh when token is expired', () async {
-      final pastExpiry = DateTime.now().subtract(Duration(hours: 1));
+      final pastExpiry = DateTime.now().subtract(const Duration(hours: 1));
 
       when(mockSecureStorage.read(key: 'auth_access_token'))
           .thenAnswer((_) async => 'expired_access_token');

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../lib/presentation/bloc/auth_bloc.dart';
+import 'package:auth/lib/presentation/bloc/auth_bloc.dart';
 import 'social_sign_in_service.dart';
 
 /// Apple Sign-In button following Apple Human Interface Guidelines

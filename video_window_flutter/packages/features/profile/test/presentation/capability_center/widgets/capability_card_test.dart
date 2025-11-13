@@ -6,7 +6,7 @@ void main() {
   group('CapabilityCard Widget Tests', () {
     testWidgets('displays title and description', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: CapabilityCard(
               title: 'Test Capability',
@@ -23,7 +23,7 @@ void main() {
 
     testWidgets('displays status badge with correct label', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: CapabilityCard(
               title: 'Test',
@@ -64,13 +64,13 @@ void main() {
 
     testWidgets('displays blockers when present', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: CapabilityCard(
               title: 'Test',
               description: 'Test',
               status: CapabilityStatus.blocked,
-              blockers: const [
+              blockers: [
                 'Blocker 1',
                 'Blocker 2',
               ],
@@ -86,7 +86,7 @@ void main() {
 
     testWidgets('shows blocked status badge correctly', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: CapabilityCard(
               title: 'Test',
@@ -103,7 +103,7 @@ void main() {
 
     testWidgets('shows in progress status correctly', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: CapabilityCard(
               title: 'Test',
@@ -120,7 +120,7 @@ void main() {
 
     testWidgets('shows in review status correctly', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: CapabilityCard(
               title: 'Test',

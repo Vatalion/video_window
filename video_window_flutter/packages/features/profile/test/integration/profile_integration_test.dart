@@ -96,7 +96,7 @@ void main() {
           return profileBloc;
         },
         act: (bloc) => bloc.add(
-          ProfileUpdateRequested(
+          const ProfileUpdateRequested(
             userId,
             {'username': 'updateduser', 'bio': 'Updated bio'},
           ),
@@ -162,7 +162,7 @@ void main() {
           return profileBloc;
         },
         act: (bloc) => bloc.add(
-          PrivacySettingsUpdateRequested(
+          const PrivacySettingsUpdateRequested(
             userId,
             {
               'profileVisibility': 'private',
@@ -231,7 +231,7 @@ void main() {
           return profileBloc;
         },
         act: (bloc) => bloc.add(
-          NotificationPreferencesUpdateRequested(
+          const NotificationPreferencesUpdateRequested(
             userId,
             {
               'emailNotifications': false,
@@ -273,7 +273,7 @@ void main() {
         },
         act: (bloc) => bloc.add(const ExportUserDataRequested(userId)),
         expect: () => [
-          UserDataExported(exportData: {
+          const UserDataExported(exportData: {
             'profile': {'username': 'testuser'},
             'privacySettings': {'profileVisibility': 'public'},
             'notificationPreferences': {'emailNotifications': true},

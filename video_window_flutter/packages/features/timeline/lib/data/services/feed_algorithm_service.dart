@@ -130,8 +130,8 @@ class FeedAlgorithmService {
               FeedConfiguration(
                 id: '',
                 userId: '',
-                preferredTags: [],
-                blockedMakers: [],
+                preferredTags: const [],
+                blockedMakers: const [],
                 preferredQuality: VideoQuality.hd,
                 autoPlay: true,
                 showCaptions: false,

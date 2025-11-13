@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import '../../lib/use_cases/preload_videos_use_case.dart';
-import '../../lib/data/services/video_preloader_service.dart';
-import '../../lib/data/services/feed_performance_service.dart';
-import '../../lib/data/repositories/feed_cache_repository.dart';
-import '../../lib/domain/entities/video.dart';
+import 'package:timeline/use_cases/preload_videos_use_case.dart';
+import 'package:timeline/data/services/video_preloader_service.dart';
+import 'package:timeline/data/services/feed_performance_service.dart';
+import 'package:timeline/data/repositories/feed_cache_repository.dart';
+import 'package:timeline/domain/entities/video.dart';
 import 'package:core/services/analytics_service.dart';
 
 /// Integration tests for preload pipeline
@@ -53,7 +53,7 @@ void main() {
                   duration: const Duration(seconds: 30),
                   viewCount: 100,
                   likeCount: 10,
-                  tags: [],
+                  tags: const [],
                   quality: VideoQuality.hd,
                   createdAt: DateTime.now(),
                   updatedAt: DateTime.now(),
@@ -103,7 +103,7 @@ void main() {
                   duration: const Duration(seconds: 30),
                   viewCount: 100,
                   likeCount: 10,
-                  tags: [],
+                  tags: const [],
                   quality: VideoQuality.hd,
                   createdAt: DateTime.now(),
                   updatedAt: DateTime.now(),
@@ -171,7 +171,7 @@ void main() {
                   duration: const Duration(seconds: 30),
                   viewCount: 100,
                   likeCount: 10,
-                  tags: [],
+                  tags: const [],
                   quality: VideoQuality.hd,
                   createdAt: DateTime.now(),
                   updatedAt: DateTime.now(),

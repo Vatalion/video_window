@@ -1,11 +1,7 @@
-import 'package:video_window_client/video_window_client.dart';
-import '../../../../features/story/domain/entities/share_response.dart';
-import '../../../../features/story/domain/repositories/share_repository.dart';
+rt 'package:core/domain/repositories/share_repository.dart';
 
 class ShareRepositoryImpl implements ShareRepository {
-  final Client _client;
-
-  ShareRepositoryImpl(this._client);
+  ShareRepositoryImpl();
 
   @override
   Future<String?> toggleStorySave(

@@ -49,14 +49,14 @@ class PayoutBlockerSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(AppRadius.lg),
           topRight: Radius.circular(AppRadius.lg),
         ),
       ),
-      padding: EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -73,33 +73,33 @@ class PayoutBlockerSheet extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.lg),
 
             // Header with icon
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(AppSpacing.md),
+                  padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
                     color: AppColors.error.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.payment_outlined,
                     color: AppColors.error,
                     size: 32,
                   ),
                 ),
-                SizedBox(width: AppSpacing.md),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Payment Setup Required',
                         style: AppTypography.headlineSmall,
                       ),
-                      SizedBox(height: AppSpacing.xs),
+                      const SizedBox(height: AppSpacing.xs),
                       Text(
                         'Set up payments to start selling',
                         style: AppTypography.bodyMedium.copyWith(
@@ -112,11 +112,11 @@ class PayoutBlockerSheet extends StatelessWidget {
               ],
             ),
 
-            SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.lg),
 
             // Requirements
             Container(
-              padding: EdgeInsets.all(AppSpacing.md),
+              padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 color: AppColors.neutral100,
                 borderRadius: BorderRadius.circular(AppRadius.md),
@@ -130,18 +130,18 @@ class PayoutBlockerSheet extends StatelessWidget {
                       color: AppColors.neutral900,
                     ),
                   ),
-                  SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: AppSpacing.sm),
                   ...requirements.map(
                     (requirement) => Padding(
-                      padding: EdgeInsets.only(bottom: AppSpacing.xs),
+                      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                       child: Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.arrow_forward,
                             size: 16,
                             color: AppColors.primary,
                           ),
-                          SizedBox(width: AppSpacing.sm),
+                          const SizedBox(width: AppSpacing.sm),
                           Expanded(
                             child: Text(
                               requirement,
@@ -156,7 +156,7 @@ class PayoutBlockerSheet extends StatelessWidget {
               ),
             ),
 
-            SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.lg),
 
             // Action buttons
             Row(
@@ -166,19 +166,19 @@ class PayoutBlockerSheet extends StatelessWidget {
                     child: OutlinedButton(
                       onPressed: onCancel,
                       style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                        side: BorderSide(color: AppColors.neutral300),
+                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                        side: const BorderSide(color: AppColors.neutral300),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Cancel',
                         style: AppTypography.labelLarge,
                       ),
                     ),
                   ),
-                  SizedBox(width: AppSpacing.md),
+                  const SizedBox(width: AppSpacing.md),
                 ],
                 Expanded(
                   child: ElevatedButton(
@@ -203,7 +203,7 @@ class PayoutBlockerSheet extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.onPrimary,
-                      padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(AppRadius.sm),
                       ),

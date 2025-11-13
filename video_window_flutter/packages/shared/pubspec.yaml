@@ -1,6 +1,7 @@
 name: shared
 description: Shared design system, widgets, and common utilities for Video Window
 publish_to: 'none'
+resolution: workspace
 version: 1.0.0+1
 
 environment:

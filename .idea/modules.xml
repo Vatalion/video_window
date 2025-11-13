@@ -2,6 +2,16 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<module fileurl="file://$PROJECT_DIR$/video_window_flutter/packages/features/auth/melos_auth.iml" filepath="$PROJECT_DIR$/video_window_flutter/packages/features/auth/melos_auth.iml"/>
+<module fileurl="file://$PROJECT_DIR$/video_window_flutter/packages/core/melos_core.iml" filepath="$PROJECT_DIR$/video_window_flutter/packages/core/melos_core.iml"/>
+<module fileurl="file://$PROJECT_DIR$/video_window_flutter/packages/features/profile/melos_profile.iml" filepath="$PROJECT_DIR$/video_window_flutter/packages/features/profile/melos_profile.iml"/>
+<module fileurl="file://$PROJECT_DIR$/video_window_flutter/packages/shared/melos_shared.iml" filepath="$PROJECT_DIR$/video_window_flutter/packages/shared/melos_shared.iml"/>
+<module fileurl="file://$PROJECT_DIR$/video_window_flutter/packages/features/story/melos_story.iml" filepath="$PROJECT_DIR$/video_window_flutter/packages/features/story/melos_story.iml"/>
+<module fileurl="file://$PROJECT_DIR$/video_window_flutter/packages/features/timeline/melos_timeline.iml" filepath="$PROJECT_DIR$/video_window_flutter/packages/features/timeline/melos_timeline.iml"/>
+<module fileurl="file://$PROJECT_DIR$/video_window_client/melos_video_window_client.iml" filepath="$PROJECT_DIR$/video_window_client/melos_video_window_client.iml"/>
+<module fileurl="file://$PROJECT_DIR$/video_window_flutter/melos_video_window_flutter.iml" filepath="$PROJECT_DIR$/video_window_flutter/melos_video_window_flutter.iml"/>
+<module fileurl="file://$PROJECT_DIR$/video_window_server/melos_video_window_server.iml" filepath="$PROJECT_DIR$/video_window_server/melos_video_window_server.iml"/>
+<module fileurl="file://$PROJECT_DIR$/melos_video_window.iml" filepath="$PROJECT_DIR$/melos_video_window.iml"/>
 <module fileurl="file://$PROJECT_DIR$/melos_video_window_workspace.iml" filepath="$PROJECT_DIR$/melos_video_window_workspace.iml"/>
 <module fileurl="file://$PROJECT_DIR$/packages/features/auth/melos_video_window_auth.iml" filepath="$PROJECT_DIR$/packages/features/auth/melos_video_window_auth.iml"/>
 <module fileurl="file://$PROJECT_DIR$/packages/features/chat/melos_video_window_chat.iml" filepath="$PROJECT_DIR$/packages/features/chat/melos_video_window_chat.iml"/>
@@ -14,7 +24,6 @@
 <module fileurl="file://$PROJECT_DIR$/packages/features/publishing/melos_video_window_publishing.iml" filepath="$PROJECT_DIR$/packages/features/publishing/melos_video_window_publishing.iml"/>
 <module fileurl="file://$PROJECT_DIR$/packages/shared_models/melos_video_window_shared_models.iml" filepath="$PROJECT_DIR$/packages/shared_models/melos_video_window_shared_models.iml"/>
 <module fileurl="file://$PROJECT_DIR$/packages/features/timeline/melos_video_window_timeline.iml" filepath="$PROJECT_DIR$/packages/features/timeline/melos_video_window_timeline.iml"/>
-<module fileurl="file://$PROJECT_DIR$/melos_video_window.iml" filepath="$PROJECT_DIR$/melos_video_window.iml"/>
     </modules>
   </component>
 </project>

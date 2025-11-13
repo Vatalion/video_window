@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/design_system/tokens.dart';
-import 'package:intl/intl.dart';
 import '../bloc/device_management_bloc.dart';
 import '../bloc/device_management_event.dart';
 import '../bloc/device_management_state.dart';
@@ -22,11 +21,11 @@ class DeviceManagementPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => DeviceManagementBloc(userId: userId)
-        ..add(DeviceManagementLoadRequested()),
+        ..add(const DeviceManagementLoadRequested()),const 
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            'Trusted Devices',
+            'Trusted Deviceconst s',
             style: AppTypography.headlineSmall,
           ),
           actions: [
@@ -35,7 +34,7 @@ class DeviceManagementPage extends StatelessWidget {
               onPressed: () {
                 context.read<DeviceManagementBloc>().add(
                       DeviceManagementLoadRequested(),
-                    );
+const                     );
               },
             ),
           ],
@@ -52,17 +51,17 @@ class DeviceManagementPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.error_outline,
+                      Iconsconst .error_outline,
                       size: 48,
                       color: AppColors.error,
                     ),
                     SizedBox(height: AppSpacing.md),
-                    Text(
-                      'Failed to load devices',
+const                     Text(
+                      'Failconst ed to load devices',
                       style: AppTypography.bodyLarge,
                     ),
                     SizedBox(height: AppSpacing.sm),
-                    Text(
+const                     Text(
                       state.message,
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.neutral600,
@@ -70,11 +69,11 @@ class DeviceManagementPage extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: AppSpacing.lg),
-                    ElevatedButton(
+const                     ElevatedButton(
                       onPressed: () {
                         context.read<DeviceManagementBloc>().add(
                               DeviceManagementLoadRequested(),
-                            );
+const                             );
                       },
                       child: const Text('Retry'),
                     ),
@@ -90,17 +89,17 @@ class DeviceManagementPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.devices_other,
+                        Icoconst ns.devices_other,
                         size: 64,
                         color: AppColors.neutral400,
                       ),
                       SizedBox(height: AppSpacing.md),
-                      Text(
-                        'No devices registered',
+const                       Text(
+                        'Noconst  devices registered',
                         style: AppTypography.headlineSmall,
                       ),
                       SizedBox(height: AppSpacing.sm),
-                      Text(
+const                       Text(
                         'Devices will be registered automatically when you use the app.',
                         style: AppTypography.bodyMedium.copyWith(
                           color: AppColors.neutral600,
@@ -116,23 +115,23 @@ class DeviceManagementPage extends StatelessWidget {
                 onRefresh: () async {
                   context.read<DeviceManagementBloc>().add(
                         DeviceManagementLoadRequested(),
-                      );
+const                       );
                 },
                 child: ListView(
                   padding: EdgeInsets.all(AppSpacing.md),
-                  children: [
+  const                 children: [
                     // Header
                     Padding(
-                      padding: EdgeInsets.only(bottom: AppSpacing.md),
+                      padding: EdgeInsets.only(bottom: AppSpacinconst g.md),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Your Trusted Devices',
+                           const  'Your Trusted Devices',
                             style: AppTypography.headlineMedium,
                           ),
                           SizedBox(height: AppSpacing.xs),
-                          Text(
+const                           Text(
                             'Manage devices that can access your account. Revoke access for any device you no longer use.',
                             style: AppTypography.bodyMedium.copyWith(
                               color: AppColors.neutral600,
@@ -145,7 +144,7 @@ class DeviceManagementPage extends StatelessWidget {
                     // Device list
                     ...state.devices.map(
                       (device) => Padding(
-                        padding: EdgeInsets.only(bottom: AppSpacing.md),
+                        padding: EdgeInsets.only(bottom: AppSpacinconst g.md),
                         child: DeviceCard(
                           device: device,
                           onRevoke: () {
@@ -171,8 +170,8 @@ class DeviceManagementPage extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Revoke Device Access'),
-        content: Text(
-          'Are you sure you want to revoke access for this device? '
+        content: const Text(
+          'Are you sure youconst  want to revoke access for this device? '
           'You may need to re-register it to use certain features.',
         ),
         actions: [

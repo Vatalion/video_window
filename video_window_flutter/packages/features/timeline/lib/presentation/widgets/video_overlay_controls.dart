@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../domain/entities/video.dart';
-import '../../domain/entities/video_interaction.dart';
-
-/// Video overlay controls widget
-/// AC7: Video overlay with like button, view story CTA, and long-press menu
+ay with like button, view story CTA, and long-press menu
 class VideoOverlayControls extends StatelessWidget {
   final Video video;
   final bool isLiked;

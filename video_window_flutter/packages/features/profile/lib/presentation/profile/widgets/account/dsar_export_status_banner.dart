@@ -122,19 +122,19 @@ class DSARExportStatusBanner extends StatelessWidget {
         children: [
           const Icon(Icons.check_circle, color: Colors.green),
           const SizedBox(width: 12),
-          Expanded(
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Data Export Ready',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
                 ),
-                const SizedBox(height: 4),
-                const Text(
+                SizedBox(height: 4),
+                Text(
                   'Your data export is ready for download.',
                   style: TextStyle(fontSize: 12),
                 ),

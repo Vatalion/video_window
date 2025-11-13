@@ -9,7 +9,7 @@ void main() {
     late AppConfig disabledConfig;
 
     setUp(() {
-      enabledConfig = AppConfig(
+      enabledConfig = const AppConfig(
         environment: Environment.dev,
         apiBaseUrl: 'https://api.test.com',
         serverpodHost: 'localhost',
@@ -21,7 +21,7 @@ void main() {
         debugMode: true,
       );
 
-      disabledConfig = AppConfig(
+      disabledConfig = const AppConfig(
         environment: Environment.dev,
         apiBaseUrl: 'https://api.test.com',
         serverpodHost: 'localhost',

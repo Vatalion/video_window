@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../domain/entities/video.dart';
-import '../../domain/entities/feed_configuration.dart';
 
 /// Cache repository for feed data
 /// AC2: Local cache keeps up to 100 MB of feed data (Hive box `feed_cache`) with LRU eviction
@@ -186,7 +185,7 @@ class FeedCacheRepository {
     }
 
     // AC2: Evict oldest entries until under 100 MB limit
-    final maxSizeBytes = _maxCacheSizeMB * 1024 * 1024; // 100 MB
+    const maxSizeBytes = _maxCacheSizeMB * 1024 * 1024; // 1const
     while (totalSizeBytes > maxSizeBytes && _accessOrder.isNotEmpty) {
       final oldest = _accessOrder.removeAt(0);
       final size = entries.remove(oldest) ?? 0;

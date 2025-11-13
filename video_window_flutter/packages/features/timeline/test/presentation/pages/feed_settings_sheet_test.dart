@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:timeline/presentation/pages/feed_settings_sheet.dart';
 import 'package:timeline/presentation/bloc/feed_bloc.dart';
-import 'package:timeline/presentation/bloc/feed_state.dart';
 import 'package:timeline/domain/entities/feed_configuration.dart';
 import 'package:timeline/domain/entities/video.dart';
 import 'package:timeline/data/repositories/feed_repository.dart';
@@ -18,10 +17,10 @@ void main() {
       testConfiguration = FeedConfiguration(
         id: 'config_1',
         userId: 'user_1',
-        preferredTags: ['tag1', 'tag2'],
-        blockedMakers: ['maker_1'],
-        preferredQuality: VideoQuality.hd,
-        autoPlay: true,
+        preferredTags: const ['tag1', 'tag2'],
+        blockedMakers: const ['maker_1'],
+       const  preferredQuality: VideoQuality.hd,
+     const    autoPlay: true,
         showCaptions: false,
         playbackSpeed: 1.0,
         algorithm: FeedAlgorithm.personalized,
@@ -144,8 +143,8 @@ void main() {
       final invalidConfiguration = FeedConfiguration(
         id: 'config_1',
         userId: 'user_1',
-        preferredTags: [],
-        blockedMakers: List.generate(201, (i) => 'maker_$i'),
+        preferredTags: const [],
+        blockedMakers: List.generate(201, (i) => 'maker_$const i'),
         preferredQuality: VideoQuality.hd,
         autoPlay: true,
         showCaptions: false,

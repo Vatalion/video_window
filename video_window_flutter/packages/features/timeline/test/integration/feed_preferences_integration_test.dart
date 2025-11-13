@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:timeline/data/repositories/feed_repository.dart';
 import 'package:timeline/domain/entities/feed_configuration.dart';
 import 'package:timeline/domain/entities/video.dart';
 
@@ -18,10 +17,10 @@ void main() {
       final configuration = FeedConfiguration(
         id: 'config_test',
         userId: 'test_user',
-        preferredTags: ['test_tag'],
-        blockedMakers: ['blocked_maker_1'],
-        preferredQuality: VideoQuality.hd,
-        autoPlay: true,
+        preferredTags: const ['test_tag'],
+        blockedMakers: const ['blocked_maker_1'],
+        const preferredQuality: VideoQuality.hd,
+  const       autoPlay: true,
         showCaptions: false,
         playbackSpeed: 1.0,
         algorithm: FeedAlgorithm.personalized,
@@ -42,9 +41,9 @@ void main() {
         () => FeedConfiguration(
           id: 'config_test',
           userId: 'test_user',
-          preferredTags: [],
+          preferredTags: const [],
           blockedMakers: tooManyBlocked,
-          preferredQuality: VideoQuality.hd,
+          preferredQuconst ality: VideoQuality.hd,
           autoPlay: true,
           showCaptions: false,
           playbackSpeed: 1.0,
@@ -62,10 +61,10 @@ void main() {
       final original = FeedConfiguration(
         id: 'config_test',
         userId: 'test_user',
-        preferredTags: ['tag1', 'tag2'],
-        blockedMakers: ['maker1'],
-        preferredQuality: VideoQuality.fhd,
-        autoPlay: false,
+        preferredTags: const ['tag1', 'tag2'],
+        blockedMakers: const ['maker1'],
+        prefeconst rredQuality: VideoQuality.fhd,
+        auconst toPlay: false,
         showCaptions: true,
         playbackSpeed: 1.5,
         algorithm: FeedAlgorithm.trending,

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../lib/presentation/bloc/auth_bloc.dart';
+import 'package:auth/lib/presentation/bloc/auth_bloc.dart';
 import 'recovery_token_verification_page.dart';
 
 /// Account Recovery Request Page
 /// First step in account recovery - user enters email
 /// AC2: Recovery entry point from auth landing page
 class AccountRecoveryRequestPage extends StatefulWidget {
-  const AccountRecoveryRequestPage({Key? key}) : super(key: key);
+  const AccountRecoveryRequestPage({super.key});
 
   @override
   State<AccountRecoveryRequestPage> createState() =>

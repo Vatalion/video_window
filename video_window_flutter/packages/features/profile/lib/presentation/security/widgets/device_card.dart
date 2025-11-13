@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared/design_system/tokens.dart';
-import 'package:intl/intl.dart';
 
 /// Widget displaying a device card with trust score and revoke option
 ///
@@ -82,8 +81,8 @@ class DeviceCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(AppSpacing.md),
-        child: Column(
+        padding: const EdgeInsets.all(AppSpacing.md),
+  const       child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Device header
@@ -95,7 +94,7 @@ class DeviceCard extends StatelessWidget {
                   color: AppColors.primary,
                 ),
                 SizedBox(width: AppSpacing.md),
-                Expanded(
+ const                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -106,7 +105,7 @@ class DeviceCard extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: AppSpacing.xs),
-                      Text(
+const                       Text(
                         platform.toUpperCase(),
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.neutral600,
@@ -118,7 +117,7 @@ class DeviceCard extends StatelessWidget {
                 // Trust score badge
                 Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
+           const          horizontal: AppSpacing.sm,
                     vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
@@ -138,7 +137,7 @@ class DeviceCard extends StatelessWidget {
                         color: trustScoreColor,
                       ),
                       SizedBox(width: AppSpacing.xs),
-                      Text(
+ const                      Text(
                         '${(trustScore * 100).toInt()}%',
                         style: AppTypography.bodySmall.copyWith(
                           color: trustScoreColor,
@@ -152,7 +151,7 @@ class DeviceCard extends StatelessWidget {
             ),
 
             SizedBox(height: AppSpacing.md),
-
+const 
             // Device details
             Row(
               children: [
@@ -167,7 +166,7 @@ class DeviceCard extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: AppSpacing.xs),
-                      Text(
+const                       Text(
                         lastSeenText,
                         style: AppTypography.bodyMedium,
                       ),
@@ -181,7 +180,7 @@ class DeviceCard extends StatelessWidget {
                   label: const Text('Revoke'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.error,
-                    side: BorderSide(color: AppColors.error),
+                    side: BorderSide(color: AppColors.errorconst ),
                   ),
                 ),
               ],
@@ -189,7 +188,7 @@ class DeviceCard extends StatelessWidget {
 
             // Device ID (collapsed by default)
             SizedBox(height: AppSpacing.sm),
-            Text(
+const             Text(
               'Device ID: ${deviceId.substring(0, deviceId.length > 20 ? 20 : deviceId.length)}...',
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.neutral500,

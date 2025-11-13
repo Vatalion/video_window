@@ -1,5 +1,4 @@
-import 'dart:convert';
-import 'package:equatable/equatable.dart';
+le/equatable.dart';
 
 /// Video entity representing a story/video in the feed
 class Video extends Equatable {

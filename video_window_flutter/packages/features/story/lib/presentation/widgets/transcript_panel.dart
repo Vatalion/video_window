@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:core/data/services/accessibility/caption_service.dart';
 import 'package:core/services/analytics_service.dart';
 import '../analytics/story_analytics_events.dart';
@@ -93,7 +92,7 @@ class _TranscriptPanelState extends State<TranscriptPanel> {
     if (activeIndex != null && activeIndex < widget.cues.length) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
-          final itemHeight = 80.0; // Approximate height per cue
+          const itemHeight = 80.0; // Approximate constt per cue
           final targetOffset = activeIndex * itemHeight;
           _scrollController.animateTo(
             targetOffset.clamp(0.0, _scrollController.position.maxScrollExtent),

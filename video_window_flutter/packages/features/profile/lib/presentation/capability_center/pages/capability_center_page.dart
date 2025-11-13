@@ -22,7 +22,7 @@ class CapabilityCenterPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Capabilities',
           style: AppTypography.headlineSmall,
         ),
@@ -49,22 +49,22 @@ class CapabilityCenterPage extends StatelessWidget {
           if (state is CapabilityCenterError) {
             return Center(
               child: Padding(
-                padding: EdgeInsets.all(AppSpacing.lg),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.error_outline,
                       size: 64,
                       color: AppColors.error,
                     ),
-                    SizedBox(height: AppSpacing.md),
-                    Text(
+                    const SizedBox(height: AppSpacing.md),
+                    const Text(
                       'Failed to Load Capabilities',
                       style: AppTypography.headlineSmall,
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       state.message,
                       style: AppTypography.bodyMedium.copyWith(
@@ -72,7 +72,7 @@ class CapabilityCenterPage extends StatelessWidget {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: AppSpacing.lg),
+                    const SizedBox(height: AppSpacing.lg),
                     ElevatedButton(
                       onPressed: () {
                         context.read<CapabilityCenterBloc>().add(
@@ -95,19 +95,19 @@ class CapabilityCenterPage extends StatelessWidget {
                     );
               },
               child: ListView(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                 children: [
                   // Header
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Manage Your Capabilities',
                           style: AppTypography.headlineMedium,
                         ),
-                        SizedBox(height: AppSpacing.sm),
+                        const SizedBox(height: AppSpacing.sm),
                         Text(
                           'Enable capabilities to unlock publishing, payments, and fulfillment features.',
                           style: AppTypography.bodyMedium.copyWith(
@@ -117,7 +117,7 @@ class CapabilityCenterPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  SizedBox(height: AppSpacing.lg),
+                  const SizedBox(height: AppSpacing.lg),
 
                   // Publish Capability
                   CapabilityCard(
@@ -197,12 +197,12 @@ class CapabilityCenterPage extends StatelessWidget {
 
                   // Polling indicator
                   if (state.isPolling) ...[
-                    SizedBox(height: AppSpacing.md),
+                    const SizedBox(height: AppSpacing.md),
                     Center(
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             width: 12,
                             height: 12,
                             child: CircularProgressIndicator(
@@ -212,7 +212,7 @@ class CapabilityCenterPage extends StatelessWidget {
                               ),
                             ),
                           ),
-                          SizedBox(width: AppSpacing.sm),
+                          const SizedBox(width: AppSpacing.sm),
                           Text(
                             'Checking for updates...',
                             style: AppTypography.bodySmall.copyWith(
